@@ -1,0 +1,11 @@
+datasets==2.10.0
+ipykernel==6.21.2
+lion-pytorch==0.0.7
+nvidia-cuda-nvrtc-cu11==11.7.99
+nvidia-cuda-runtime-cu11==11.7.99
+nvidia-cudnn-cu11==8.5.0.96
+pip-chill==1.0.1
+scikit-learn==1.2.1
+seaborn==0.12.2
+transformers==4.26.1
+xgboost==1.7.4

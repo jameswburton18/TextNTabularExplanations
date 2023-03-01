@@ -1,0 +1,25 @@
+--- # DEFAULT
+config: default
+fast_dev_run: true
+do_train: true
+do_predict: true
+tags:
+- bert
+batch_size: 16
+model_base: bert-base-uncased
+output_root: models/airbnb/
+weight_decay: 0.3
+num_epochs: 50
+early_stopping_patience: 3
+grad_accumulation_steps: 1
+seed: 43
+logging_steps: 10
+lr_scheduler: linear
+warmup_ratio: 0
+device: cuda
+num_workers: 1
+resume_from_checkpoint: false
+predict_batch_size: 4
+save_total_limit: 1
+lr: 5.0e-05
+lion_optim: false

@@ -1,0 +1,22 @@
+--- # airbnb_0
+config: airbnb_0
+fast_dev_run: false
+tags:
+- bert
+- lion
+lr: 2.0e-05
+lion_optim: true
+
+--- # airbnb_1
+config: airbnb_1
+fast_dev_run: false
+tags:
+- bert
+
+--- # TESTING
+config: testing
+tags:
+- bert
+- lion
+lr: 2.0e-05
+lion_optim: true

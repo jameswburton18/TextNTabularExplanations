@@ -1,0 +1,5 @@
+/.vscode
+/env
+/models
+/wandb
+/data
