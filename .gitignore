@@ -1,5 +1,8 @@
 /.vscode
 /env
+/env11
+/envPT2
 /models
 /wandb
 /data
+/logs
