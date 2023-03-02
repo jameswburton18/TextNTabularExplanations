@@ -4,7 +4,7 @@ from transformers import (
     TrainingArguments,
     Trainer,
 )
-from datasets import load_from_disk
+from datasets import load_from_disk, load_dataset
 import wandb
 import os
 import yaml
@@ -47,7 +47,8 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(args["model_base"])
 
     # Dataset
-    dataset = load_from_disk("data/processed/airbnb/summaries")
+    # dataset = load_from_disk("data/processed/airbnb/summaries")
+    dataset = load_dataset('james-burton/airbnb_summaries')
     
     # Tokenize the dataset
     def encode(examples):
@@ -108,8 +109,7 @@ def main():
         save_total_limit=args["save_total_limit"],
         load_best_model_at_end=True,
         remove_unused_columns=False,
-        # # PyTorch 2.0
-        # torch_compile=True,
+        torch_compile=args['pytorch2.0'], # Needs to be true if PyTorch 2.0
     )
 
     mse_metric = evaluate.load("mse")
