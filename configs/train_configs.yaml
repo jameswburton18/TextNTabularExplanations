@@ -13,6 +13,25 @@ fast_dev_run: false
 tags:
 - bert
 
+--- # airbnb_2
+config: airbnb_2
+fast_dev_run: false
+tags:
+- bert
+pytorch2.0: true
+batch_size: 8
+num_epochs: 10
+early_stopping_patience: -1
+
+--- # airbnb_3
+config: airbnb_3
+fast_dev_run: false
+tags:
+- bert
+batch_size: 8
+num_epochs: 10
+early_stopping_patience: -1
+
 --- # TESTING
 config: testing
 tags:
