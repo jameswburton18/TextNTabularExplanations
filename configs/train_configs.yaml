@@ -6,12 +6,17 @@ tags:
 - lion
 lr: 2.0e-05
 lion_optim: true
+dataset: airbnb
+pytorch2.0: false
 
 --- # airbnb_1
 config: airbnb_1
 fast_dev_run: false
 tags:
 - bert
+pytorch2.0: true
+dataset: airbnb
+pytorch2.0: false
 
 --- # airbnb_2
 config: airbnb_2
@@ -22,6 +27,8 @@ pytorch2.0: true
 batch_size: 8
 num_epochs: 10
 early_stopping_patience: -1
+dataset: airbnb
+pytorch2.0: false
 
 --- # airbnb_3
 config: airbnb_3
@@ -31,11 +38,19 @@ tags:
 batch_size: 8
 num_epochs: 10
 early_stopping_patience: -1
+dataset: airbnb
+pytorch2.0: false
+
+--- # books_0
+config: books_0
+fast_dev_run: false
+tags:
+- bert
+batch_size: 32
 
 --- # TESTING
 config: testing
+do_train: false
 tags:
 - bert
-- lion
-lr: 2.0e-05
-lion_optim: true
+dataset: books

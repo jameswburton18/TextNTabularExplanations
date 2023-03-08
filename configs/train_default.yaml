@@ -23,4 +23,5 @@ predict_batch_size: 4
 save_total_limit: 1
 lr: 5.0e-05
 lion_optim: false
-pytorch2.0: false
+pytorch2.0: true
+dataset: books
