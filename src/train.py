@@ -48,12 +48,22 @@ def main():
 
     # Dataset
     # dataset = load_from_disk("data/processed/airbnb/summaries")
-    dataset = load_dataset('james-burton/airbnb_summaries')
+    ds_type = args['dataset']
+    if ds_type == 'airbnb':
+        ds_name = 'james-burton/airbnb_summaries'
+        project = 'Airbnb'
+    elif ds_type == 'books':
+        ds_name = 'james-burton/books_price_prediction'
+        project = 'Books'
+    dataset = load_dataset(ds_name, download_mode='force_redownload')
+    mean_price = np.mean(dataset['train']['label'])
+    std_price = np.std(dataset['train']['label'])
+    
     
     # Tokenize the dataset
-    def encode(examples):
-        return {"label": np.array([examples["label"]]),
-                **tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)}
+    def encode(examples, ds_type=ds_type):
+        return {"label": np.array([examples["scaled_label"]]),
+                    **tokenizer(examples["text"], truncation=True, padding="max_length")}
     dataset = dataset.map(encode,load_from_cache_file=True)
 
     # Fast dev run if want to run quickly and not save to wandb
@@ -70,7 +80,7 @@ def main():
     # If not, initialize wandb
     else:
         wandb.init(
-            project="Airbnb",
+            project=project,
             tags=args["tags"],
             save_code=True,
             config={"my_args/" + k: v for k, v in args.items()},
@@ -86,6 +96,8 @@ def main():
     # Save args file
     with open(os.path.join(output_dir, "args.yaml"), "w") as f:
         yaml.dump(args, f)
+        
+    
 
     # Initialise training arguments and trainer
     training_args = TrainingArguments(
@@ -108,11 +120,9 @@ def main():
         save_strategy="epoch",
         save_total_limit=args["save_total_limit"],
         load_best_model_at_end=True,
-        remove_unused_columns=False,
         torch_compile=args['pytorch2.0'], # Needs to be true if PyTorch 2.0
     )
 
-    mse_metric = evaluate.load("mse")
     if args["lion_optim"]:
         opt = Lion(model.parameters(), lr=args['lr'], weight_decay=args['weight_decay'])
         sched = None
@@ -139,6 +149,10 @@ def main():
         print("***** Running Prediction *****")
         # Test the model
         results = trainer.evaluate(dataset["test"], metric_key_prefix="test")
+        preds = trainer.predict(dataset["test"]).predictions
+        unscaled_preds = preds * std_price + mean_price
+        unscaled_refs = [[x[0]*std_price + mean_price] for x in dataset['test']['label']]
+        results['test_unscaled_rmse'] = np.sqrt(np.mean((unscaled_preds - unscaled_refs)**2))
         results['test_rmse'] = np.sqrt(results['test_loss'])
 
         # Save the predictions
