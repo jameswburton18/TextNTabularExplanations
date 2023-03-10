@@ -12,6 +12,8 @@ How do these explanations change when I use different models?
 
 When just a textual predictor is used, or just a tabular predictor is used, are the explanations similar to the explanations when both are used?
 
+How important is the text as a whole? Swap out the whole text for another text to see how it ranks, vs swapping out individual words.
+
 ## Using the textual explanations
 I will need to think of a way of linking in my textual explanations. Perhaps feeding it straight in to the textual explainer?
 
@@ -20,6 +22,7 @@ Noura even suggested feeding in the textual explanation as well as the text and 
 ## Data
 * Airbnb data downloaded from https://www.kaggle.com/datasets/tylerx/melbourne-airbnb-open-data?resource=download
 * Books data from https://machinehack.com/hackathons/predict_the_price_of_books/data
+* Benchmark suite from https://github.com/sxjscience/automl_multimodal_benchmark
 
 In [Melbourne Airbnb Price Prediction](https://cs229.stanford.edu/proj2019aut/data/assignment_308832_raw/26586189.pdf) they recognise that there are multiple reviews for every listing. Reviews are concatenated together with the corresponding listing to be used as the text input. Train, val and test are split by listing id.
 
@@ -64,3 +67,30 @@ To start:
 ## Thoughts on [DIME](https://arxiv.org/pdf/2203.02013.pdf) paper
 * This actually has a lot of relevance to hierarchical
 * They disentangle the LIME outputs of a multimodal model into text, image and multimodel interactions. Specifically the multimodal interactions between 
+
+## Thoughts on [Benchmarking Multimodal AutoML for Tabular Data with Text Fields](https://arxiv.org/abs/2111.02705)
+* Here they have over a dozen different tabntext datasets and they compare performance between different combination methods. Namely for 
+    * Weighted Ensemble: weighted average of the text and tabular model predictions
+    * Stack Ensemble: An additional modal is trained on the predictions of the text and tabular models
+
+In the paper they refer to an LM that just uses the text data as Text-Net and one that uses the tabular data too (in some fashion) as Multimodal-Net.
+For them All-text means that tabular features are converted into text, Fuse-early means that the tabular features are mapped by dense layers into the same embedding space as the text tokens. Fuse-late means that the text features are encoded by a tranformer into one latent space and an MLP is used to map the tabular features into another, which are then concatenated and fed into a final MLP.
+Also:
+* Get LM embeddings, no fine tuning on just text
+* Fine tune on just text cols, then get LM embeddings
+Here they even calculate feature importance for the features but it is only a small portion, and they do not go down to the word level.
+
+Data Process methods, this comes from AutoML/AutoGluon:
+* Missing values for catergorial features are represented as a new "Unknown" category
+* Missing text fields are handled as an empty string
+* Categorial features with more than 20 unique values are counted as a text string
+
+## Where to go from here:
+* I have a few ways to combine tabular and text and I have a few potential datasets that I can try. Is the path forward to train these models first? The goal here is to compare explanations so I think I need to start cranking them out, or at least develop a pipeline for doing so. I need to also gauge how long the explanations will take
+* From the benchmark dataset I have the performance from the different datasets
+
+If we think throught the IMDB dataset
+* There are 7 numerical columns and 3 text columns
+* Train a model on the numerical columns
+* Train a model on the text columns, maybe just use one of the columns.
+* Get the SHAP explanations for several
