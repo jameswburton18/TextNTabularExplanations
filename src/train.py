@@ -13,6 +13,9 @@ from transformers.trainer_callback import EarlyStoppingCallback
 import evaluate
 import numpy as np
 from lion_pytorch import Lion
+from sklearn.metrics import precision_score, recall_score, roc_auc_score
+from torch.optim.lr_scheduler import _LRScheduler
+from torch.optim import AdamW
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -40,30 +43,44 @@ def main():
         print(f"Updating with:\n{yaml_args}\n")
     print(f"\n{args}\n")
 
-    # Load model and tokenizer
-    model = AutoModelForSequenceClassification.from_pretrained(
-        args["model_base"], num_labels=1, problem_type="regression"
-    )
-    tokenizer = AutoTokenizer.from_pretrained(args["model_base"])
-
     # Dataset
-    # dataset = load_from_disk("data/processed/airbnb/summaries")
     ds_type = args['dataset']
     if ds_type == 'airbnb':
         ds_name = 'james-burton/airbnb_summaries'
         project = 'Airbnb'
+        label_col, text_col = 'scaled_label', 'text'
+        prob_type, num_labels = 'regression', 1
     elif ds_type == 'books':
         ds_name = 'james-burton/books_price_prediction'
         project = 'Books'
-    dataset = load_dataset(ds_name, download_mode='force_redownload')
-    mean_price = np.mean(dataset['train']['label'])
-    std_price = np.std(dataset['train']['label'])
+        label_col, text_col = 'scaled_label', 'text'
+        prob_type, num_labels = 'regression', 1
+    elif ds_type == 'imdb':
+        ds_name = 'james-burton/imdb_gross'
+        project = 'IMDB'
+        label_col, text_col = 'scaled_label', 'text'
+        prob_type, num_labels = 'regression', 1
+    elif ds_type == 'imdb_genre':
+        ds_name = 'james-burton/imdb_genre_prediction'
+        project = 'IMDB Genre'
+        label_col, text_col = 'Genre_is_Drama', 'Description'
+        prob_type, num_labels = 'single_label_classification', 2
+    dataset = load_dataset(ds_name)
+    if prob_type == 'regression':
+        mean_price = np.mean(dataset['train']['label'])
+        std_price = np.std(dataset['train']['label'])
     
+        # Load model and tokenizer
+    model = AutoModelForSequenceClassification.from_pretrained(
+        args["model_base"], num_labels=num_labels, problem_type=prob_type
+    )
+    tokenizer = AutoTokenizer.from_pretrained(args["model_base"])
     
     # Tokenize the dataset
     def encode(examples, ds_type=ds_type):
-        return {"label": np.array([examples["scaled_label"]]),
-                    **tokenizer(examples["text"], truncation=True, padding="max_length")}
+        return {
+            "labels": np.array([examples[label_col]]),
+                    **tokenizer(examples[text_col], truncation=True, padding="max_length")}
     dataset = dataset.map(encode,load_from_cache_file=True)
 
     # Fast dev run if want to run quickly and not save to wandb
@@ -86,7 +103,7 @@ def main():
             config={"my_args/" + k: v for k, v in args.items()},
         )
         os.environ["WANDB_LOG_MODEL"] = "True"
-        output_dir = os.path.join(args["output_root"], wandb.run.name)
+        output_dir = os.path.join(args["output_root"],ds_type, wandb.run.name)
         print(f"Results will be saved @: {output_dir}")
 
     # Make output directory
@@ -126,6 +143,8 @@ def main():
     if args["lion_optim"]:
         opt = Lion(model.parameters(), lr=args['lr'], weight_decay=args['weight_decay'])
         sched = None
+     
+    
     
     trainer = Trainer(
         model=model,
@@ -150,10 +169,17 @@ def main():
         # Test the model
         results = trainer.evaluate(dataset["test"], metric_key_prefix="test")
         preds = trainer.predict(dataset["test"]).predictions
-        unscaled_preds = preds * std_price + mean_price
-        unscaled_refs = [[x[0]*std_price + mean_price] for x in dataset['test']['label']]
-        results['test_unscaled_rmse'] = np.sqrt(np.mean((unscaled_preds - unscaled_refs)**2))
-        results['test_rmse'] = np.sqrt(results['test_loss'])
+        labels = [l[0] for l in dataset['test']['labels']]
+        if prob_type == 'regression':
+            unscaled_preds = preds * std_price + mean_price
+            unscaled_refs = [[x[0]*std_price + mean_price] for x in dataset['test']['label']]
+            results['test_unscaled_rmse'] = np.sqrt(np.mean((unscaled_preds - unscaled_refs)**2))
+            results['test_rmse'] = np.sqrt(results['test_loss'])
+        else:
+            results['test/accuracy'] = np.mean(np.argmax(preds, axis=1) == labels)
+            results['test/precision'] = precision_score(labels, np.argmax(preds, axis=1))
+            results['test/recall'] = recall_score(labels, np.argmax(preds, axis=1))
+            results['test/roc_auc'] = roc_auc_score(labels, preds[:,1])
 
         # Save the predictions
         with open(os.path.join(output_dir, "test_results.txt"), "w") as f:
