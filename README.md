@@ -94,3 +94,12 @@ If we think throught the IMDB dataset
 * Train a model on the numerical columns
 * Train a model on the text columns, maybe just use one of the columns.
 * Get the SHAP explanations for several
+
+## March 14th
+I can now generate SHAP explanations for text columns as a whole when combining them in a 50/50 way. Doing the same but for a different weighting should be trivial. If I were to do a stack ensemble (to use the language from above), then I would need to make some edits. The trouble I think is just compute time if I am to run 68k examples through BERT. Currently I can do it speedily  by recognising that there is an independence in the ensemble models, so therefore I can run them seperately. In a stack ensemble I think I should be able to find some degree of separation so it should not take that long. The tricky one will be if it is all transformed into text.
+
+Could be an interesting side bit, what is the difference between the SHAP explanations when I have tabular columns as text and use the text method (removing words) vs when I have the tabular columns as text and use the tabular method (sampling different nums).
+
+Next move: eventually I need to bulk generate these explanations but right now maybe I just get a single explanation, or could try a set if it only takes a few minutes, for balanced, weighted and stack ensemble.
+
+In order to do that I need to first find out which is the best weight for combining the two models. I can try different weights and see how the explanations change but it is still useful to find out the most effective weight.
