@@ -1,21 +1,47 @@
 --- # airbnb_0
 config: airbnb_0
-fast_dev_run: false
 tags:
 - bert
 dataset: airbnb
-batch_size: 8
+batch_size: 32
 
 --- # books_0
 config: books_0
-fast_dev_run: false
 tags:
 - bert
-batch_size: 16
+batch_size: 32
+early_stopping_patience: 5
+
+--- # imdb_0
+config: imdb_0
+tags:
+- bert
+batch_size: 32
+dataset: imdb
+early_stopping_patience: 5
+
+--- # imdb_genre_0
+config: imdb_genre_0
+model_base: distilbert-base-uncased
+tags:
+- distilbert
+dataset: imdb_genre
+batch_size: 64
+
+--- # imdb_genre_text_0
+config: imdb_genre_text_0
+model_base: distilbert-base-uncased
+tags:
+- distilbert
+dataset: imdb_genre_text
+batch_size: 32
 
 --- # TESTING
 config: testing
-do_train: false
+fast_dev_run: true
+do_train: true
+model_base: distilbert-base-uncased
 tags:
-- bert
-dataset: books
+- distilbert
+dataset: imdb_genre
+batch_size: 16

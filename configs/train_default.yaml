@@ -1,13 +1,13 @@
 --- # DEFAULT
 config: default
-fast_dev_run: true
+fast_dev_run: false
 do_train: true
 do_predict: true
 tags:
 - bert
 batch_size: 16
 model_base: bert-base-uncased
-output_root: models/airbnb/
+output_root: models/
 weight_decay: 0.3
 num_epochs: 50
 early_stopping_patience: 3
