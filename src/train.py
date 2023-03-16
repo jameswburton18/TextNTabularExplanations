@@ -61,9 +61,14 @@ def main():
         label_col, text_col = 'scaled_label', 'text'
         prob_type, num_labels = 'regression', 1
     elif ds_type == 'imdb_genre':
-        ds_name = 'james-burton/imdb_genre_prediction'
+        ds_name = 'james-burton/imdb_genre_prediction2'
         project = 'IMDB Genre'
         label_col, text_col = 'Genre_is_Drama', 'Description'
+        prob_type, num_labels = 'single_label_classification', 2
+    elif ds_type == 'imdb_genre_text':
+        ds_name = 'james-burton/imdb_genre_prediction_all_text'
+        project = 'IMDB Genre All Text'
+        label_col, text_col = 'Genre_is_Drama', 'text'
         prob_type, num_labels = 'single_label_classification', 2
     dataset = load_dataset(ds_name)
     if prob_type == 'regression':
