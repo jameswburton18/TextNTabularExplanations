@@ -103,3 +103,19 @@ Could be an interesting side bit, what is the difference between the SHAP explan
 Next move: eventually I need to bulk generate these explanations but right now maybe I just get a single explanation, or could try a set if it only takes a few minutes, for balanced, weighted and stack ensemble.
 
 In order to do that I need to first find out which is the best weight for combining the two models. I can try different weights and see how the explanations change but it is still useful to find out the most effective weight.
+
+## March 16th
+What am I trying to achieve?
+I will be able to see the different focuses of the models when they are combined in different ways.
+
+How can I embed the text explanations?
+I would have to get the explanations for the tabular model, say, then train a new model with just the explanation such as to predict again. Can I use the training set for both?
+
+If I have a training set X_train to predict y_train, I will produce a bunch of explanations. It will be explaining the predictions of seen examples so therefore the predictions will likely be a lot more confident (overfitted) than if it were for unseen examples. 
+
+Then I have a new training set of exp(X_train) which would still be predicting y_train. It might be entirely crap at predicting y_train, but whatever. If I still test on the unseen validation and test sets then that's still okay. 
+
+As for how it fits in with this new multi-model explanation business, maybe the story can start off with that with just using a transformer all-text is bad and focuses too much on on the description. I generate explanations for X_train (and X_val and X_test) and then generate textual explanations based off of those. Then I concatenate the descriptions and the textual explanations and train a new model on that.
+
+How can I combine with the different multi-modal explanations?
+* 
