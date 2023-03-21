@@ -8,3 +8,4 @@
 /logs
 /notebooks/wandb
 /notebooks/artifacts
+/my_package.egg-info
