@@ -25,3 +25,4 @@ lr: 5.0e-05
 lion_optim: false
 pytorch2.0: true
 dataset: books
+version: null

@@ -1,21 +1,21 @@
 --- # airbnb_0
 config: airbnb_0
 tags:
-- bert
+  - bert
 dataset: airbnb
 batch_size: 32
 
 --- # books_0
 config: books_0
 tags:
-- bert
+  - bert
 batch_size: 32
 early_stopping_patience: 5
 
 --- # imdb_0
 config: imdb_0
 tags:
-- bert
+  - bert
 batch_size: 32
 dataset: imdb
 early_stopping_patience: 5
@@ -24,15 +24,85 @@ early_stopping_patience: 5
 config: imdb_genre_0
 model_base: distilbert-base-uncased
 tags:
-- distilbert
+  - distilbert
 dataset: imdb_genre
 batch_size: 64
+
+--- # imdb_genre_1
+config: imdb_genre_1
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tab_as_text
+dataset: imdb_genre
+version: tab_as_text
+batch_size: 32
+
+--- # imdb_genre_2
+config: imdb_genre_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tabx5
+dataset: imdb_genre
+version: tabx5
+batch_size: 32
+
+--- # imdb_genre_3
+config: imdb_genre_3
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - reorder1
+dataset: imdb_genre
+version: reorder1
+batch_size: 32
+
+--- # imdb_genre_4
+config: imdb_genre_4
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - reorder2
+dataset: imdb_genre
+version: reorder2
+batch_size: 32
+
+--- # imdb_genre_5
+config: imdb_genre_5
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tabx5_nodesc
+dataset: imdb_genre
+version: tabx5_nodesc
+batch_size: 32
+
+--- # imdb_genre_6
+config: imdb_genre_6
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tabx2_nodesc
+dataset: imdb_genre
+version: tabx2_nodesc
+batch_size: 32
+
+--- # imdb_genre_7
+config: imdb_genre_7
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tabx2
+dataset: imdb_genre
+version: tabx2
+batch_size: 32
 
 --- # imdb_genre_text_0
 config: imdb_genre_text_0
 model_base: distilbert-base-uncased
 tags:
-- distilbert
+  - distilbert
 dataset: imdb_genre_text
 batch_size: 32
 
@@ -42,6 +112,7 @@ fast_dev_run: true
 do_train: true
 model_base: distilbert-base-uncased
 tags:
-- distilbert
+  - distilbert
 dataset: imdb_genre
+version: tabx2
 batch_size: 16
