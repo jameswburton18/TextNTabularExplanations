@@ -16,6 +16,11 @@ from lion_pytorch import Lion
 from sklearn.metrics import precision_score, recall_score, roc_auc_score
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim import AdamW
+from utils import (
+    prepare_text,
+    row_to_string,
+    multiple_row_to_string,
+)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -63,7 +68,7 @@ def main():
     elif ds_type == 'imdb_genre':
         ds_name = 'james-burton/imdb_genre_prediction2'
         project = 'IMDB Genre'
-        label_col, text_col = 'Genre_is_Drama', 'Description'
+        label_col, text_col = 'Genre_is_Drama', 'text'
         prob_type, num_labels = 'single_label_classification', 2
     elif ds_type == 'imdb_genre_text':
         ds_name = 'james-burton/imdb_genre_prediction_all_text'
@@ -71,11 +76,12 @@ def main():
         label_col, text_col = 'Genre_is_Drama', 'text'
         prob_type, num_labels = 'single_label_classification', 2
     dataset = load_dataset(ds_name)
+    dataset = prepare_text(dataset, args['version'])
     if prob_type == 'regression':
         mean_price = np.mean(dataset['train']['label'])
         std_price = np.std(dataset['train']['label'])
     
-        # Load model and tokenizer
+    # Load model and tokenizer
     model = AutoModelForSequenceClassification.from_pretrained(
         args["model_base"], num_labels=num_labels, problem_type=prob_type
     )
@@ -167,6 +173,8 @@ def main():
     if args["do_train"]:
         print("Training...")
         trainer.train()
+        if not args["fast_dev_run"]:
+            model.push_to_hub(config_type, private=True)
         print("Training complete")
     # Predict on the test set
     if args["do_predict"]:
