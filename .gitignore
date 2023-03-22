@@ -9,3 +9,4 @@
 /notebooks/wandb
 /notebooks/artifacts
 /my_package.egg-info
+/shap_vals
