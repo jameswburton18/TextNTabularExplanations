@@ -161,11 +161,42 @@ Explanations:
 * [x] tab as text (imdb_genre_1) word style
 * [x] tabx2_nodesc (imdb_genre_6) word style
 * [x] tabx5_nodesc (imdb_genre_5) word style
-* [ ] tab as text (imdb_genre_1) tabular style
-* [ ] tabx2_nodesc (imdb_genre_6) tabular style
-* [ ] tabx5_nodesc (imdb_genre_5) tabular style
-* [ ] tabx2 (imdb_genre_7) tabular style
-* [ ] tabx5 (imdb_genre_2) tabular style
-* [ ] reorder1 (imdb_genre_3) tabular style
-* [ ] reorder2 (imdb_genre_4) tabular style
-* [ ] all as text (imdb_genre_0) tabular style on validation set
+* [x] tab as text (imdb_genre_1) tabular style
+* [x] tabx2_nodesc (imdb_genre_6) tabular style
+* [x] tabx5_nodesc (imdb_genre_5) tabular style
+* [x] tabx2 (imdb_genre_7) tabular style
+* [x] tabx5 (imdb_genre_2) tabular style
+* [x] reorder1 (imdb_genre_3) tabular style
+* [x] reorder2 (imdb_genre_4) tabular style
+~~* [ ] all as text (imdb_genre_0) tabular style on validation set~~
+
+In order to test the above I need to do:
+
+* [x] np load the exps
+* [x] find the data for them. I needed this data when I trained the models so look in the gen exps file
+* [x] do shap summary plots
+
+## March 22nd
+
+I want to explore to see if performance will improve if I pass the features into the model according to how important they are to the decision (on average). I must keep the test set seperate, so I will have to use the validation set to get explanations. It doesn't make too  much sense to do it including the text description becuase the transformer model basically ignore the other features when it is present.
+
+* [x] imdb_genre_1 tabular style on validation set
+* [x] reorder and retrain based on importance values
+
+The problem that I want to tackle is to be able to get an overall explanation which puts words alongside categorical features. This could be a technical challenge, telling the model to treat some features a certain way and some a different way. 
+
+Two questions:
+
+* How does lgb handle missing values?
+  * [x] Search online
+  ~~* [ ] Create a test case and make a prediction~~
+* For simple ensembles, can we recover the feature importance values simply by multiplying together the feature importance values of the individual models?
+  * [x] Look at average shap values for tab features, in lgb and how they compare when multiplied by 0.25, 0.5 and 0.75
+
+Missing values that are unseen during training are treated as belonging to the 'other' non-split category and are always put to the right (for categorical variables). For numerical variables the missing val is converted to 0.
+
+* Order of features in text model seems important:
+  * [ ] imdb_genre_0 tabular style on validation set
+* Can I get a word level explanation that includes the text features
+  * [ ] Get a set of word level explanations for the text only model
+  * [ ] Combine them with the tabular features explanations
