@@ -10,8 +10,9 @@ MODEL_NAME_TO_DESC_DICT = {
     'imdb_genre_5': 'tabx5_nodesc',
     'imdb_genre_6': 'tabx2_nodesc',
     'imdb_genre_7': 'tabx2',
-    'imdb_genre_8': 'tab as text, reorder3',
+    'imdb_genre_8': 'tab as text, exp-based reorder',
     'imdb_genre_9': 'text col only',
+    'imdb_genre_10': 'all as text exp-based reorder',
 }
    
 
@@ -60,6 +61,10 @@ def prepare_text(dataset, version):
         return dataset
     elif version == 'reorder3':
         cols = ['Revenue (Millions)','Metascore', 'Rank', 'Year','Votes','Runtime (Minutes)', 'Rating']
+        dataset = dataset.map(row_to_string, fn_kwargs={'cols': cols})
+        return dataset
+    elif version == 'all_as_text_exp_reorder':
+        cols = ['Description','Revenue (Millions)','Votes','Rank', 'Metascore', 'Year','Runtime (Minutes)', 'Rating']
         dataset = dataset.map(row_to_string, fn_kwargs={'cols': cols})
         return dataset
     elif version == 'text_col_only':
@@ -126,8 +131,14 @@ def select_prepare_array_fn(model_name):
             return np.array(
                 " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]), dtype="<U512"
                 )
-    elif model_name == 'imdb_genre_8': # reorder3
+    elif model_name == 'imdb_genre_8': # reorder3/'tab as text, exp-based reorder'
         cols = ['Revenue (Millions)','Metascore', 'Rank', 'Year','Votes','Runtime (Minutes)', 'Rating']
+        def array_fn(array):
+            return np.array(
+                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]), dtype="<U512"
+                )
+    elif model_name == 'imdb_genre_10': # all_as_text_exp_reorder
+        cols = ['Description','Revenue (Millions)','Votes','Rank', 'Metascore', 'Year','Runtime (Minutes)', 'Rating']
         def array_fn(array):
             return np.array(
                 " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]), dtype="<U512"
