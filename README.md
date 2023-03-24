@@ -196,7 +196,40 @@ Two questions:
 Missing values that are unseen during training are treated as belonging to the 'other' non-split category and are always put to the right (for categorical variables). For numerical variables the missing val is converted to 0.
 
 * Order of features in text model seems important:
-  * [ ] imdb_genre_0 tabular style on validation set
+  * [x] imdb_genre_0 tabular style on validation set
+  * [x] reorder and retrain based on importance values
 * Can I get a word level explanation that includes the text features
-  * [ ] Get a set of word level explanations for the text only model
-  * [ ] Combine them with the tabular features explanations
+  * [x] Get a set of word level explanations for the text only model
+  ~~* [ ] Combine them with the tabular features explanations~~
+
+## March 23rd
+
+I have been able to get an output for the text and tabular combination.
+
+## March 24th
+
+When combining the text and tabular outputs in a simple ensemble (linear transformation) the combination of explanations is trivial. The feature importance values and the expected value form a linear y = mx + c relationship, therefore when the output is transformed linearly, eg y = 0.5(text) + 0.5(tab) I can simply multiply both explanation equations together to form a new expected value and a new set of feature importance values.
+
+I can display the output in terms of a word level explanation using the shap library, but only when I remove the `hierarchical_values`, which is the part of the explanation that groups word-pieces together. There may well be a way to set it up for the combined tabular values too but at the moment it is simpler just to remove it.
+
+I feel like I am now in a similar place to before: I want to test the relationship between the individual model explanations and the global explanations when combining the two modalities in a stack ensemble. The current thing that we are trying to solve is how can we present an explanation that is on a word level with text and tabular data. Options:
+
+1. Calculate them both independently and then combine them in some fashion
+2. Think of a method to do both a word level and a tabular level explanation at the same time
+
+### 1
+
+In order to work out a method to combine them I first need to get an answer of what they are supposed to look like together. DIME calculated 3 LIME explanations, one where the image is held constant and the text is perturbed, one vice versa and one where both are perturbed. They then calculated the multimodal interaction by taking the different between the combined and the individual. We do this when the two modalities are not independent. For the case of a simple ensemble they are: perturbing the text will not effect the contribution of the tabular features and vice versa. Therefore the multimodal interaction should be 0.
+
+How does SHAP work for tabular data: 
+I should use the shap.kmeans function: it runs the scikit learn kmeans function to get k (go for 100) clusters of the data. The data is then rounded to the nearest datapoint in the dataset. It is then made into a DenseData object which takes the cluster centres, the group names and weights depending on how many datapoints are in each cluster.
+
+If I had a single background reference then I would be able to do a combined text and tabular explanation, surely. I would just substitute the tabualr features for its background reference and swap the text feature for the [MASK] token.
+
+The question is, when there is a background dataset and I am looking to 'remove' one feature, does it randomly pick from the background dataset or does it sample multiple times?
+
+~~Text examples where the tokenisation happens within the predict function eg https://shap.readthedocs.io/en/latest/example_notebooks/api_examples/plots/text.html use a partition explainer. Due to this example doing the tokensation within the predict function I think that I will be able to have some success using this method. I just need to work out how to deal with the background dataset. On Monday~~
+
+Tokenisation does happen in the predict function but the masking is still the same in the other part of the explainer, still need some thinking.
+
+* [ ] Make a reference dataset of just the kmeans centroids and 
