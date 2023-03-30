@@ -221,7 +221,8 @@ I feel like I am now in a similar place to before: I want to test the relationsh
 
 In order to work out a method to combine them I first need to get an answer of what they are supposed to look like together. DIME calculated 3 LIME explanations, one where the image is held constant and the text is perturbed, one vice versa and one where both are perturbed. They then calculated the multimodal interaction by taking the different between the combined and the individual. We do this when the two modalities are not independent. For the case of a simple ensemble they are: perturbing the text will not effect the contribution of the tabular features and vice versa. Therefore the multimodal interaction should be 0.
 
-How does SHAP work for tabular data: 
+How does SHAP work for tabular
+ data: 
 I should use the shap.kmeans function: it runs the scikit learn kmeans function to get k (go for 100) clusters of the data. The data is then rounded to the nearest datapoint in the dataset. It is then made into a DenseData object which takes the cluster centres, the group names and weights depending on how many datapoints are in each cluster.
 
 If I had a single background reference then I would be able to do a combined text and tabular explanation, surely. I would just substitute the tabualr features for its background reference and swap the text feature for the [MASK] token.
@@ -232,4 +233,28 @@ The question is, when there is a background dataset and I am looking to 'remove'
 
 Tokenisation does happen in the predict function but the masking is still the same in the other part of the explainer, still need some thinking.
 
-* [ ] Make a reference dataset of just the kmeans centroids and 
+~~* [ ] Make a reference dataset of just the kmeans centroids and~~
+
+## March 27th
+
+How does shap explain text?
+
+* It uses a Partition explainer. The `__call__()` function of the parent `Explainer` package is called but that just converts a Dataframe/dataset into lists and retreives the right column. It then loops over all rows which are to be explained and calls `explain_row()` from `Partition` 
+* As it does it one row at a time, the effect of the removal of one or more of the words is calculated for the output of that particular row. Word masked, prediction made, other word masked, prediction made, etc. We cannot do this for tabular becaause there is no background data. 
+
+Imagine there is a sentence to be explained and then a single tabular feature. We would calcualte the words as normal but then we also need to vary to tabular instance. Because we cannot replace it with a single mask token we have to sample it. 
+
+## March 29th
+
+* [x] Using the brute force kernel shap explain a single row using a single reference value
+~~* [ ] Explain a single row using multiple reference values~~
+
+Looking more closely and I am seeing that text shap values are not calculated through the permutation explainer, but instead through the partition explainer which makes groups of words and then substitutes them out as a whole when calculatin the presence or not of certain features in the shap val calculation.
+
+I think the steps will be to first create an exact brute force explainer which does the SHAP values for everything. But this may well take ages as it will treat each word invividually. In theory I can do a partition explainer for the combined two, but in order to do so I need a way of calculating the similarity between words and the tabular features. It might be the case that I just split the clustering tree into two parts, splitting tab and text at the top level. I think this means that clusters split at the top level will treat each other as a whole, ie (i think) the tabular features will treat the words as a single feature. Same as saying "Given the text is the way that it is, how do the tabular features affect the output". 
+
+If I am calculating them seperately (if we are talking about all as text, for example) and I am holding the text constant, then I'd be using the sampling method to get the shap values of the tabular features.
+
+## March 30th
+
+* [x] Get a clustering output for the text and tabular features
