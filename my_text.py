@@ -20,6 +20,7 @@ from brute_force_explainer import Model
 import lightgbm as lgb
 from shap.utils import safe_isinstance
 from shap.utils.transformers import parse_prefix_suffix_for_tokenizer, SENTENCEPIECE_TOKENIZERS, getattr_silent
+# import faulthandler; faulthandler.enable()
 
 class JointMasker(Masker):
     def __init__(self, tab_df, tokenizer=None, mask_token=None, collapse_mask_token="auto", output_type="string"):
@@ -46,6 +47,7 @@ class JointMasker(Masker):
             sp.spatial.distance.pdist(tab_df.T, metric="correlation")
             )
         self.n_tab_groups = len(self.tab_pt)
+        self.tab_feature_names = list(tab_df.columns)
         
         parsed_tokenizer_dict = parse_prefix_suffix_for_tokenizer(self.tokenizer)
 
@@ -240,25 +242,12 @@ class JointMasker(Masker):
         # References to non-leaf nodes need to be shifted by the number of new leaves
         Z_join = np.zeros([self.n_tab_groups+n_text_groups+1,4])
         
-        '''
-        Z_join[:n_text_groups,:2] = np.where(text_pt[:,:2]>=n_text_leaves, 
-                                             text_pt[:,:2]+ self.n_tab_cols, 
-                                             text_pt[:,:2])
-        Z_join[n_text_groups:-1,:2] = np.where(self.tab_pt[:,:2]>=self.n_tab_cols,
-                                               self.tab_pt[:,:2]+n_text_leaves+ n_text_groups,
-                                               self.tab_pt[:,:2]+n_text_leaves)
-        
-        # 3rd and 4th columns are left unchanged
-        Z_join[:n_text_groups,2:] = text_pt[:,2:]
-        Z_join[n_text_groups:-1,2:] = self.tab_pt[:,2:]
-        '''
-        
         # Put tab first, then text
         Z_join[:self.n_tab_groups,:2] = np.where(self.tab_pt[:,:2]>=self.n_tab_cols, 
                                              self.tab_pt[:,:2]+n_text_leaves, 
                                              self.tab_pt[:,:2])
         Z_join[self.n_tab_groups:-1,:2] = np.where(text_pt[:,:2]>=n_text_leaves,
-                                                  text_pt[:,:2]+self.n_tab_cols+ n_text_groups,
+                                                  text_pt[:,:2]+self.n_tab_cols+ self.n_tab_groups,
                                                     text_pt[:,:2]+self.n_tab_cols)
         
         # 3rd and 4th columns are left unchanged
@@ -266,10 +255,10 @@ class JointMasker(Masker):
         Z_join[self.n_tab_groups:-1,2:] = text_pt[:,2:]
         
         # Create top join, joining the text and tab dendrograms together
-        top_text_node = n_text_leaves + self.n_tab_cols + n_text_groups + -1
-        top_tab_node = top_text_node + self.n_tab_groups
+        top_tab_node = self.n_tab_cols + n_text_leaves + self.n_tab_groups -1
+        top_text_node = top_tab_node + n_text_groups
         # Set similarity of top node to 1.5
-        Z_join[-1,:] = np.array([top_text_node, top_tab_node, 1.5, self.n_tab_cols + n_text_leaves])
+        Z_join[-1,:] = np.array([top_tab_node, top_text_node, 1.5, n_text_leaves+self.n_tab_cols])
         
         return Z_join
     
@@ -279,11 +268,25 @@ class JointMasker(Masker):
         Note we only return a single sample, so there is no expectation averaging.
         """
         self._update_s_cache(s[-1])
-        return (1, len(self.n_tab_cols+self._tokenized_s))
+        return (1, self.n_tab_cols+len(self._tokenized_s))
+    
+    
+    def mask_shapes(self, s):
+        """ The shape of the masks we expect.
+        """
+        self._update_s_cache(s[-1])
+        return [(self.n_tab_cols+len(self._tokenized_s),)]
+
+
+    def feature_names(self, s):
+        """ The names of the features for each mask position for the given input string.
+        """
+        self._update_s_cache(s[-1])
+        return [self.tab_feature_names+[v.strip() for v in self._segments_s]]
     
 
 def run_shap_vals(type='text'):
-    train_df = load_dataset('james-burton/imdb_genre_prediction2', split='train[:10]').to_pandas()
+    train_df = load_dataset('james-burton/imdb_genre_prediction2', split='train').to_pandas()
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
     text_pipeline = pipeline('text-classification', model="james-burton/imdb_genre_9", tokenizer=tokenizer, device="cuda:0")
     # test_df = load_dataset('james-burton/imdb_genre_prediction2', split='test[:1]')
@@ -329,7 +332,7 @@ def run_shap_vals(type='text'):
     elif type == 'text':
         masker = Text(tokenizer=tokenizer)
         explainer = shap.Explainer(model=text_pred_fn, masker=masker)
-        shap_vals = explainer(['surprising twists and turns'])
+        shap_vals = explainer(['offbeat romantic comedy'])
     else:
         masker = Tabular(train_df[tab_cols], clustering="correlation")
         explainer = shap.explainers.Partition(model=tab_pred_fn, masker=masker)
@@ -351,3 +354,4 @@ if __name__ == "__main__":
     # masker.clustering(sample_text)    
     
     run_shap_vals('joint')
+    # run_shap_vals('text')
