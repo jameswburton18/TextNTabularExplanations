@@ -13,7 +13,7 @@ from transformers.pipelines.pt_utils import KeyDataset
 from tqdm import tqdm
 from shap.maskers import Masker
 from shap.utils.transformers import parse_prefix_suffix_for_tokenizer, getattr_silent
-from shap.maskers._text import Token, TokenGroup, partition_tree
+from shap.maskers._text import Token, TokenGroup, partition_tree, Text
 import re
 
 import lightgbm as lgb
@@ -25,11 +25,12 @@ class Model():
         self.text_pipeline = text_pipeline
         
         
-    def predict_both(self, examples, text_weight=0.5, load_from_cache=True):
+    def predict_both(self, examples, text_weight=0.5):
+        if len(examples.shape) == 1:
+            examples = examples.reshape(1, -1)
         tab_examples = examples[:,:-1]
         text_examples = examples[:,-1]
         tab_preds = self.tab_model.predict_proba(tab_examples)
-        
         
         desc_dict = {}
         for i, desc in tqdm(enumerate(text_examples)):
@@ -38,13 +39,15 @@ class Model():
             else:
                 desc_dict[desc].append(i)
         
-        if load_from_cache:
+        if self.text_to_pred_dict is not None:
             text_preds = np.array([self.text_to_pred_dict[desc] for desc in desc_dict.keys()])    
             
         else:
-            text_preds = self.text_pipeline(list(desc_dict.keys()))
+            dict_keys = list(desc_dict.keys())
+            dict_keys = dict_keys[0] if len(dict_keys) == 1 else dict_keys
+            text_preds = self.text_pipeline(dict_keys)
             text_preds = np.array([format_text_pred(pred) for pred in text_preds])
-                            
+                                        
         
         expanded_text_preds = np.zeros((len(text_examples), 2))
         for i, (desc, idxs) in enumerate(desc_dict.items()):
@@ -181,6 +184,8 @@ def run_proper():
 class JointMasker(Masker):
     def __init__(self, tokenizer=None, mask_token=None, collapse_mask_token="auto", output_type="string", tab_clustering=None, num_tab_features=None):
         self.tokenizer = tokenizer
+        if self.tokenizer is None:
+            self.tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
         self.output_type = output_type
         self.collapse_mask_token = collapse_mask_token
         self.input_mask_token = mask_token
@@ -421,11 +426,7 @@ def text_partition_tree(decoded_tokens, special_tokens):
 
 if __name__ == "__main__":
     # run_example()
-    run_proper()
-    
-    Z_comb2 = np.array([[ 0.        ,  1.        ,  0.5       ,  2.        ],
-       [ 2.        ,  3.        ,  0.5       ,  2.        ],
-       [ 4.        ,  5.        ,  1.        ,  4.        ],
-       [ 7.        ,  8.        ,  0.49212894,  8.        ],
-       [ 6.        ,  9.        ,  0.62301468,  9.        ],
-       [10.        , 11.        ,  1.5       ,  7.        ]])
+    # run_proper()
+    masker = JointMasker()
+    sample_text = 'organic romantic comedy'
+    masker.custom_clustering(sample_text)

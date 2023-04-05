@@ -1,29 +1,27 @@
-import scipy.special
 import numpy as np
-import itertools
 import shap
-from datasets import load_dataset
-from src.utils import MODEL_NAME_TO_DESC_DICT, format_text_pred, prepare_text
-import matplotlib.pyplot as plt
-import numpy as np
-from transformers import AutoModelForSequenceClassification, pipeline, AutoTokenizer
-import pandas as pd
-from datasets import load_dataset, DatasetDict, Dataset
-from transformers.pipelines.pt_utils import KeyDataset
-from tqdm import tqdm
 from shap.maskers import Masker
-from shap.maskers._text import Token, TokenGroup, partition_tree, Text, SimpleTokenizer
-from shap.maskers._tabular import Tabular
+from shap.maskers._text import partition_tree, Text, SimpleTokenizer
+from shap.maskers._tabular import Tabular, _delta_masking
+from shap.utils import safe_isinstance, MaskedModel, sample
+from shap.utils.transformers import parse_prefix_suffix_for_tokenizer, SENTENCEPIECE_TOKENIZERS, getattr_silent
+from shap.utils._exceptions import DimensionError, InvalidClusteringError
+from datasets import load_dataset
+from src.utils import format_text_pred
+from transformers import pipeline, AutoTokenizer
+import pandas as pd
+from datasets import load_dataset, Dataset
+from transformers.pipelines.pt_utils import KeyDataset
 import re
 import scipy as sp
 from brute_force_explainer import Model
 import lightgbm as lgb
-from shap.utils import safe_isinstance
-from shap.utils.transformers import parse_prefix_suffix_for_tokenizer, SENTENCEPIECE_TOKENIZERS, getattr_silent
-# import faulthandler; faulthandler.enable()
+import faulthandler
+
+faulthandler.enable()
 
 class JointMasker(Masker):
-    def __init__(self, tab_df, tokenizer=None, mask_token=None, collapse_mask_token="auto", output_type="string"):
+    def __init__(self, tab_df, max_samples=20, tokenizer=None, mask_token=None, collapse_mask_token="auto", output_type="string"):
         if tokenizer is None:
             self.tokenizer = SimpleTokenizer()
         elif callable(tokenizer):
@@ -42,13 +40,32 @@ class JointMasker(Masker):
         self.mask_token = mask_token # could be recomputed later in this function
         self.mask_token_id = mask_token if isinstance(mask_token, int) else None
         
+        # Tab
+        self.output_dataframe = False
+        if safe_isinstance(tab_df, "pandas.core.frame.DataFrame"):
+            self.tab_feature_names = list(tab_df.columns)
+            tab_df = tab_df.values
+            self.output_dataframe = True
+            
+        if hasattr(tab_df, "shape") and tab_df.shape[0] > max_samples:
+            tab_df = sample(tab_df, max_samples)
+            
+        self.data = tab_df
+        self.max_samples = max_samples
+        
+        # Tab clustering
         self.n_tab_cols = tab_df.shape[-1]
         self.tab_pt = sp.cluster.hierarchy.complete(
             sp.spatial.distance.pdist(tab_df.T, metric="correlation")
             )
         self.n_tab_groups = len(self.tab_pt)
-        self.tab_feature_names = list(tab_df.columns)
         
+        self._masked_data = tab_df.copy()
+        self._last_mask = np.zeros(tab_df.shape[1], dtype='bool')
+        self.tab_shape = tab_df.shape
+        self.supports_delta_masking = True
+        
+        # Text
         parsed_tokenizer_dict = parse_prefix_suffix_for_tokenizer(self.tokenizer)
 
         self.keep_prefix = parsed_tokenizer_dict['keep_prefix']
@@ -87,11 +104,63 @@ class JointMasker(Masker):
         self.immutable_outputs = True
         
     def __call__(self, mask, x):
-        tab_mask = mask[:self.n_tab_cols]
-        # text_mask = np.concatenate(([1], mask[M_tab:], [1])) # add start and end tokens
-        masked_tab = x[:self.n_tab_cols] * tab_mask
+        '''
+        tab_mask_call returns a dataframe of shape (num_samples, num_tab_features)
+        However, if only the text is being masked, then we do not need to sample
+        from tab_df and can just take the first row
+        '''
+        masked_tab = self.tab_mask_call(mask[:self.n_tab_cols], x[:self.n_tab_cols])
+        # masked_tab = pd.DataFrame(self._masked_data.copy())
         masked_text = self.text_mask_call(mask[self.n_tab_cols:], x[self.n_tab_cols])
-        return np.hstack([masked_tab.astype('O'), masked_text[0]]).reshape(1,-1)
+        
+        masked_tab['text'] = masked_text[0][0] #'hello' #
+        
+        # return masked_tab.iloc[0].values.reshape(1,-1)
+        return masked_tab.values
+        # return np.hstack([masked_tab.iloc[0].values.astype('O'), masked_text[0]]).reshape(1,-1)
+        # return np.hstack([masked_tab.astype('O'), masked_text[0]]).reshape(1,-1)
+        # return masked_tab.values
+        
+        # if mask[:self.n_tab_cols].all():
+        #     return masked_tab[:1]
+        # else:
+        #     return masked_tab
+        
+    def tab_mask_call(self, mask, x):
+        mask = self._standardize_mask(mask, x)
+
+        # make sure we are given a single sample
+        if len(x.shape) != 1 or x.shape[0] != self.data.shape[1]:
+            raise DimensionError("The input passed for tabular masking does not match the background data shape!")
+
+        # if mask is an array of integers then we are doing delta masking
+        if np.issubdtype(mask.dtype, np.integer):
+
+            variants = ~self.invariants(x)
+            curr_delta_inds = np.zeros(len(mask), dtype=np.int)
+            num_masks = (mask >= 0).sum()
+            varying_rows_out = np.zeros((num_masks, self.tab_shape[0]), dtype='bool')
+            masked_inputs_out = np.zeros((num_masks * self.tab_shape[0], self.tab_shape[1]))
+            self._last_mask[:] = False
+            self._masked_data[:] = self.data
+            _delta_masking(
+                mask, x, curr_delta_inds,
+                varying_rows_out, self._masked_data, self._last_mask, self. data, variants,
+                masked_inputs_out, MaskedModel.delta_mask_noop_value
+            )
+            if self.output_dataframe:
+                return (pd.DataFrame(masked_inputs_out, columns=self.tab_feature_names),), varying_rows_out
+
+            return (masked_inputs_out,), varying_rows_out
+
+        # otherwise we update the whole set of masked data for a single sample
+        self._masked_data[:] = x * mask + self.data * np.invert(mask)
+        self._last_mask[:] = mask
+
+        if self.output_dataframe:
+            return pd.DataFrame(self._masked_data, columns=self.tab_feature_names)
+        
+        return (self._masked_data,)
     
     def text_mask_call(self, mask, s):
         mask = self._standardize_mask(mask, s)
@@ -268,7 +337,7 @@ class JointMasker(Masker):
         Note we only return a single sample, so there is no expectation averaging.
         """
         self._update_s_cache(s[-1])
-        return (1, self.n_tab_cols+len(self._tokenized_s))
+        return (self.max_samples, self.n_tab_cols+len(self._tokenized_s))
     
     
     def mask_shapes(self, s):
@@ -353,5 +422,6 @@ if __name__ == "__main__":
     # masker = shap.maskers.Text(tokenizer)   
     # masker.clustering(sample_text)    
     
+    # run_shap_vals('tab')
     run_shap_vals('joint')
     # run_shap_vals('text')
