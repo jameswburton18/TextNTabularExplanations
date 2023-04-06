@@ -137,7 +137,7 @@ How can I combine with the different multi-modal explanations?
 
 ## March 20th
 
-How can we combine the different modalities in order to get the overall one. I can get the overall text explanation, but how do I get the overall explanation at a word level alongside the tabular features? I could look at doing the masking thing that happens for the pure text features. So what would that look like? For text you run it a bunch of times but swapping the words for blanks and seeing how the prediction changes. For tabular we sample from the background distribtution. It would be interesting to see if there are any sort of cross modality interactions. 
+How can we combine the different modalities in order to get the overall one. I can get the overall text explanation, but how do I get the overall explanation at a word level alongside the tabular features? I could look at doing the masking thing that happens for the pure text features. So what would that look like? For text you run it a bunch of times but swapping the words for blanks and seeing how the prediction changes. For tabular we sample from the background distribtution. It would be interesting to see if there are any sort of cross modality interactions.
 
 For the full text transformer, how can I tell the model to focus more on the other features
 
@@ -183,7 +183,7 @@ I want to explore to see if performance will improve if I pass the features into
 * [x] imdb_genre_1 tabular style on validation set
 * [x] reorder and retrain based on importance values
 
-The problem that I want to tackle is to be able to get an overall explanation which puts words alongside categorical features. This could be a technical challenge, telling the model to treat some features a certain way and some a different way. 
+The problem that I want to tackle is to be able to get an overall explanation which puts words alongside categorical features. This could be a technical challenge, telling the model to treat some features a certain way and some a different way.
 
 Two questions:
 
@@ -222,14 +222,14 @@ I feel like I am now in a similar place to before: I want to test the relationsh
 In order to work out a method to combine them I first need to get an answer of what they are supposed to look like together. DIME calculated 3 LIME explanations, one where the image is held constant and the text is perturbed, one vice versa and one where both are perturbed. They then calculated the multimodal interaction by taking the different between the combined and the individual. We do this when the two modalities are not independent. For the case of a simple ensemble they are: perturbing the text will not effect the contribution of the tabular features and vice versa. Therefore the multimodal interaction should be 0.
 
 How does SHAP work for tabular
- data: 
+ data:
 I should use the shap.kmeans function: it runs the scikit learn kmeans function to get k (go for 100) clusters of the data. The data is then rounded to the nearest datapoint in the dataset. It is then made into a DenseData object which takes the cluster centres, the group names and weights depending on how many datapoints are in each cluster.
 
 If I had a single background reference then I would be able to do a combined text and tabular explanation, surely. I would just substitute the tabualr features for its background reference and swap the text feature for the [MASK] token.
 
 The question is, when there is a background dataset and I am looking to 'remove' one feature, does it randomly pick from the background dataset or does it sample multiple times?
 
-~~Text examples where the tokenisation happens within the predict function eg https://shap.readthedocs.io/en/latest/example_notebooks/api_examples/plots/text.html use a partition explainer. Due to this example doing the tokensation within the predict function I think that I will be able to have some success using this method. I just need to work out how to deal with the background dataset. On Monday~~
+~~Text examples where the tokenisation happens within the predict function eg <https://shap.readthedocs.io/en/latest/example_notebooks/api_examples/plots/text.html> use a partition explainer. Due to this example doing the tokensation within the predict function I think that I will be able to have some success using this method. I just need to work out how to deal with the background dataset. On Monday~~
 
 Tokenisation does happen in the predict function but the masking is still the same in the other part of the explainer, still need some thinking.
 
@@ -239,10 +239,10 @@ Tokenisation does happen in the predict function but the masking is still the sa
 
 How does shap explain text?
 
-* It uses a Partition explainer. The `__call__()` function of the parent `Explainer` package is called but that just converts a Dataframe/dataset into lists and retreives the right column. It then loops over all rows which are to be explained and calls `explain_row()` from `Partition` 
-* As it does it one row at a time, the effect of the removal of one or more of the words is calculated for the output of that particular row. Word masked, prediction made, other word masked, prediction made, etc. We cannot do this for tabular becaause there is no background data. 
+* It uses a Partition explainer. The `__call__()` function of the parent `Explainer` package is called but that just converts a Dataframe/dataset into lists and retreives the right column. It then loops over all rows which are to be explained and calls `explain_row()` from `Partition`
+* As it does it one row at a time, the effect of the removal of one or more of the words is calculated for the output of that particular row. Word masked, prediction made, other word masked, prediction made, etc. We cannot do this for tabular becaause there is no background data.
 
-Imagine there is a sentence to be explained and then a single tabular feature. We would calcualte the words as normal but then we also need to vary to tabular instance. Because we cannot replace it with a single mask token we have to sample it. 
+Imagine there is a sentence to be explained and then a single tabular feature. We would calcualte the words as normal but then we also need to vary to tabular instance. Because we cannot replace it with a single mask token we have to sample it.
 
 ## March 29th
 
@@ -251,10 +251,36 @@ Imagine there is a sentence to be explained and then a single tabular feature. W
 
 Looking more closely and I am seeing that text shap values are not calculated through the permutation explainer, but instead through the partition explainer which makes groups of words and then substitutes them out as a whole when calculatin the presence or not of certain features in the shap val calculation.
 
-I think the steps will be to first create an exact brute force explainer which does the SHAP values for everything. But this may well take ages as it will treat each word invividually. In theory I can do a partition explainer for the combined two, but in order to do so I need a way of calculating the similarity between words and the tabular features. It might be the case that I just split the clustering tree into two parts, splitting tab and text at the top level. I think this means that clusters split at the top level will treat each other as a whole, ie (i think) the tabular features will treat the words as a single feature. Same as saying "Given the text is the way that it is, how do the tabular features affect the output". 
+I think the steps will be to first create an exact brute force explainer which does the SHAP values for everything. But this may well take ages as it will treat each word invividually. In theory I can do a partition explainer for the combined two, but in order to do so I need a way of calculating the similarity between words and the tabular features. It might be the case that I just split the clustering tree into two parts, splitting tab and text at the top level. I think this means that clusters split at the top level will treat each other as a whole, ie (i think) the tabular features will treat the words as a single feature. Same as saying "Given the text is the way that it is, how do the tabular features affect the output".
 
 If I am calculating them seperately (if we are talking about all as text, for example) and I am holding the text constant, then I'd be using the sampling method to get the shap values of the tabular features.
 
 ## March 30th
 
 * [x] Get a clustering output for the text and tabular features
+
+## April 6th
+
+Right now the code is at a stage where I can get a joint explanation for the text and tabular features. The clustering dendograms are combined and the tabular features are sampled from the background dataset. Just to recap, the tab features are sampled from the background dataset because there is no one default, mask value that they can be replaced with, unlike with words. So, with that in mind, functionally the words also get sampled from the background dataset but it is always replaced with the same, masked value.
+
+Maybe can look into owen values, but I think the important thing now is that I have a way of getting a joint explanation for both tabular and text features.
+
+Let's get some results. Thinking back to types of explanations, we have:
+
+* Tab in LGB
+* Tab in BERT
+* Text in BERT
+* Text and Tab in BERT
+* Simple ensemble
+* Weighted ensemble
+* Stack ensemble
+
+The goal is to compare the explanations between all of them. Two things: I will already be able to get an acceptable explanation for some of the variants. Second, I might need to redo them such that they are all done in the same way (Partition).
+
+I will need to adjust the code in order to account for some methods which don't use tabular features at all, but for now let's focus on those which use both and I can plug and play:
+
+* Text and Tab in BERT
+* Simple ensemble (0.5)
+* Weighted ensemble (0.25)
+* Weighted ensemble (0.75)
+* Stack ensemble
