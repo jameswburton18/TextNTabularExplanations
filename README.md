@@ -284,3 +284,19 @@ I will need to adjust the code in order to account for some methods which don't 
 * Weighted ensemble (0.25)
 * Weighted ensemble (0.75)
 * Stack ensemble
+
+* [x] Code set up for weighted ensembles
+* [ ] Code set up for stack ensembles
+* [ ] Code set up for text and tab in BERT
+
+## April 7th
+
+Model created for:
+
+* [x] All as text (0)
+* [ ] Tabx2 (7)
+* [ ] Tabx5 (8)
+* [x] Simple ensemble
+* [x] Stack ensemble
+* [ ] Weighted ensemble (0.25)
+* [ ] Weighted ensemble (0.75)
