@@ -18,9 +18,10 @@ from datasets import load_dataset, Dataset
 from transformers.pipelines.pt_utils import KeyDataset
 import re
 import scipy as sp
+
 # from src.models import Model
 import lightgbm as lgb
-from .models import Model
+from src.models import WeightedEnsemble
 
 # import faulthandler
 
@@ -453,7 +454,7 @@ def run_shap_vals(type="text"):
         preds = np.array([format_text_pred(pred) for pred in preds])
         return preds
 
-    test_model = Model(tab_model=tab_model, text_pipeline=text_pipeline)
+    test_model = WeightedEnsemble(tab_model=tab_model, text_pipeline=text_pipeline)
 
     # We want to explain a single row
     np.random.seed(1)
@@ -466,7 +467,7 @@ def run_shap_vals(type="text"):
         pt = masker.clustering(x)
 
         explainer = shap.explainers.Partition(
-            model=test_model.predict_both, masker=masker, partition_tree=pt
+            model=test_model.predict, masker=masker, partition_tree=pt
         )
         shap_vals = explainer(np.array([x], dtype=object))
         return shap_vals
@@ -484,5 +485,5 @@ def run_shap_vals(type="text"):
 
 if __name__ == "__main__":
     # run_shap_vals('tab')
-    run_shap_vals("joint")
-    # run_shap_vals('text')
+    # run_shap_vals("joint")
+    run_shap_vals("text")
