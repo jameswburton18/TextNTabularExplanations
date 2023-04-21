@@ -129,8 +129,7 @@ def run_shap_multiple_text(model_type):
         "Metascore",
         "Rank",
     ]
-    text_col1 = ["Description"]
-    text_col2 = ["Title"]
+    text_cols = ["Description", "Title"]
     train_df_tab = train_df[tab_cols]
     val_df_tab = val_df[tab_cols]
     y_train = train_df["Genre_is_Drama"]
@@ -146,16 +145,17 @@ def run_shap_multiple_text(model_type):
         tokenizer=tokenizer,
         device="cuda:0",
     )
-    model = AllAsTextModel2(
-        text_pipeline=text_pipeline, cols=[tab_cols + text_col1 + text_col2]
-    )
+    model = AllAsTextModel2(text_pipeline=text_pipeline, cols=tab_cols + text_cols)
 
     np.random.seed(1)
-    x = test_df[tab_cols + text_col1 + text_col2].values  # .reshape(1, -1)
+    x = test_df[tab_cols + text_cols].values[0:]  # .reshape(1, -1)
     # x = [7.7, 398972.0, 32.39, "offbeat romantic comedy"]
 
     masker = JointMasker(
-        tab_df=train_df[tab_cols], tokenizer=tokenizer, collapse_mask_token=True
+        tab_df=train_df[tab_cols],
+        text_cols=text_cols,
+        tokenizer=tokenizer,
+        collapse_mask_token=True,
     )
 
     explainer = shap.explainers.Partition(model=model.predict, masker=masker)
@@ -171,8 +171,8 @@ if __name__ == "__main__":
         # "stack",
         "all_text",
     ]:
-        run_shap_multiple_text(model_type)
-        shap_vals = run_shap(model_type)
+        shap_vals = run_shap_multiple_text(model_type)
+        # shap_vals = run_shap(model_type)
         # with open(f"shap_vals_{model_type}.pkl", "wb") as f:
         #     pickle.dump(shap_vals, f)
 

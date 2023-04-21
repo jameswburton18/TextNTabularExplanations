@@ -32,6 +32,7 @@ class JointMasker(Masker):
     def __init__(
         self,
         tab_df,
+        text_cols,
         max_samples=20,
         tokenizer=None,
         mask_token=None,
@@ -82,6 +83,7 @@ class JointMasker(Masker):
         self.supports_delta_masking = True
 
         # Text
+        self.text_cols = text_cols
         parsed_tokenizer_dict = parse_prefix_suffix_for_tokenizer(self.tokenizer)
 
         self.keep_prefix = parsed_tokenizer_dict["keep_prefix"]
@@ -129,10 +131,10 @@ class JointMasker(Masker):
         from tab_df and can just take the first row
         """
         masked_tab = self.tab_mask_call(mask[: self.n_tab_cols], x[: self.n_tab_cols])
-        masked_text = self.text_mask_call(mask[self.n_tab_cols :], x[self.n_tab_cols])
+        masked_text = self.text_mask_call(mask[self.n_tab_cols :], x[self.n_tab_cols :])
 
         # We unpack the string from the tuple and array
-        masked_tab["text"] = masked_text[0][0]
+        masked_tab[self.text_cols] = masked_text[0][0]
 
         return masked_tab.values
 
@@ -185,8 +187,13 @@ class JointMasker(Masker):
         return (self._masked_data,)
 
     def text_mask_call(self, mask, s):
-        mask = self._standardize_mask(mask, s)
-        self._update_s_cache(s)
+        if len(s) == 1:
+            text = s[0]
+        else:
+            # Chain together the strings with [SEP] tokens
+            text = self.tokenizer.sep_token.join(s)
+        mask = self._standardize_mask(mask, text)
+        self._update_s_cache(text)
 
         # if we have a fixed prefix or suffix then we need to grow the mask to account for that
         if self.keep_prefix > 0 or self.keep_suffix > 0:
@@ -218,10 +225,15 @@ class JointMasker(Masker):
             if safe_isinstance(self.tokenizer, SENTENCEPIECE_TOKENIZERS):
                 out = out.replace("▁", " ")
 
-            # replace sequence of spaces with a single space and strip beginning and end spaces
-            out = re.sub(
-                r"[\s]+", " ", out
-            ).strip()  # TODOmaybe: should do strip?? (originally because of fast vs. slow tokenizer differences)
+            if len(self.text_cols) == 1:
+                # replace sequence of spaces with a single space and strip beginning and end spaces
+                out = re.sub(
+                    r"[\s]+", " ", out
+                ).strip()  # TODOmaybe: should do strip?? (originally because of fast vs. slow tokenizer differences)
+            else:
+                out = out.split(self.tokenizer.sep_token)
+                # replace sequence of spaces with a single space and strip beginning and end spaces
+                out = [re.sub(r"[\s]+", " ", s).strip() for s in out]
 
         else:
             if self.mask_token_id is None:
@@ -309,7 +321,12 @@ class JointMasker(Masker):
             return tokens, token_ids
 
     def clustering(self, s=[7.7, 398972.0, "offbeat romantic comedy"]):
-        text = s[-1]  # "Good film [SEP] Johnny Depp [SEP] Amazing"
+        if len(s[self.n_tab_cols :]) == 1:
+            text = s[-1]
+        else:
+            # Chain together the strings with [SEP] tokens
+            text = self.tokenizer.sep_token.join(s[self.n_tab_cols :])
+        # text = s[-1]  # "Good film [SEP] Johnny Depp [SEP] Amazing"
 
         self._update_s_cache(text)
         special_tokens = []
@@ -389,17 +406,32 @@ class JointMasker(Masker):
 
         Note we only return a single sample, so there is no expectation averaging.
         """
-        self._update_s_cache(s[-1])
+        if len(s[self.n_tab_cols :]) == 1:
+            text = s[-1]
+        else:
+            # Chain together the strings with [SEP] tokens
+            text = self.tokenizer.sep_token.join(s[self.n_tab_cols :])
+        self._update_s_cache(text)
         return (self.max_samples, self.n_tab_cols + len(self._tokenized_s))
 
     def mask_shapes(self, s):
         """The shape of the masks we expect."""
-        self._update_s_cache(s[-1])
+        if len(s[self.n_tab_cols :]) == 1:
+            text = s[-1]
+        else:
+            # Chain together the strings with [SEP] tokens
+            text = self.tokenizer.sep_token.join(s[self.n_tab_cols :])
+        self._update_s_cache(text)
         return [(self.n_tab_cols + len(self._tokenized_s),)]
 
     def feature_names(self, s):
         """The names of the features for each mask position for the given input string."""
-        self._update_s_cache(s[-1])
+        if len(s[self.n_tab_cols :]) == 1:
+            text = s[-1]
+        else:
+            # Chain together the strings with [SEP] tokens
+            text = self.tokenizer.sep_token.join(s[self.n_tab_cols :])
+        self._update_s_cache(text)
         return [self.tab_feature_names + [v.strip() for v in self._segments_s]]
 
 
