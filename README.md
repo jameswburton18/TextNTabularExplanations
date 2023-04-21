@@ -298,5 +298,16 @@ Model created for:
 * [ ] Tabx5 (8)
 * [x] Simple ensemble
 * [x] Stack ensemble
-* [ ] Weighted ensemble (0.25)
-* [ ] Weighted ensemble (0.75)
+* [x] Weighted ensemble (0.25)
+* [x] Weighted ensemble (0.75)
+
+## April 21st
+
+Now I have set up the code such that I can compute tabular and text at the same time: words in text features are replaced with [MASK] tokens whereas tabular features are sampled from the background dataset. I can now compare the explanations between the different methods. The question is how do I compare them?
+
+Also:
+* I would like to extend the method to be able to use multiple text features, such as description and title. Then I can get a joint explanation for each of the words in 
+
+## Steps
+
+* Shap generates a batch of masks, using the shape functions to find the correct shape for the masks.
