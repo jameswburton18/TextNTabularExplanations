@@ -124,22 +124,17 @@ class JointMasker(Masker):
     def __call__(self, mask, x):
         """
         tab_mask_call returns a dataframe of shape (num_samples, num_tab_features)
+        text_mask_call returns a tuple of an array of a string, with the mask applied to the text
         However, if only the text is being masked, then we do not need to sample
         from tab_df and can just take the first row
         """
         masked_tab = self.tab_mask_call(mask[: self.n_tab_cols], x[: self.n_tab_cols])
-        # masked_tab = pd.DataFrame(self._masked_data.copy())
         masked_text = self.text_mask_call(mask[self.n_tab_cols :], x[self.n_tab_cols])
 
-        masked_tab["text"] = masked_text[0][0]  #'hello' #
+        # We unpack the string from the tuple and array
+        masked_tab["text"] = masked_text[0][0]
 
         return masked_tab.values
-
-        # if mask[:self.n_tab_cols].all():
-        #     self.mask
-        #     return masked_tab[:1].values
-        # else:
-        #     return masked_tab.values
 
     def tab_mask_call(self, mask, x):
         mask = self._standardize_mask(mask, x)
@@ -200,10 +195,6 @@ class JointMasker(Masker):
             mask[-self.keep_suffix :] = True
 
         if self.output_type == "string":
-            # if self.mask_token == "":
-            #     out = self._segments_s[mask]
-            # else:
-            #     #out = np.array([self._segments_s[i] if mask[i] else self.mask_token for i in range(len(mask))])
             out_parts = []
             is_previous_appended_token_mask_token = False
             sep_token = getattr_silent(self.tokenizer, "sep_token")
@@ -318,7 +309,7 @@ class JointMasker(Masker):
             return tokens, token_ids
 
     def clustering(self, s=[7.7, 398972.0, "offbeat romantic comedy"]):
-        text = s[-1]
+        text = s[-1]  # "Good film [SEP] Johnny Depp [SEP] Amazing"
 
         self._update_s_cache(text)
         special_tokens = []
@@ -412,6 +403,7 @@ class JointMasker(Masker):
         return [self.tab_feature_names + [v.strip() for v in self._segments_s]]
 
 
+"""
 def run_shap_vals(type="text"):
     train_df = load_dataset(
         "james-burton/imdb_genre_prediction2", split="train"
@@ -481,9 +473,9 @@ def run_shap_vals(type="text"):
         explainer = shap.explainers.Partition(model=tab_pred_fn, masker=masker)
         shap_vals = explainer(np.array([x[:-1]]))
         return shap_vals
-
+"""
 
 if __name__ == "__main__":
     # run_shap_vals('tab')
     # run_shap_vals("joint")
-    run_shap_vals("text")
+    pass

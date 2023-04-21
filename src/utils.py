@@ -394,3 +394,11 @@ def array_to_string(
     return np.array(
         " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]), dtype="<U512"
     )
+
+
+def format_fts_for_plotting(fts, tab_data):
+    for i in range(len(tab_data)):
+        fts[i] = fts[i] + f" = {tab_data[i]}   "
+    for j in range(len(tab_data), len(fts)):
+        fts[j] = fts[j] + " "
+    return fts

@@ -12,7 +12,7 @@ import scipy as sp
 
 # from src.models import Model
 import lightgbm as lgb
-from src.models import WeightedEnsemble, StackModel, AllAsTextModel
+from src.models import WeightedEnsemble, StackModel, AllAsTextModel, AllAsTextModel2
 from src.joint_masker import JointMasker
 
 
@@ -109,21 +109,71 @@ def run_shap(model_type):
     return shap_vals
 
 
+def run_shap_multiple_text(model_type):
+    # Data
+    train_df = load_dataset(
+        "james-burton/imdb_genre_prediction2", split="train"
+    ).to_pandas()
+    val_df = load_dataset(
+        "james-burton/imdb_genre_prediction2", split="validation"
+    ).to_pandas()
+    test_df = load_dataset(
+        "james-burton/imdb_genre_prediction2", split="test"
+    ).to_pandas()
+    tab_cols = [
+        "Year",
+        "Runtime (Minutes)",
+        "Rating",
+        "Votes",
+        "Revenue (Millions)",
+        "Metascore",
+        "Rank",
+    ]
+    text_col1 = ["Description"]
+    text_col2 = ["Title"]
+    train_df_tab = train_df[tab_cols]
+    val_df_tab = val_df[tab_cols]
+    y_train = train_df["Genre_is_Drama"]
+    y_val = val_df["Genre_is_Drama"]
+
+    # Models
+    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+
+    # elif model_type == "all_text":
+    text_pipeline = pipeline(
+        "text-classification",
+        model="james-burton/imdb_genre_0",
+        tokenizer=tokenizer,
+        device="cuda:0",
+    )
+    model = AllAsTextModel2(
+        text_pipeline=text_pipeline, cols=[tab_cols + text_col1 + text_col2]
+    )
+
+    np.random.seed(1)
+    x = test_df[tab_cols + text_col1 + text_col2].values  # .reshape(1, -1)
+    # x = [7.7, 398972.0, 32.39, "offbeat romantic comedy"]
+
+    masker = JointMasker(
+        tab_df=train_df[tab_cols], tokenizer=tokenizer, collapse_mask_token=True
+    )
+
+    explainer = shap.explainers.Partition(model=model.predict, masker=masker)
+    shap_vals = explainer(x)
+    return shap_vals
+
+
 if __name__ == "__main__":
     for model_type in [
-        "ensemble_50",
-        "ensemble_75",
-        "ensemble_25",
-        "stack",
+        # "ensemble_50",
+        # "ensemble_75",
+        # "ensemble_25",
+        # "stack",
         "all_text",
     ]:
+        run_shap_multiple_text(model_type)
         shap_vals = run_shap(model_type)
-        with open(f"shap_vals_{model_type}.pkl", "wb") as f:
-            pickle.dump(shap_vals, f)
-    # shap_vals = run_shap("all_text")
-    # with open("shap_vals.pkl", "wb") as f:
-    #     pickle.dump(shap_vals, f)
-    # np.save("shap_vals.npy", shap_vals, allow_pickle=True)
+        # with open(f"shap_vals_{model_type}.pkl", "wb") as f:
+        #     pickle.dump(shap_vals, f)
 
-    # shap_vals = np.load("shap_vals.npy", allow_pickle=True)
     print(shap_vals)
