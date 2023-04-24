@@ -148,7 +148,7 @@ def run_shap_multiple_text(model_type):
     model = AllAsTextModel2(text_pipeline=text_pipeline, cols=tab_cols + text_cols)
 
     np.random.seed(1)
-    x = test_df[tab_cols + text_cols].values[0:]  # .reshape(1, -1)
+    x = test_df[tab_cols + text_cols].values[:1]  # .reshape(1, -1)
     # x = [7.7, 398972.0, 32.39, "offbeat romantic comedy"]
 
     masker = JointMasker(

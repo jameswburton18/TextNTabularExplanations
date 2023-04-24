@@ -1,7 +1,8 @@
 import numpy as np
 import shap
 from shap.maskers import Masker
-from shap.maskers._text import partition_tree, Text, SimpleTokenizer
+
+# from shap.maskers._text import partition_tree, Text, SimpleTokenizer
 from shap.maskers._tabular import Tabular, _delta_masking
 from shap.utils import safe_isinstance, MaskedModel, sample
 from shap.utils.transformers import (
@@ -22,6 +23,7 @@ import scipy as sp
 # from src.models import Model
 import lightgbm as lgb
 from src.models import WeightedEnsemble
+import math
 
 # import faulthandler
 
@@ -131,12 +133,53 @@ class JointMasker(Masker):
         from tab_df and can just take the first row
         """
         masked_tab = self.tab_mask_call(mask[: self.n_tab_cols], x[: self.n_tab_cols])
-        masked_text = self.text_mask_call(mask[self.n_tab_cols :], x[self.n_tab_cols :])
+
+        self._text_ft_index_ends(x[self.n_tab_cols :])
+        text = " ".join(x[self.n_tab_cols :])
+        # if len(self.text_cols) == 1:
+        #     text = x[-1]
+        # else:
+        #     self._text_ft_index_ends(x[self.n_tab_cols :])
+        #     text = " ".join(x[self.n_tab_cols :])
+
+        # masked_text_fts = []
+        # for ft in range(len(self.text_cols)):
+        #     # We take the first mask token (CLS) and last mask token (SEP) together with the text feature
+        #     ft_mask = np.concatenate(
+        #         (
+        #             mask[:1],
+        #             mask[self._text_ft_lens[ft] : self._text_ft_lens[ft + 1]],
+        #             mask[-1:],
+        #         )
+        #     )
+        #     masked_ft = self.text_mask_call(ft_mask, x[self.n_tab_cols + ft])
+        #     masked_text_fts.append(masked_ft[0][0])
+
+        masked_text = self.text_mask_call(mask[self.n_tab_cols :], text)
 
         # We unpack the string from the tuple and array
         masked_tab[self.text_cols] = masked_text[0][0]
 
         return masked_tab.values
+
+    def _text_ft_index_ends(self, s):
+        lens = []
+        sent_indices = []
+        for idx, col in enumerate(s):
+            if lens == []:
+                tokens, token_ids = self.token_segments(col)
+                lens.append(len(tokens) - 2)
+            else:
+                tokens, token_ids = self.token_segments(col)
+                lens.append(lens[-1] + len(tokens) - 2)
+            sent_indices.extend([idx] * (len(tokens) - 2))
+        lens[0] += 1  # add 1 for the CLS token
+        sent_indices = [0] + sent_indices
+        lens[-1] += 1  # add 1 for the SEP token
+        sent_indices = sent_indices + [sent_indices[-1]]
+
+        self._sent_split_idxs = lens[:-1]
+        self.sent_indices = sent_indices
 
     def tab_mask_call(self, mask, x):
         mask = self._standardize_mask(mask, x)
@@ -187,11 +230,8 @@ class JointMasker(Masker):
         return (self._masked_data,)
 
     def text_mask_call(self, mask, s):
-        if len(s) == 1:
-            text = s[0]
-        else:
-            # Chain together the strings with [SEP] tokens
-            text = self.tokenizer.sep_token.join(s)
+        # text = " ".join(s[self.n_tab_cols :])
+        text = s
         mask = self._standardize_mask(mask, text)
         self._update_s_cache(text)
 
@@ -203,6 +243,7 @@ class JointMasker(Masker):
 
         if self.output_type == "string":
             out_parts = []
+            out = []
             is_previous_appended_token_mask_token = False
             sep_token = getattr_silent(self.tokenizer, "sep_token")
             for i, v in enumerate(mask):
@@ -210,6 +251,7 @@ class JointMasker(Masker):
                 if v or sep_token == self._segments_s[i]:
                     out_parts.append(self._segments_s[i])
                     is_previous_appended_token_mask_token = False
+                    # Change in here to show diffs between desc and titele
                 else:
                     if not self.collapse_mask_token or (
                         self.collapse_mask_token
@@ -217,23 +259,32 @@ class JointMasker(Masker):
                     ):
                         out_parts.append(" " + self.mask_token)
                         is_previous_appended_token_mask_token = True
-            out = "".join(out_parts)
+                if i in self._sent_split_idxs:
+                    out.append(" ".join(out_parts))
+                    out_parts = []
+                    is_previous_appended_token_mask_token = False
+            out.append(" ".join(out_parts))
 
             # tokenizers which treat spaces like parts of the tokens and dont replace the special token while decoding need further postprocessing
             # by replacing whitespace encoded as '_' for sentencepiece tokenizer or 'Ġ' for sentencepiece like encoding (GPT2TokenizerFast)
             # with ' '
-            if safe_isinstance(self.tokenizer, SENTENCEPIECE_TOKENIZERS):
-                out = out.replace("▁", " ")
+            # if safe_isinstance(self.tokenizer, SENTENCEPIECE_TOKENIZERS):
+            #     out = out.replace("▁", " ")
 
-            if len(self.text_cols) == 1:
-                # replace sequence of spaces with a single space and strip beginning and end spaces
-                out = re.sub(
-                    r"[\s]+", " ", out
-                ).strip()  # TODOmaybe: should do strip?? (originally because of fast vs. slow tokenizer differences)
-            else:
-                out = out.split(self.tokenizer.sep_token)
-                # replace sequence of spaces with a single space and strip beginning and end spaces
-                out = [re.sub(r"[\s]+", " ", s).strip() for s in out]
+            # if len(self.text_cols) == 1:
+            #     # replace sequence of spaces with a single space and strip beginning and end spaces
+            #     out = re.sub(
+            #         r"[\s]+", " ", out
+            #     ).strip()  # TODOmaybe: should do strip?? (originally because of fast vs. slow tokenizer differences)
+            # else:
+            #     out = out.split(self.tokenizer.sep_token)
+            #     # replace sequence of spaces with a single space and strip beginning and end spaces
+            #     out = [re.sub(r"[\s]+", " ", s).strip() for s in out]
+
+            for i in range(len(out)):
+                out[i] = re.sub(r"[\s]+", " ", out[i]).strip()
+                if safe_isinstance(self.tokenizer, SENTENCEPIECE_TOKENIZERS):
+                    out[i] = out[i].replace("▁", " ")
 
         else:
             if self.mask_token_id is None:
@@ -321,13 +372,7 @@ class JointMasker(Masker):
             return tokens, token_ids
 
     def clustering(self, s=[7.7, 398972.0, "offbeat romantic comedy"]):
-        if len(s[self.n_tab_cols :]) == 1:
-            text = s[-1]
-        else:
-            # Chain together the strings with [SEP] tokens
-            text = self.tokenizer.sep_token.join(s[self.n_tab_cols :])
-        # text = s[-1]  # "Good film [SEP] Johnny Depp [SEP] Amazing"
-
+        text = " ".join(s[self.n_tab_cols :])
         self._update_s_cache(text)
         special_tokens = []
         sep_token = getattr_silent(self.tokenizer, "sep_token")
@@ -351,7 +396,24 @@ class JointMasker(Masker):
             else:
                 tokens.append(v.strip())
 
-        text_pt = partition_tree(tokens, special_tokens)
+        # Ensure it doesn't combine two sentences
+        # temp_tokens = tokens.copy()
+        # if len(self._text_ft_lens) > 1:
+        #     swap_dict = {}
+        #     for i in range(len(self._text_ft_lens)):
+        #         temp_tokens[self._text_ft_lens[i]] = f"[START_{i}]"
+        #         temp_tokens[self._text_ft_lens[i] + 1] = f"[END_{i}]"
+        #         swap_dict[f"[START_{i}]"] = tokens[self._text_ft_lens[i]]
+        #         swap_dict[f"[END_{i}]"] = tokens[self._text_ft_lens[i] + 1]
+
+        # sent_indices = [0] * len(tokens)
+        # # self._text_ft_lens denotes the indices at the end of each sentence
+        # # loop through the tokens and add the number sentence it realtes to
+        # if len(self._sent_split_idxs) > 1:
+        #     for i in range(0, len(self._sent_split_idxs)):
+        #         sent_indices[self._sent_split_idxs[i] :] = i + 1
+
+        text_pt = partition_tree(tokens, special_tokens, self.sent_indices)
         text_pt[:, 2] = text_pt[:, 3]
         text_pt[:, 2] /= text_pt[:, 2].max()
 
@@ -387,6 +449,9 @@ class JointMasker(Masker):
             text_pt[:, :2] + self.n_tab_cols,
         )
 
+        # Scale tab_pt
+        self.tab_pt[:, 2] /= self.tab_pt[:, 2].max()
+
         # 3rd and 4th columns are left unchanged
         Z_join[: self.n_tab_groups, 2:] = self.tab_pt[:, 2:]
         Z_join[self.n_tab_groups : -1, 2:] = text_pt[:, 2:]
@@ -394,9 +459,9 @@ class JointMasker(Masker):
         # Create top join, joining the text and tab dendrograms together
         top_tab_node = self.n_tab_cols + n_text_leaves + self.n_tab_groups - 1
         top_text_node = top_tab_node + n_text_groups
-        # Set similarity of top node to 1.5
+        # Set similarity of top node to 1.2
         Z_join[-1, :] = np.array(
-            [top_tab_node, top_text_node, 1.5, n_text_leaves + self.n_tab_cols]
+            [top_tab_node, top_text_node, 1.2, n_text_leaves + self.n_tab_cols]
         )
 
         return Z_join
@@ -406,33 +471,252 @@ class JointMasker(Masker):
 
         Note we only return a single sample, so there is no expectation averaging.
         """
-        if len(s[self.n_tab_cols :]) == 1:
-            text = s[-1]
-        else:
-            # Chain together the strings with [SEP] tokens
-            text = self.tokenizer.sep_token.join(s[self.n_tab_cols :])
+        text = " ".join(s[self.n_tab_cols :])
         self._update_s_cache(text)
         return (self.max_samples, self.n_tab_cols + len(self._tokenized_s))
 
     def mask_shapes(self, s):
         """The shape of the masks we expect."""
-        if len(s[self.n_tab_cols :]) == 1:
-            text = s[-1]
-        else:
-            # Chain together the strings with [SEP] tokens
-            text = self.tokenizer.sep_token.join(s[self.n_tab_cols :])
+        text = " ".join(s[self.n_tab_cols :])
         self._update_s_cache(text)
         return [(self.n_tab_cols + len(self._tokenized_s),)]
 
     def feature_names(self, s):
         """The names of the features for each mask position for the given input string."""
-        if len(s[self.n_tab_cols :]) == 1:
-            text = s[-1]
-        else:
-            # Chain together the strings with [SEP] tokens
-            text = self.tokenizer.sep_token.join(s[self.n_tab_cols :])
+        text = " ".join(s[self.n_tab_cols :])
         self._update_s_cache(text)
         return [self.tab_feature_names + [v.strip() for v in self._segments_s]]
+
+
+class SimpleTokenizer:  # pylint: disable=too-few-public-methods
+    """A basic model agnostic tokenizer."""
+
+    def __init__(self, split_pattern=r"\W+"):
+        """Create a tokenizer based on a simple splitting pattern."""
+        self.split_pattern = re.compile(split_pattern)
+
+    def __call__(self, s, return_offsets_mapping=True):
+        """Tokenize the passed string, optionally returning the offsets of each token in the original string."""
+        pos = 0
+        offset_ranges = []
+        input_ids = []
+        for m in re.finditer(self.split_pattern, s):
+            start, end = m.span(0)
+            offset_ranges.append((pos, start))
+            input_ids.append(s[pos:start])
+            pos = end
+        if pos != len(s):
+            offset_ranges.append((pos, len(s)))
+            input_ids.append(s[pos:])
+
+        out = {}
+        out["input_ids"] = input_ids
+        if return_offsets_mapping:
+            out["offset_mapping"] = offset_ranges
+        return out
+
+
+def post_process_sentencepiece_tokenizer_output(s):
+    """replaces whitespace encoded as '_' with ' ' for sentencepiece tokenizers."""
+    s = s.replace("▁", " ")
+    return s
+
+
+openers = {"(": ")"}
+closers = {")": "("}
+enders = [".", ","]
+connectors = ["but", "and", "or"]
+
+
+class Token:
+    """A token representation used for token clustering."""
+
+    def __init__(self, value, sent_no):
+        self.s = value
+        self.sent_no = sent_no
+        if value in openers or value in closers:
+            self.balanced = False
+        else:
+            self.balanced = True
+
+    def __str__(self):
+        return self.s
+
+    def __repr__(self):
+        if not self.balanced:
+            return self.s + "!"
+        return self.s
+
+
+class TokenGroup:
+    """A token group (substring) representation used for token clustering."""
+
+    def __init__(self, group, index=None):
+        self.g = group
+        self.index = index
+
+    def __repr__(self):
+        return self.g.__repr__()
+
+    def __getitem__(self, index):
+        return self.g[index]
+
+    def __add__(self, o):
+        return TokenGroup(self.g + o.g)
+
+    def __len__(self):
+        return len(self.g)
+
+
+def merge_score(group1, group2, special_tokens):
+    """Compute the score of merging two token groups.
+
+    special_tokens: tokens (such as separator tokens) that should be grouped last
+    """
+    # if type(group1)
+
+    score = 0
+
+    # Changed
+    ########################################
+    if group1[-1].sent_no != group2[0].sent_no:
+        score -= (
+            math.inf
+        )  # subtracting infinity to create lowest score and ensure combining these groups last
+
+    ########################################
+
+    # ensures special tokens are combined last, so 1st subtree is 1st sentence and 2nd subtree is 2nd sentence
+    if len(special_tokens) > 0:
+        if group1[-1].s in special_tokens and group2[0].s in special_tokens:
+            score -= (
+                math.inf
+            )  # subtracting infinity to create lowest score and ensure combining these groups last
+
+    # merge broken-up parts of words first
+    if group2[0].s.startswith("##"):
+        score += 20
+
+    # merge apostrophe endings next
+    if group2[0].s == "'" and (
+        len(group2) == 1 or (len(group2) == 2 and group2[1].s in ["t", "s"])
+    ):
+        score += 15
+    if group1[-1].s == "'" and group2[0].s in ["t", "s"]:
+        score += 15
+
+    start_ctrl = group1[0].s.startswith("[") and group1[0].s.endswith("]")
+    end_ctrl = group2[-1].s.startswith("[") and group2[-1].s.endswith("]")
+
+    if (start_ctrl and not end_ctrl) or (end_ctrl and not start_ctrl):
+        score -= 1000
+    if group2[0].s in openers and not group2[0].balanced:
+        score -= 100
+    if group1[-1].s in closers and not group1[-1].balanced:
+        score -= 100
+
+    # attach surrounding an openers and closers a bit later
+    if group1[0].s in openers and not group2[-1] in closers:
+        score -= 2
+
+    # reach across connectors later
+    if group1[-1].s in connectors or group2[0].s in connectors:
+        score -= 2
+
+    # reach across commas later
+    if group1[-1].s == ",":
+        score -= 10
+    if group2[0].s == ",":
+        if len(group2) > 1:  # reach across
+            score -= 10
+        else:
+            score -= 1
+
+    # reach across sentence endings later
+    if group1[-1].s in [".", "?", "!"]:
+        score -= 20
+    if group2[0].s in [".", "?", "!"]:
+        if len(group2) > 1:  # reach across
+            score -= 20
+        else:
+            score -= 1
+
+    score -= len(group1) + len(group2)
+    # print(group1, group2, score)
+    return score
+
+
+def merge_closest_groups(groups, special_tokens):
+    """Finds the two token groups with the best merge score and merges them."""
+    scores = [
+        merge_score(groups[i], groups[i + 1], special_tokens)
+        for i in range(len(groups) - 1)
+    ]
+    # print(scores)
+    ind = np.argmax(scores)
+    groups[ind] = groups[ind] + groups[ind + 1]
+    # print(groups[ind][0].s in openers, groups[ind][0])
+    if (
+        groups[ind][0].s in openers
+        and groups[ind + 1][-1].s == openers[groups[ind][0].s]
+    ):
+        groups[ind][0].balanced = True
+        groups[ind + 1][-1].balanced = True
+
+    groups.pop(ind + 1)
+
+
+def partition_tree(decoded_tokens, special_tokens, sent_indices):
+    """Build a heriarchial clustering of tokens that align with sentence structure.
+
+    Note that this is fast and heuristic right now.
+    TODO: Build this using a real constituency parser.
+    """
+    token_groups = [
+        TokenGroup([Token(t, idx)], i)
+        for i, (t, idx) in enumerate(zip(decoded_tokens, sent_indices))
+    ]
+    #     print(token_groups)
+    M = len(decoded_tokens)
+    new_index = M
+    clustm = np.zeros((M - 1, 4))
+    for i in range(len(token_groups) - 1):
+        scores = [
+            merge_score(token_groups[i], token_groups[i + 1], special_tokens)
+            for i in range(len(token_groups) - 1)
+        ]
+
+        #         print(scores)
+        ind = np.argmax(scores)
+
+        lind = token_groups[ind].index
+        rind = token_groups[ind + 1].index
+        clustm[new_index - M, 0] = token_groups[ind].index
+        clustm[new_index - M, 1] = token_groups[ind + 1].index
+        clustm[new_index - M, 2] = -scores[ind]
+        clustm[new_index - M, 3] = (clustm[lind - M, 3] if lind >= M else 1) + (
+            clustm[rind - M, 3] if rind >= M else 1
+        )
+
+        token_groups[ind] = token_groups[ind] + token_groups[ind + 1]
+        token_groups[ind].index = new_index
+
+        # track balancing of openers/closers
+        if (
+            token_groups[ind][0].s in openers
+            and token_groups[ind + 1][-1].s == openers[token_groups[ind][0].s]
+        ):
+            token_groups[ind][0].balanced = True
+            token_groups[ind + 1][-1].balanced = True
+
+        token_groups.pop(ind + 1)
+        new_index += 1
+
+    # negative means we should never split a group, so we add 10 to ensure these are very tight groups
+    # (such as parts of the same word)
+    clustm[:, 2] = clustm[:, 2] + 10
+
+    return clustm
 
 
 """

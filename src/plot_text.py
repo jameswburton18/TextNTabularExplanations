@@ -31,6 +31,7 @@ def text(
     cmax=None,
     display=True,
     linebreak_after_idx=None,
+    text_cols=None,
 ):
     """Plots an explanation of a string of text using coloring and interactive labels.
 
@@ -362,29 +363,33 @@ def text(
     # Changed from shap
     #################################
     if linebreak_after_idx is not None:
-        tokens = np.insert(tokens, linebreak_after_idx, "")
-        values = np.insert(values, linebreak_after_idx, 0)
-        group_sizes = np.insert(group_sizes, linebreak_after_idx, 1)
-        top_inds = np.argsort(-np.abs(values))[:num_starting_labels]
-        group_sizes = group_sizes
+        for idx in linebreak_after_idx:
+            tokens = np.insert(tokens, idx, "")
+            values = np.insert(values, idx, 0)
+            group_sizes = np.insert(group_sizes, idx, 1)
+    # if text_cols is not None:
+    #     for col in text_cols:
+    #         tokens = np.insert(tokens, idx, "")
+    #         values = np.insert(values, idx, 0)
+    #         group_sizes = np.insert(group_sizes, idx, 1)
     #################################
     out += "<div align='center'><div style=\"color: rgb(120,120,120); font-size: 12px; margin-top: -15px;\">inputs</div>"
+    text_col_count = 0
+
     for i, token in enumerate(tokens):
         # Changed from shap
         #################################
-        if i == linebreak_after_idx:
-            token = "<br>"
+        if i in linebreak_after_idx:
+            token = f"<br>{text_cols[text_col_count]} = "
             # we add a line break between the tabular features and the text features
             out += f"""<div style='display: inline; text-align: center;'
         ><div style='display: none; color: #999; padding-top: 0px; font-size: 12px;'></div
             ><div id='_tp_{uuid}_ind_newline'
                 style='display: inline; border-radius: 3px; padding: 0px'
             >{token}</div></div>"""
+            text_col_count += 1
         else:
-            if i < linebreak_after_idx:
-                element_id = i
-            else:
-                element_id = i - 1
+            element_id = i - text_col_count
             #################################
 
             scaled_value = 0.5 + 0.5 * values[i] / (cmax + 1e-8)
