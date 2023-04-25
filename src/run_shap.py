@@ -156,6 +156,7 @@ def run_shap_multiple_text(model_type):
         text_cols=text_cols,
         tokenizer=tokenizer,
         collapse_mask_token=True,
+        max_samples=20,
     )
 
     explainer = shap.explainers.Partition(model=model.predict, masker=masker)

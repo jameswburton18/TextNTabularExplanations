@@ -23,6 +23,8 @@ except ImportError:
 # the force plot and the coloring to update based on mouseovers (or clicks to make it fixed) of the output text
 def text(
     shap_values,
+    linebreak_after_idxs,  # Added this parameter
+    text_cols,  # Added this parameter
     num_starting_labels=0,
     grouping_threshold=0.01,
     separator="",
@@ -30,15 +32,14 @@ def text(
     xmax=None,
     cmax=None,
     display=True,
-    linebreak_after_idx=None,
-    text_cols=None,
 ):
     """Plots an explanation of a string of text using coloring and interactive labels.
 
     The output is interactive HTML and you can click on any token to toggle the display of the
     SHAP value assigned to that token.
 
-    Exactly the same as the shap.plots.text() function, but with the addition of linebreak_after_idx parameter.
+    Exactly the same as the shap.plots.text() function, but with the addition of linebreak_after_idxs and text_cls parameter.
+    These are used to add linebreaks with the text column name at the end of the function.
 
     Parameters
     ----------
@@ -69,9 +70,12 @@ def text(
     display: bool
         Whether to display or return html to further manipulate or embed. default: True
 
-    linebreak_after_idx: int
+    linebreak_after_idx: list
         After how many features to add a line break, designed to split tabular and text features. This is the only part of the file
         that is different from the original shap text file. default: None
+
+    text_cols: list
+        List of column names that are text features, to be printed as col = ... default: None
 
     """
 
@@ -131,6 +135,8 @@ def text(
                 xmax=xmax,
                 cmax=cmax,
                 display=False,
+                linebreak_after_idxs=linebreak_after_idxs,
+                text_cols=text_cols,
             )
         if display:
             ipython_display(HTML(out))
@@ -235,7 +241,8 @@ def text(
                 xmax=xmax,
                 cmax=cmax,
                 display=False,
-                linebreak_after_idx=linebreak_after_idx,
+                linebreak_after_idxs=linebreak_after_idxs,
+                text_cols=text_cols,
             )
             out += "</div>"
             out += f"<div id='_tp_{uuid}_output_{i}_zoom' style='display: none;'>"
@@ -245,7 +252,8 @@ def text(
                 grouping_threshold=grouping_threshold,
                 separator=separator,
                 display=False,
-                linebreak_after_idx=linebreak_after_idx,
+                linebreak_after_idxs=linebreak_after_idxs,
+                text_cols=text_cols,
             )
             out += "</div>"
         out += "</div>"
@@ -309,7 +317,8 @@ def text(
                 xmax=xmax,
                 cmax=cmax,
                 display=False,
-                linebreak_after_idx=linebreak_after_idx,
+                linebreak_after_idxs=linebreak_after_idxs,
+                text_cols=text_cols,
             )
         if display:
             ipython_display(HTML(out))
@@ -362,16 +371,14 @@ def text(
 
     # Changed from shap
     #################################
-    if linebreak_after_idx is not None:
-        for idx in linebreak_after_idx:
-            tokens = np.insert(tokens, idx, "")
-            values = np.insert(values, idx, 0)
-            group_sizes = np.insert(group_sizes, idx, 1)
-    # if text_cols is not None:
-    #     for col in text_cols:
-    #         tokens = np.insert(tokens, idx, "")
-    #         values = np.insert(values, idx, 0)
-    #         group_sizes = np.insert(group_sizes, idx, 1)
+    if linebreak_after_idxs is not None:
+        lines_inserted = 0
+        for idx in linebreak_after_idxs:
+            tokens = np.insert(tokens, idx + lines_inserted, "")
+            values = np.insert(values, idx + lines_inserted, 0)
+            group_sizes = np.insert(group_sizes, idx + lines_inserted, 1)
+            lines_inserted += 1
+    linebreak_on_idxs = [i + 1 for i in linebreak_after_idxs]
     #################################
     out += "<div align='center'><div style=\"color: rgb(120,120,120); font-size: 12px; margin-top: -15px;\">inputs</div>"
     text_col_count = 0
@@ -379,7 +386,7 @@ def text(
     for i, token in enumerate(tokens):
         # Changed from shap
         #################################
-        if i in linebreak_after_idx:
+        if i in linebreak_on_idxs:
             token = f"<br>{text_cols[text_col_count]} = "
             # we add a line break between the tabular features and the text features
             out += f"""<div style='display: inline; text-align: center;'
