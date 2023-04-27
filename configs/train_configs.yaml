@@ -138,6 +138,16 @@ tags:
 dataset: imdb_genre_text
 batch_size: 32
 
+--- # prod_sent_0
+config: prod_sent_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text
+dataset: prod_sent
+version: all_as_text
+batch_size: 32
+
 --- # prod_sent_9
 config: prod_sent_9
 model_base: distilbert-base-uncased
@@ -146,6 +156,16 @@ tags:
   - text_col_only
 dataset: prod_sent
 version: text_col_only
+batch_size: 32
+
+--- # fake_0
+config: fake_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text
+dataset: fake
+version: all_as_text
 batch_size: 32
 
 --- # fake_9

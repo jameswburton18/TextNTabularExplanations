@@ -184,6 +184,10 @@ def prepare_text(dataset, version, ds_type):
             # dataset rename column
             dataset = dataset.rename_column("Product_Description", "text")
             return dataset
+        if version == "all_as_text":
+            cols = ["Product_Type", "Product_Description"]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -191,6 +195,18 @@ def prepare_text(dataset, version, ds_type):
     elif "fake" in ds_type:
         if version == "text_col_only":
             cols = ["title", "description", "salary_range"]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        if version == "all_as_text":
+            cols = [
+                "title",
+                "required_experience",
+                "required_education",
+                "title",
+                "salary_range",
+                "description",
+            ]
+
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:
