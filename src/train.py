@@ -94,6 +94,7 @@ def main():
         ds_name = "james-burton/jigsaw_unintended_bias100K"
         project = "Jigsaw"
         label_col, text_col = "target", "comment_text"
+        prob_type, num_labels = "single_label_classification", 2
     dataset = load_dataset(ds_name)
     dataset = prepare_text(dataset, args["version"], ds_type)
     if prob_type == "regression":
