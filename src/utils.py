@@ -35,147 +35,164 @@ def multiple_row_to_string(row, cols, multiplier=1, nodesc=False):
     return row
 
 
-def prepare_text(dataset, version):
-    if version == "all_as_text":
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-            "Description",
-        ]
-        dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-        return dataset
-    elif version == "tab_as_text":
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-        dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-        return dataset
-    elif version == "tabx5":
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-        dataset = dataset.map(
-            multiple_row_to_string, fn_kwargs={"cols": cols, "multiplier": 5}
-        )
-        return dataset
-    elif version == "tabx5_nodesc":
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-        dataset = dataset.map(
-            multiple_row_to_string,
-            fn_kwargs={"cols": cols, "multiplier": 5, "nodesc": True},
-        )
-        return dataset
-    elif version == "tabx2_nodesc":
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-        dataset = dataset.map(
-            multiple_row_to_string,
-            fn_kwargs={"cols": cols, "multiplier": 2, "nodesc": True},
-        )
-        return dataset
-    elif version == "tabx2":
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-        dataset = dataset.map(
-            multiple_row_to_string, fn_kwargs={"cols": cols, "multiplier": 2}
-        )
-        return dataset
-    elif version == "reorder1":
-        cols = [
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-            "Description",
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-        ]
-        dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-        return dataset
-    elif version == "reorder2":
-        cols = [
-            "Description",
-            "Rank",
-            "Metascore",
-            "Revenue (Millions)",
-            "Votes",
-            "Rating",
-            "Runtime (Minutes)",
-            "Year",
-        ]
-        dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-        return dataset
-    elif version == "reorder3":
-        cols = [
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-            "Year",
-            "Votes",
-            "Runtime (Minutes)",
-            "Rating",
-        ]
-        dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-        return dataset
-    elif version == "all_as_text_exp_reorder":
-        cols = [
-            "Description",
-            "Revenue (Millions)",
-            "Votes",
-            "Rank",
-            "Metascore",
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-        ]
-        dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-        return dataset
-    elif version == "text_col_only":
-        # dataset rename column
-        dataset = dataset.rename_column("Description", "text")
-        return dataset
+def prepare_text(dataset, version, ds_type):
+    if "imdb" in ds_type:
+        if version == "all_as_text":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+                "Description",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "tab_as_text":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "tabx5":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(
+                multiple_row_to_string, fn_kwargs={"cols": cols, "multiplier": 5}
+            )
+            return dataset
+        elif version == "tabx5_nodesc":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(
+                multiple_row_to_string,
+                fn_kwargs={"cols": cols, "multiplier": 5, "nodesc": True},
+            )
+            return dataset
+        elif version == "tabx2_nodesc":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(
+                multiple_row_to_string,
+                fn_kwargs={"cols": cols, "multiplier": 2, "nodesc": True},
+            )
+            return dataset
+        elif version == "tabx2":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(
+                multiple_row_to_string, fn_kwargs={"cols": cols, "multiplier": 2}
+            )
+            return dataset
+        elif version == "reorder1":
+            cols = [
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+                "Description",
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "reorder2":
+            cols = [
+                "Description",
+                "Rank",
+                "Metascore",
+                "Revenue (Millions)",
+                "Votes",
+                "Rating",
+                "Runtime (Minutes)",
+                "Year",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "reorder3":
+            cols = [
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+                "Year",
+                "Votes",
+                "Runtime (Minutes)",
+                "Rating",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_exp_reorder":
+            cols = [
+                "Description",
+                "Revenue (Millions)",
+                "Votes",
+                "Rank",
+                "Metascore",
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "text_col_only":
+            # dataset rename column
+            dataset = dataset.rename_column("Description", "text")
+            return dataset
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
+    elif "prod_sent" in ds_type:
+        if version == "text_col_only":
+            # dataset rename column
+            dataset = dataset.rename_column("Product_Description", "text")
+            return dataset
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
+
     else:
-        raise ValueError(f"Unknown version: {version}")
+        raise ValueError(
+            f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+        )
 
 
 def format_text_pred(pred):
