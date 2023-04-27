@@ -12,11 +12,11 @@ import scipy as sp
 
 # from src.models import Model
 import lightgbm as lgb
-from src.models import WeightedEnsemble, StackModel, AllAsTextModel, AllAsTextModel2
+from src.models import WeightedEnsemble, StackModel, AllAsTextModel
 from src.joint_masker import JointMasker
 
 
-def run_shap(model_type):
+def run_shap(model_type, max_samples):
     # Data
     train_df = load_dataset(
         "james-burton/imdb_genre_prediction2", split="train"
@@ -36,7 +36,7 @@ def run_shap(model_type):
         "Metascore",
         "Rank",
     ]
-    text_col = ["Description"]
+    text_cols = ["Description"]
     train_df_tab = train_df[tab_cols]
     val_df_tab = val_df[tab_cols]
     y_train = train_df["Genre_is_Drama"]
@@ -67,7 +67,7 @@ def run_shap(model_type):
         )
     elif model_type == "stack":
         # Training set is the preditions from the tabular and text models
-        text_val_preds = text_pipeline(list(val_df[text_col].values.squeeze()))
+        text_val_preds = text_pipeline(list(val_df[text_cols].values.squeeze()))
         text_val_preds = np.array([format_text_pred(pred) for pred in text_val_preds])
         tab_val_preds = tab_model.predict_proba(val_df_tab)
 
@@ -89,19 +89,21 @@ def run_shap(model_type):
             tokenizer=tokenizer,
             device="cuda:0",
         )
-        model = AllAsTextModel(text_pipeline=text_pipeline)
-    # elif model_type ==
-    #     model = AllAsTextModel
+        model = AllAsTextModel(text_pipeline=text_pipeline, cols=tab_cols + text_cols)
     else:
         raise ValueError(f"Invalid model type of {model_type}")
 
     # We want to explain a single row
     np.random.seed(1)
-    x = test_df[tab_cols + text_col].values  # .reshape(1, -1)
+    x = test_df[tab_cols + text_cols].values  # .reshape(1, -1)
     # x = [7.7, 398972.0, 32.39, "offbeat romantic comedy"]
 
     masker = JointMasker(
-        tab_df=train_df[tab_cols], tokenizer=tokenizer, collapse_mask_token=True
+        tab_df=train_df[tab_cols],
+        text_cols=text_cols,
+        tokenizer=tokenizer,
+        collapse_mask_token=True,
+        max_samples=max_samples,
     )
 
     explainer = shap.explainers.Partition(model=model.predict, masker=masker)
@@ -129,7 +131,7 @@ def run_shap_multiple_text(model_type):
         "Metascore",
         "Rank",
     ]
-    text_cols = ["Description", "Title"]
+    text_cols = ["Description"]  # , "Title"]
     train_df_tab = train_df[tab_cols]
     val_df_tab = val_df[tab_cols]
     y_train = train_df["Genre_is_Drama"]
@@ -145,7 +147,7 @@ def run_shap_multiple_text(model_type):
         tokenizer=tokenizer,
         device="cuda:0",
     )
-    model = AllAsTextModel2(text_pipeline=text_pipeline, cols=tab_cols + text_cols)
+    model = AllAsTextModel(text_pipeline=text_pipeline, cols=tab_cols + text_cols)
 
     np.random.seed(1)
     x = test_df[tab_cols + text_cols].values[:1]  # .reshape(1, -1)
@@ -166,15 +168,16 @@ def run_shap_multiple_text(model_type):
 
 if __name__ == "__main__":
     for model_type in [
-        # "ensemble_50",
-        # "ensemble_75",
-        # "ensemble_25",
-        # "stack",
+        "ensemble_50",
+        "ensemble_75",
+        "ensemble_25",
+        "stack",
         "all_text",
     ]:
-        shap_vals = run_shap_multiple_text(model_type)
-        # shap_vals = run_shap(model_type)
-        # with open(f"shap_vals_{model_type}.pkl", "wb") as f:
-        #     pickle.dump(shap_vals, f)
+        # shap_vals = run_shap_multiple_text(model_type)
+        shap_vals = run_shap(model_type)
+        pass
+        with open(f"shap_vals_{model_type}.pkl", "wb") as f:
+            pickle.dump(shap_vals, f)
 
     print(shap_vals)
