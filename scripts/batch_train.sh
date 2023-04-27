@@ -9,12 +9,12 @@
 #     done
 # done
 
-for idx in 10 #{1..4}
+for idx in 0 9 #{1..4}
 do
-    for cfg in imdb_genre_${idx}
+    for cfg in wine_${idx} #jigsaw_${idx} kick_${idx} 
     do
-        sbatch --job-name=$cfg scripts/train_office_pc.sh $cfg
-        # sbatch --job-name=$cfg scripts/train.sh $cfg
+        # sbatch --job-name=$cfg scripts/train_office_pc.sh $cfg
+        sbatch --job-name=$cfg scripts/train.sh $cfg
         sleep 4 # so that wandb runs don't get assigned the same number
     done
 done

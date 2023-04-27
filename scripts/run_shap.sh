@@ -35,4 +35,4 @@ echo "$mem Mb available"
 
 date '+%c'
 # python combine_LIME.py --dataset fraud --model joint
-python src/train.py --config $1
+python src/run_shap.py --ds_type $1
