@@ -137,7 +137,7 @@ How can I combine with the different multi-modal explanations?
 
 ## March 20th
 
-How can we combine the different modalities in order to get the overall one. I can get the overall text explanation, but how do I get the overall explanation at a word level alongside the tabular features? I could look at doing the masking thing that happens for the pure text features. So what would that look like? For text you run it a bunch of times but swapping the words for blanks and seeing how the prediction changes. For tabular we sample from the background distribtution. It would be interesting to see if there are any sort of cross modality interactions. 
+How can we combine the different modalities in order to get the overall one. I can get the overall text explanation, but how do I get the overall explanation at a word level alongside the tabular features? I could look at doing the masking thing that happens for the pure text features. So what would that look like? For text you run it a bunch of times but swapping the words for blanks and seeing how the prediction changes. For tabular we sample from the background distribtution. It would be interesting to see if there are any sort of cross modality interactions.
 
 For the full text transformer, how can I tell the model to focus more on the other features
 
@@ -161,11 +161,153 @@ Explanations:
 * [x] tab as text (imdb_genre_1) word style
 * [x] tabx2_nodesc (imdb_genre_6) word style
 * [x] tabx5_nodesc (imdb_genre_5) word style
-* [ ] tab as text (imdb_genre_1) tabular style
-* [ ] tabx2_nodesc (imdb_genre_6) tabular style
-* [ ] tabx5_nodesc (imdb_genre_5) tabular style
-* [ ] tabx2 (imdb_genre_7) tabular style
-* [ ] tabx5 (imdb_genre_2) tabular style
-* [ ] reorder1 (imdb_genre_3) tabular style
-* [ ] reorder2 (imdb_genre_4) tabular style
-* [ ] all as text (imdb_genre_0) tabular style on validation set
+* [x] tab as text (imdb_genre_1) tabular style
+* [x] tabx2_nodesc (imdb_genre_6) tabular style
+* [x] tabx5_nodesc (imdb_genre_5) tabular style
+* [x] tabx2 (imdb_genre_7) tabular style
+* [x] tabx5 (imdb_genre_2) tabular style
+* [x] reorder1 (imdb_genre_3) tabular style
+* [x] reorder2 (imdb_genre_4) tabular style
+~~* [ ] all as text (imdb_genre_0) tabular style on validation set~~
+
+In order to test the above I need to do:
+
+* [x] np load the exps
+* [x] find the data for them. I needed this data when I trained the models so look in the gen exps file
+* [x] do shap summary plots
+
+## March 22nd
+
+I want to explore to see if performance will improve if I pass the features into the model according to how important they are to the decision (on average). I must keep the test set seperate, so I will have to use the validation set to get explanations. It doesn't make too  much sense to do it including the text description becuase the transformer model basically ignore the other features when it is present.
+
+* [x] imdb_genre_1 tabular style on validation set
+* [x] reorder and retrain based on importance values
+
+The problem that I want to tackle is to be able to get an overall explanation which puts words alongside categorical features. This could be a technical challenge, telling the model to treat some features a certain way and some a different way.
+
+Two questions:
+
+* How does lgb handle missing values?
+  * [x] Search online
+  ~~* [ ] Create a test case and make a prediction~~
+* For simple ensembles, can we recover the feature importance values simply by multiplying together the feature importance values of the individual models?
+  * [x] Look at average shap values for tab features, in lgb and how they compare when multiplied by 0.25, 0.5 and 0.75
+
+Missing values that are unseen during training are treated as belonging to the 'other' non-split category and are always put to the right (for categorical variables). For numerical variables the missing val is converted to 0.
+
+* Order of features in text model seems important:
+  * [x] imdb_genre_0 tabular style on validation set
+  * [x] reorder and retrain based on importance values
+* Can I get a word level explanation that includes the text features
+  * [x] Get a set of word level explanations for the text only model
+  ~~* [ ] Combine them with the tabular features explanations~~
+
+## March 23rd
+
+I have been able to get an output for the text and tabular combination.
+
+## March 24th
+
+When combining the text and tabular outputs in a simple ensemble (linear transformation) the combination of explanations is trivial. The feature importance values and the expected value form a linear y = mx + c relationship, therefore when the output is transformed linearly, eg y = 0.5(text) + 0.5(tab) I can simply multiply both explanation equations together to form a new expected value and a new set of feature importance values.
+
+I can display the output in terms of a word level explanation using the shap library, but only when I remove the `hierarchical_values`, which is the part of the explanation that groups word-pieces together. There may well be a way to set it up for the combined tabular values too but at the moment it is simpler just to remove it.
+
+I feel like I am now in a similar place to before: I want to test the relationship between the individual model explanations and the global explanations when combining the two modalities in a stack ensemble. The current thing that we are trying to solve is how can we present an explanation that is on a word level with text and tabular data. Options:
+
+1. Calculate them both independently and then combine them in some fashion
+2. Think of a method to do both a word level and a tabular level explanation at the same time
+
+### 1
+
+In order to work out a method to combine them I first need to get an answer of what they are supposed to look like together. DIME calculated 3 LIME explanations, one where the image is held constant and the text is perturbed, one vice versa and one where both are perturbed. They then calculated the multimodal interaction by taking the different between the combined and the individual. We do this when the two modalities are not independent. For the case of a simple ensemble they are: perturbing the text will not effect the contribution of the tabular features and vice versa. Therefore the multimodal interaction should be 0.
+
+How does SHAP work for tabular
+ data:
+I should use the shap.kmeans function: it runs the scikit learn kmeans function to get k (go for 100) clusters of the data. The data is then rounded to the nearest datapoint in the dataset. It is then made into a DenseData object which takes the cluster centres, the group names and weights depending on how many datapoints are in each cluster.
+
+If I had a single background reference then I would be able to do a combined text and tabular explanation, surely. I would just substitute the tabualr features for its background reference and swap the text feature for the [MASK] token.
+
+The question is, when there is a background dataset and I am looking to 'remove' one feature, does it randomly pick from the background dataset or does it sample multiple times?
+
+~~Text examples where the tokenisation happens within the predict function eg <https://shap.readthedocs.io/en/latest/example_notebooks/api_examples/plots/text.html> use a partition explainer. Due to this example doing the tokensation within the predict function I think that I will be able to have some success using this method. I just need to work out how to deal with the background dataset. On Monday~~
+
+Tokenisation does happen in the predict function but the masking is still the same in the other part of the explainer, still need some thinking.
+
+~~* [ ] Make a reference dataset of just the kmeans centroids and~~
+
+## March 27th
+
+How does shap explain text?
+
+* It uses a Partition explainer. The `__call__()` function of the parent `Explainer` package is called but that just converts a Dataframe/dataset into lists and retreives the right column. It then loops over all rows which are to be explained and calls `explain_row()` from `Partition`
+* As it does it one row at a time, the effect of the removal of one or more of the words is calculated for the output of that particular row. Word masked, prediction made, other word masked, prediction made, etc. We cannot do this for tabular becaause there is no background data.
+
+Imagine there is a sentence to be explained and then a single tabular feature. We would calcualte the words as normal but then we also need to vary to tabular instance. Because we cannot replace it with a single mask token we have to sample it.
+
+## March 29th
+
+* [x] Using the brute force kernel shap explain a single row using a single reference value
+~~* [ ] Explain a single row using multiple reference values~~
+
+Looking more closely and I am seeing that text shap values are not calculated through the permutation explainer, but instead through the partition explainer which makes groups of words and then substitutes them out as a whole when calculatin the presence or not of certain features in the shap val calculation.
+
+I think the steps will be to first create an exact brute force explainer which does the SHAP values for everything. But this may well take ages as it will treat each word invividually. In theory I can do a partition explainer for the combined two, but in order to do so I need a way of calculating the similarity between words and the tabular features. It might be the case that I just split the clustering tree into two parts, splitting tab and text at the top level. I think this means that clusters split at the top level will treat each other as a whole, ie (i think) the tabular features will treat the words as a single feature. Same as saying "Given the text is the way that it is, how do the tabular features affect the output".
+
+If I am calculating them seperately (if we are talking about all as text, for example) and I am holding the text constant, then I'd be using the sampling method to get the shap values of the tabular features.
+
+## March 30th
+
+* [x] Get a clustering output for the text and tabular features
+
+## April 6th
+
+Right now the code is at a stage where I can get a joint explanation for the text and tabular features. The clustering dendograms are combined and the tabular features are sampled from the background dataset. Just to recap, the tab features are sampled from the background dataset because there is no one default, mask value that they can be replaced with, unlike with words. So, with that in mind, functionally the words also get sampled from the background dataset but it is always replaced with the same, masked value.
+
+Maybe can look into owen values, but I think the important thing now is that I have a way of getting a joint explanation for both tabular and text features.
+
+Let's get some results. Thinking back to types of explanations, we have:
+
+* Tab in LGB
+* Tab in BERT
+* Text in BERT
+* Text and Tab in BERT
+* Simple ensemble
+* Weighted ensemble
+* Stack ensemble
+
+The goal is to compare the explanations between all of them. Two things: I will already be able to get an acceptable explanation for some of the variants. Second, I might need to redo them such that they are all done in the same way (Partition).
+
+I will need to adjust the code in order to account for some methods which don't use tabular features at all, but for now let's focus on those which use both and I can plug and play:
+
+* Text and Tab in BERT
+* Simple ensemble (0.5)
+* Weighted ensemble (0.25)
+* Weighted ensemble (0.75)
+* Stack ensemble
+
+* [x] Code set up for weighted ensembles
+* [ ] Code set up for stack ensembles
+* [ ] Code set up for text and tab in BERT
+
+## April 7th
+
+Model created for:
+
+* [x] All as text (0)
+* [ ] Tabx2 (7)
+* [ ] Tabx5 (8)
+* [x] Simple ensemble
+* [x] Stack ensemble
+* [x] Weighted ensemble (0.25)
+* [x] Weighted ensemble (0.75)
+
+## April 21st
+
+Now I have set up the code such that I can compute tabular and text at the same time: words in text features are replaced with [MASK] tokens whereas tabular features are sampled from the background dataset. I can now compare the explanations between the different methods. The question is how do I compare them?
+
+Also:
+* I would like to extend the method to be able to use multiple text features, such as description and title. Then I can get a joint explanation for each of the words in 
+
+## Steps
+
+* Shap generates a batch of masks, using the shape functions to find the correct shape for the masks.

@@ -9,9 +9,9 @@
 #     done
 # done
 
-for idx in 0 # {7..10}
+for idx in 10 #{1..4}
 do
-    for cfg in imdb_genre_text_${idx}
+    for cfg in imdb_genre_${idx}
     do
         sbatch --job-name=$cfg scripts/train_office_pc.sh $cfg
         # sbatch --job-name=$cfg scripts/train.sh $cfg
