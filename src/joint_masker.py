@@ -35,11 +35,12 @@ class JointMasker(Masker):
         self,
         tab_df,
         text_cols,
-        max_samples=20,
+        max_samples=100,
         tokenizer=None,
         mask_token=None,
         collapse_mask_token="auto",
         output_type="string",
+        tab_cluster_scale_factor=2,
     ):
         if tokenizer is None:
             self.tokenizer = SimpleTokenizer()
@@ -58,6 +59,9 @@ class JointMasker(Masker):
         self.input_mask_token = mask_token
         self.mask_token = mask_token  # could be recomputed later in this function
         self.mask_token_id = mask_token if isinstance(mask_token, int) else None
+        self.tab_cluster_scale_factor = (
+            tab_cluster_scale_factor  # This could be important
+        )
 
         # Tab
         self.output_dataframe = False
@@ -136,25 +140,6 @@ class JointMasker(Masker):
 
         self._text_ft_index_ends(x[self.n_tab_cols :])
         text = " ".join(x[self.n_tab_cols :])
-        # if len(self.text_cols) == 1:
-        #     text = x[-1]
-        # else:
-        #     self._text_ft_index_ends(x[self.n_tab_cols :])
-        #     text = " ".join(x[self.n_tab_cols :])
-
-        # masked_text_fts = []
-        # for ft in range(len(self.text_cols)):
-        #     # We take the first mask token (CLS) and last mask token (SEP) together with the text feature
-        #     ft_mask = np.concatenate(
-        #         (
-        #             mask[:1],
-        #             mask[self._text_ft_lens[ft] : self._text_ft_lens[ft + 1]],
-        #             mask[-1:],
-        #         )
-        #     )
-        #     masked_ft = self.text_mask_call(ft_mask, x[self.n_tab_cols + ft])
-        #     masked_text_fts.append(masked_ft[0][0])
-
         masked_text = self.text_mask_call(mask[self.n_tab_cols :], text)
 
         # We unpack the string from the tuple and array
@@ -166,17 +151,27 @@ class JointMasker(Masker):
         lens = []
         sent_indices = []
         for idx, col in enumerate(s):
+            # First text col
             if lens == []:
                 tokens, token_ids = self.token_segments(col)
-                lens.append(len(tokens) - 2)
+                # -1 as we don't use SEP tokens (unless it's the only text col)
+                also_last = 1 if len(s) == 1 else 0
+                token_len = len(tokens) - 1 + also_last
+                lens.append(token_len)
+                sent_indices.extend([idx] * token_len)
+            # Last text col
+            elif idx == len(s) - 1:
+                tokens, token_ids = self.token_segments(col)
+                # -1 for CLS tokens
+                token_len = len(tokens) - 1
+                lens.append(lens[-1] + token_len)
+                sent_indices.extend([idx] * token_len)
+            # Middle text cols
             else:
                 tokens, token_ids = self.token_segments(col)
-                lens.append(lens[-1] + len(tokens) - 2)
-            sent_indices.extend([idx] * (len(tokens) - 2))
-        lens[0] += 1  # add 1 for the CLS token
-        sent_indices = [0] + sent_indices
-        lens[-1] += 1  # add 1 for the SEP token
-        sent_indices = sent_indices + [sent_indices[-1]]
+                # -2 for CLS and SEP tokens
+                token_len = len(tokens) - 2
+                lens.append(lens[-1] + token_len)
 
         self._sent_split_idxs = lens[:-1]
         self.sent_indices = sent_indices
@@ -265,22 +260,6 @@ class JointMasker(Masker):
                     is_previous_appended_token_mask_token = False
             out.append(" ".join(out_parts))
 
-            # tokenizers which treat spaces like parts of the tokens and dont replace the special token while decoding need further postprocessing
-            # by replacing whitespace encoded as '_' for sentencepiece tokenizer or 'Ġ' for sentencepiece like encoding (GPT2TokenizerFast)
-            # with ' '
-            # if safe_isinstance(self.tokenizer, SENTENCEPIECE_TOKENIZERS):
-            #     out = out.replace("▁", " ")
-
-            # if len(self.text_cols) == 1:
-            #     # replace sequence of spaces with a single space and strip beginning and end spaces
-            #     out = re.sub(
-            #         r"[\s]+", " ", out
-            #     ).strip()  # TODOmaybe: should do strip?? (originally because of fast vs. slow tokenizer differences)
-            # else:
-            #     out = out.split(self.tokenizer.sep_token)
-            #     # replace sequence of spaces with a single space and strip beginning and end spaces
-            #     out = [re.sub(r"[\s]+", " ", s).strip() for s in out]
-
             for i in range(len(out)):
                 out[i] = re.sub(r"[\s]+", " ", out[i]).strip()
                 if safe_isinstance(self.tokenizer, SENTENCEPIECE_TOKENIZERS):
@@ -296,13 +275,6 @@ class JointMasker(Masker):
                         for i in range(len(mask))
                     ]
                 )
-                # print("mask len", len(out))
-                # # crop the output if needed
-                # if self.max_length is not None and len(out) > self.max_length:
-                #     new_out = np.zeros(self.max_length)
-                #     new_out[:] = out[:self.max_length]
-                #     new_out[-self.keep_suffix:] = out[-self.keep_suffix:]
-                #     out = new_out
 
         # for some sentences with strange configurations around the separator tokens, tokenizer encoding/decoding may contain
         # extra unnecessary tokens, for example ''. you may want to strip out spaces adjacent to separator tokens. Refer to PR
@@ -396,23 +368,6 @@ class JointMasker(Masker):
             else:
                 tokens.append(v.strip())
 
-        # Ensure it doesn't combine two sentences
-        # temp_tokens = tokens.copy()
-        # if len(self._text_ft_lens) > 1:
-        #     swap_dict = {}
-        #     for i in range(len(self._text_ft_lens)):
-        #         temp_tokens[self._text_ft_lens[i]] = f"[START_{i}]"
-        #         temp_tokens[self._text_ft_lens[i] + 1] = f"[END_{i}]"
-        #         swap_dict[f"[START_{i}]"] = tokens[self._text_ft_lens[i]]
-        #         swap_dict[f"[END_{i}]"] = tokens[self._text_ft_lens[i] + 1]
-
-        # sent_indices = [0] * len(tokens)
-        # # self._text_ft_lens denotes the indices at the end of each sentence
-        # # loop through the tokens and add the number sentence it realtes to
-        # if len(self._sent_split_idxs) > 1:
-        #     for i in range(0, len(self._sent_split_idxs)):
-        #         sent_indices[self._sent_split_idxs[i] :] = i + 1
-
         text_pt = partition_tree(tokens, special_tokens, self.sent_indices)
         text_pt[:, 2] = text_pt[:, 3]
         text_pt[:, 2] /= text_pt[:, 2].max()
@@ -450,7 +405,7 @@ class JointMasker(Masker):
         )
 
         # Scale tab_pt
-        self.tab_pt[:, 2] /= self.tab_pt[:, 2].max()
+        self.tab_pt[:, 2] /= self.tab_pt[:, 2].max() * self.tab_cluster_scale_factor
 
         # 3rd and 4th columns are left unchanged
         Z_join[: self.n_tab_groups, 2:] = self.tab_pt[:, 2:]
@@ -718,78 +673,6 @@ def partition_tree(decoded_tokens, special_tokens, sent_indices):
 
     return clustm
 
-
-"""
-def run_shap_vals(type="text"):
-    train_df = load_dataset(
-        "james-burton/imdb_genre_prediction2", split="train"
-    ).to_pandas()
-    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-    text_pipeline = pipeline(
-        "text-classification",
-        model="james-burton/imdb_genre_9",
-        tokenizer=tokenizer,
-        device="cuda:0",
-    )
-    # test_df = load_dataset('james-burton/imdb_genre_prediction2', split='test[:1]')
-    tab_cols = [
-        "Rating",
-        "Votes",
-        "Revenue (Millions)",
-    ]  # ['Year','Runtime (Minutes)', 'Rating', 'Votes', 'Revenue (Millions)','Metascore', 'Rank']
-    text_col = ["Description"]
-
-    # test_df_text = prepare_text(test_df, 'text_col_only')
-    # test_df_tab = test_df.to_pandas()[tab_cols]
-
-    train_df_tab = train_df[tab_cols]
-    y_train = train_df["Genre_is_Drama"]
-
-    tab_model = lgb.LGBMClassifier(random_state=42)
-    tab_model.fit(train_df_tab, y_train)
-
-    def tab_pred_fn(examples):
-        preds = tab_model.predict_proba(examples)
-        return preds
-
-    def text_pred_fn(examples):
-        dataset = Dataset.from_dict({"text": examples})
-        # put the dataset on the GPU
-
-        preds = [
-            out for out in text_pipeline(KeyDataset(dataset, "text"), batch_size=64)
-        ]
-        preds = np.array([format_text_pred(pred) for pred in preds])
-        return preds
-
-    test_model = WeightedEnsemble(tab_model=tab_model, text_pipeline=text_pipeline)
-
-    # We want to explain a single row
-    np.random.seed(1)
-    # x = np.array([['2009.0', '95.0', '7.7', '398972.0', '32.39', '76.0', '508.0',
-    #     "An offbeat romantic comedy about a woman who doesn't believe true love exists, and the young man who falls for her."]])
-    x = [7.7, 398972.0, 32.39, "offbeat romantic comedy"]
-
-    if type == "joint":
-        masker = JointMasker(tab_df=train_df[tab_cols], tokenizer=tokenizer)
-        pt = masker.clustering(x)
-
-        explainer = shap.explainers.Partition(
-            model=test_model.predict, masker=masker, partition_tree=pt
-        )
-        shap_vals = explainer(np.array([x], dtype=object))
-        return shap_vals
-    elif type == "text":
-        masker = Text(tokenizer=tokenizer)
-        explainer = shap.Explainer(model=text_pred_fn, masker=masker)
-        shap_vals = explainer(["offbeat romantic comedy"])
-        return shap_vals
-    else:
-        masker = Tabular(train_df[tab_cols], clustering="correlation")
-        explainer = shap.explainers.Partition(model=tab_pred_fn, masker=masker)
-        shap_vals = explainer(np.array([x[:-1]]))
-        return shap_vals
-"""
 
 if __name__ == "__main__":
     # run_shap_vals('tab')
