@@ -12,6 +12,16 @@ import os
 import lightgbm as lgb
 from src.models import WeightedEnsemble, StackModel, AllAsTextModel
 from src.joint_masker import JointMasker
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--ds_type",
+    type=str,
+    default="wine",
+    help="Name of dataset to use",
+)
+ds_type = parser.parse_args().ds_type
 
 """
 prod_sent: 
@@ -36,7 +46,7 @@ jigsaw:
 """
 
 
-def run_shap(model_type, max_samples=100, ds_type="imdb_genre", test_set_size=100):
+def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
     output_root = "models/shap_vals/"
 
     if ds_type == "imdb_genre":
@@ -286,15 +296,15 @@ def run_shap(model_type, max_samples=100, ds_type="imdb_genre", test_set_size=10
 
 
 if __name__ == "__main__":
-    for ds_type in ["imdb_genre", "prod_sent", "fake", "kick", "jigsaw", "wine"]:
-        for model_type in [
-            "ensemble_50",
-            # "ensemble_75",
-            # "ensemble_25",
-            # "stack",
-            # "all_text",
-        ]:
-            # shap_vals = run_shap_multiple_text(model_type)
-            shap_vals = run_shap(model_type)
+    # for ds_type in ["imdb_genre", "prod_sent", "fake", "kick", "jigsaw", "wine"]:
+    for model_type in [
+        "ensemble_50",
+        "ensemble_75",
+        "ensemble_25",
+        "stack",
+        "all_text",
+    ]:
+        # shap_vals = run_shap_multiple_text(model_type)
+        shap_vals = run_shap(model_type, ds_type=ds_type)
 
-            # print(shap_vals)
+        # print(shap_vals)
