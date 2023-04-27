@@ -85,7 +85,15 @@ def main():
         project = "Fake Job Postings"
         label_col, text_col = "fraudulent", "text"
         prob_type, num_labels = "single_label_classification", 2
-
+    elif ds_type == "kick":
+        ds_name = "james-burton/kick_starter_funding"
+        project = "Kickstarter"
+        label_col, text_col = "final_status", "text"
+        prob_type, num_labels = "single_label_classification", 2
+    elif ds_type == "jigsaw":
+        ds_name = "james-burton/jigsaw_unintended_bias100K"
+        project = "Jigsaw"
+        label_col, text_col = "target", "comment_text"
     dataset = load_dataset(ds_name)
     dataset = prepare_text(dataset, args["version"], ds_type)
     if prob_type == "regression":

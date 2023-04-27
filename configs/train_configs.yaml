@@ -178,6 +178,46 @@ dataset: fake
 version: text_col_only
 batch_size: 32
 
+--- # kick_0
+config: kick_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text
+dataset: kick
+version: all_as_text
+batch_size: 32
+
+--- # kick_9
+config: kick_9
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - text_col_only
+dataset: kick
+version: text_col_only
+batch_size: 32
+
+--- # jigsaw_0
+config: jigsaw_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text
+dataset: jigsaw
+version: all_as_text
+batch_size: 32
+
+--- # jigsaw_9
+config: jigsaw_9
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - text_col_only
+dataset: jigsaw
+version: text_col_only
+batch_size: 32
+
 --- # TESTING
 config: testing
 fast_dev_run: true
@@ -186,6 +226,6 @@ model_base: distilbert-base-uncased
 tags:
   - distilbert
   - text_col_only
-dataset: fake
+dataset: kick
 version: text_col_only
 batch_size: 32

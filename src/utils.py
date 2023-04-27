@@ -184,7 +184,7 @@ def prepare_text(dataset, version, ds_type):
             # dataset rename column
             dataset = dataset.rename_column("Product_Description", "text")
             return dataset
-        if version == "all_as_text":
+        elif version == "all_as_text":
             cols = ["Product_Type", "Product_Description"]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -197,7 +197,7 @@ def prepare_text(dataset, version, ds_type):
             cols = ["title", "description", "salary_range"]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
-        if version == "all_as_text":
+        elif version == "all_as_text":
             cols = [
                 "title",
                 "required_experience",
@@ -205,6 +205,75 @@ def prepare_text(dataset, version, ds_type):
                 "title",
                 "salary_range",
                 "description",
+            ]
+
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
+    elif "kick" in ds_type:
+        if version == "text_col_only":
+            cols = ["name", "desc", "keywords"]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text":
+            cols = [
+                "goal",
+                "disable_communication",
+                "country",
+                "currency",
+                "deadline",
+                "created_at",
+                "name",
+                "desc",
+                "keywords",
+            ]
+
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
+    elif "jigsaw" in ds_type:
+        if version == "text_col_only":
+            cols = ["comment_text"]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text":
+            cols = [
+                "asian",
+                "atheist",
+                "bisexual",
+                "black",
+                "buddhist",
+                "christian",
+                "female",
+                "heterosexual",
+                "hindu",
+                "homosexual_gay_or_lesbian",
+                "intellectual_or_learning_disability",
+                "jewish",
+                "latino",
+                "male",
+                "muslim",
+                "other_disability",
+                "other_gender",
+                "other_race_or_ethnicity",
+                "other_religion",
+                "other_sexual_orientation",
+                "physical_disability",
+                "psychiatric_or_mental_illness",
+                "transgender",
+                "white",
+                "funny",
+                "wow",
+                "sad",
+                "likes",
+                "disagree",
+                "comment_text",
             ]
 
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
