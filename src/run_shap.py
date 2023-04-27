@@ -16,7 +16,7 @@ from src.models import WeightedEnsemble, StackModel, AllAsTextModel
 from src.joint_masker import JointMasker
 
 
-def run_shap(model_type, max_samples):
+def run_shap(model_type, max_samples=100):
     # Data
     train_df = load_dataset(
         "james-burton/imdb_genre_prediction2", split="train"
@@ -111,7 +111,7 @@ def run_shap(model_type, max_samples):
     return shap_vals
 
 
-def run_shap_multiple_text(model_type):
+def run_shap_multiple_text(model_type, max_samples=100):
     # Data
     train_df = load_dataset(
         "james-burton/imdb_genre_prediction2", split="train"
@@ -158,7 +158,7 @@ def run_shap_multiple_text(model_type):
         text_cols=text_cols,
         tokenizer=tokenizer,
         collapse_mask_token=True,
-        max_samples=20,
+        max_samples=max_samples,
     )
 
     explainer = shap.explainers.Partition(model=model.predict, masker=masker)
