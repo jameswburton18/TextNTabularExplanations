@@ -101,24 +101,6 @@ class StackModel:
 
 
 class AllAsTextModel:
-    def __init__(self, text_pipeline):
-        self.text_pipeline = text_pipeline
-
-    def predict(self, examples):
-        examples_as_strings = np.apply_along_axis(array_to_string, 1, examples)
-        preds = [
-            out
-            for out in self.text_pipeline(
-                KeyDataset(Dataset.from_dict({"text": examples_as_strings}), "text"),
-                batch_size=64,
-            )
-        ]
-        preds = np.array([format_text_pred(pred) for pred in preds])
-
-        return preds
-
-
-class AllAsTextModel2:
     def __init__(self, text_pipeline, cols):
         self.text_pipeline = text_pipeline
         self.cols = cols
