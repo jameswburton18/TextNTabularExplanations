@@ -1,3 +1,4 @@
+#!/bin/bash
 #Enabling Slurm Status
 sudo systemctl enable slurmctld.service
 sudo systemctl enable slurmd.service

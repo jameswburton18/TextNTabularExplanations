@@ -1,3 +1,4 @@
+#!/bin/bash
 # for idx in 0 # {7..10}
 # do
 #     for cfg in airbnb_${idx}
