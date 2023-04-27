@@ -80,6 +80,11 @@ def main():
         project = "Product Sentiment"
         label_col, text_col = "Sentiment", "text"
         prob_type, num_labels = "single_label_classification", 4
+    elif ds_type == "fake":
+        ds_name = "james-burton/fake_job_postings2"
+        project = "Fake Job Postings"
+        label_col, text_col = "fraudulent", "text"
+        prob_type, num_labels = "single_label_classification", 2
 
     dataset = load_dataset(ds_name)
     dataset = prepare_text(dataset, args["version"], ds_type)
@@ -200,9 +205,17 @@ def main():
             if num_labels == 2:
                 results["test/accuracy"] = np.mean(np.argmax(preds, axis=1) == labels)
                 results["test/precision"] = precision_score(
-                    labels, np.argmax(preds, axis=1)
+                    labels,
+                    np.argmax(preds, axis=1),
+                    labels=np.arange(num_labels),
+                    zero_division=0,
                 )
-                results["test/recall"] = recall_score(labels, np.argmax(preds, axis=1))
+                results["test/recall"] = recall_score(
+                    labels,
+                    np.argmax(preds, axis=1),
+                    labels=np.arange(num_labels),
+                    zero_division=0,
+                )
                 results["test/roc_auc"] = roc_auc_score(labels, preds[:, 1])
             elif num_labels > 2:
                 results["test/accuracy"] = np.mean(np.argmax(preds, axis=1) == labels)

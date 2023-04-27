@@ -188,6 +188,15 @@ def prepare_text(dataset, version, ds_type):
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
             )
+    elif "fake" in ds_type:
+        if version == "text_col_only":
+            cols = ["title", "description", "salary_range"]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
 
     else:
         raise ValueError(
