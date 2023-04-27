@@ -50,51 +50,56 @@ def main():
 
     # Dataset
     ds_type = args["dataset"]
-    if ds_type == "airbnb":
-        ds_name = "james-burton/airbnb_summaries"
-        project = "Airbnb"
-        label_col, text_col = "scaled_label", "text"
-        prob_type, num_labels = "regression", 1
-    elif ds_type == "books":
-        ds_name = "james-burton/books_price_prediction"
-        project = "Books"
-        label_col, text_col = "scaled_label", "text"
-        prob_type, num_labels = "regression", 1
-    elif ds_type == "imdb":
-        ds_name = "james-burton/imdb_gross"
-        project = "IMDB"
-        label_col, text_col = "scaled_label", "text"
-        prob_type, num_labels = "regression", 1
-    elif ds_type == "imdb_genre":
+    # if ds_type == "airbnb":
+    #     ds_name = "james-burton/airbnb_summaries"
+    #     project = "Airbnb"
+    #     label_col, text_col = "scaled_label", "text"
+    #     prob_type, num_labels = "regression", 1
+    # elif ds_type == "books":
+    #     ds_name = "james-burton/books_price_prediction"
+    #     project = "Books"
+    #     label_col, text_col = "scaled_label", "text"
+    #     prob_type, num_labels = "regression", 1
+    # elif ds_type == "imdb":
+    #     ds_name = "james-burton/imdb_gross"
+    #     project = "IMDB"
+    #     label_col, text_col = "scaled_label", "text"
+    #     prob_type, num_labels = "regression", 1
+    # elif ds_type == "imdb_genre_text":
+    #     ds_name = "james-burton/imdb_genre_prediction_all_text"
+    #     project = "IMDB Genre All Text"
+    #     label_col = "Genre_is_Drama"
+    #     prob_type, num_labels = "single_label_classification", 2
+    if ds_type == "imdb_genre":
         ds_name = "james-burton/imdb_genre_prediction2"
         project = "IMDB Genre"
-        label_col, text_col = "Genre_is_Drama", "text"
-        prob_type, num_labels = "single_label_classification", 2
-    elif ds_type == "imdb_genre_text":
-        ds_name = "james-burton/imdb_genre_prediction_all_text"
-        project = "IMDB Genre All Text"
-        label_col, text_col = "Genre_is_Drama", "text"
+        label_col = "Genre_is_Drama"
         prob_type, num_labels = "single_label_classification", 2
     elif ds_type == "prod_sent":
         ds_name = "james-burton/product_sentiment_machine_hack"
         project = "Product Sentiment"
-        label_col, text_col = "Sentiment", "text"
+        label_col = "Sentiment"
         prob_type, num_labels = "single_label_classification", 4
     elif ds_type == "fake":
         ds_name = "james-burton/fake_job_postings2"
         project = "Fake Job Postings"
-        label_col, text_col = "fraudulent", "text"
+        label_col = "fraudulent"
         prob_type, num_labels = "single_label_classification", 2
     elif ds_type == "kick":
         ds_name = "james-burton/kick_starter_funding"
         project = "Kickstarter"
-        label_col, text_col = "final_status", "text"
+        label_col = "final_status"
         prob_type, num_labels = "single_label_classification", 2
     elif ds_type == "jigsaw":
         ds_name = "james-burton/jigsaw_unintended_bias100K"
         project = "Jigsaw"
-        label_col, text_col = "target", "comment_text"
+        label_col = "target"
         prob_type, num_labels = "single_label_classification", 2
+    elif ds_type == "wine":
+        ds_name = "james-burton/wine_reviews"
+        project = "Wine"
+        label_col = "variety"
+        prob_type, num_labels = "single_label_classification", 30
     dataset = load_dataset(ds_name)
     dataset = prepare_text(dataset, args["version"], ds_type)
     if prob_type == "regression":
@@ -111,7 +116,7 @@ def main():
     def encode(examples):
         return {
             "labels": np.array([examples[label_col]]),
-            **tokenizer(examples[text_col], truncation=True, padding="max_length"),
+            **tokenizer(examples["text"], truncation=True, padding="max_length"),
         }
 
     dataset = dataset.map(encode, load_from_cache_file=True)

@@ -239,8 +239,7 @@ def prepare_text(dataset, version, ds_type):
             )
     elif "jigsaw" in ds_type:
         if version == "text_col_only":
-            cols = ["comment_text"]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            dataset = dataset.rename_column("comment_text", "text")
             return dataset
         elif version == "all_as_text":
             cols = [
@@ -275,6 +274,20 @@ def prepare_text(dataset, version, ds_type):
                 "disagree",
                 "comment_text",
             ]
+
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
+    elif "wine" in ds_type:
+        if version == "text_col_only":
+            cols = ["country", "description", "province"]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text":
+            cols = ["points", "price", "country", "description", "province"]
 
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
