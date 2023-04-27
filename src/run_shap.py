@@ -233,7 +233,7 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    with open(f"shap_vals_{model_type}.pkl", "wb") as f:
+    with open(os.path.join(output_dir, f"shap_vals_{model_type}.pkl"), "wb") as f:
         pickle.dump(shap_vals, f)
 
     return shap_vals
