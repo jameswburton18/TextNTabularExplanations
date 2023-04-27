@@ -218,6 +218,26 @@ dataset: jigsaw
 version: text_col_only
 batch_size: 32
 
+--- # wine_0
+config: wine_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text
+dataset: wine
+version: all_as_text
+batch_size: 32
+
+--- # wine_9
+config: wine_9
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - text_col_only
+dataset: wine
+version: text_col_only
+batch_size: 32
+
 --- # TESTING
 config: testing
 fast_dev_run: true
