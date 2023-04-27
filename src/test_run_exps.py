@@ -15,11 +15,16 @@ parser.add_argument(
     default="imdb_genre_3",
     help="Name of model to pull from james-burton/ HuggingFace",
 )
+parser.add_argument('--split_for_exps', choices=['test', 'validation'], default='test')
+
 model_name = parser.parse_args().model_name
+split = parser.parse_args().split_for_exps
 tab_cols = ['Year','Runtime (Minutes)', 'Rating', 'Votes', 'Revenue (Millions)','Metascore', 'Rank']
 text_col = ['Description']
 
 match model_name:
+    case 'imdb_genre_0':
+        cols = tab_cols + text_col
     case 'imdb_genre_1':
         cols = tab_cols
     case 'imdb_genre_6':
@@ -66,7 +71,7 @@ tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
 
 
 X_train = train_df[cols]
-X_test = test_df[cols]
+X_test = test_df[cols] if split == 'test' else ds['validation'].to_pandas()[cols]
 my_pipeline = pipeline(
     "text-classification", model=f'james-burton/{model_name}', tokenizer=tokenizer, device=0, accelerator="bettertransformer"
 )    
@@ -75,4 +80,5 @@ my_shap_pipeline = PipelineModel(my_pipeline, prepare_array_fn)
 my_explainer = shap.KernelExplainer(my_shap_pipeline.predict, X_train)
 for i in range(0,len(X_test),10):
     shap_values = my_explainer.shap_values(X_test[i:i+10], seed=42)
-    np.save(f"{model_name}_shap_values_{i}.npy", shap_values)
+    save_name = model_name if split == 'test' else f'{model_name}_val'
+    np.save(f"{save_name}_shap_values_{i}.npy", shap_values)
