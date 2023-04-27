@@ -148,14 +148,24 @@ dataset: prod_sent
 version: text_col_only
 batch_size: 32
 
---- # TESTING
-config: testing
-fast_dev_run: true
-do_train: false
+--- # fake_9
+config: fake_9
 model_base: distilbert-base-uncased
 tags:
   - distilbert
   - text_col_only
-dataset: prod_sent
+dataset: fake
+version: text_col_only
+batch_size: 32
+
+--- # TESTING
+config: testing
+fast_dev_run: true
+do_train: true
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - text_col_only
+dataset: fake
 version: text_col_only
 batch_size: 32
