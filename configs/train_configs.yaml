@@ -130,7 +130,6 @@ dataset: imdb_genre
 version: all_as_text_exp_reorder
 batch_size: 32
 
-
 --- # imdb_genre_text_0
 config: imdb_genre_text_0
 model_base: distilbert-base-uncased
@@ -139,15 +138,24 @@ tags:
 dataset: imdb_genre_text
 batch_size: 32
 
-
+--- # prod_sent_9
+config: prod_sent_9
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - text_col_only
+dataset: prod_sent
+version: text_col_only
+batch_size: 32
 
 --- # TESTING
 config: testing
 fast_dev_run: true
-do_train: true
+do_train: false
 model_base: distilbert-base-uncased
 tags:
   - distilbert
-dataset: imdb_genre
-version: tabx2
-batch_size: 16
+  - text_col_only
+dataset: prod_sent
+version: text_col_only
+batch_size: 32
