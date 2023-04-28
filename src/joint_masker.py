@@ -72,8 +72,12 @@ class JointMasker(Masker):
 
         # Tab clustering
         self.n_tab_cols = tab_df.shape[-1]
+        # In order to cluster the tabular data, we replace null values with median
         self.tab_pt = sp.cluster.hierarchy.complete(
-            sp.spatial.distance.pdist(tab_df.T, metric="correlation")
+            sp.spatial.distance.pdist(
+                pd.DataFrame(tab_df).fillna(pd.DataFrame(tab_df).median()).values.T,
+                metric="correlation",
+            )
         )
         self.n_tab_groups = len(self.tab_pt)
 
