@@ -52,7 +52,7 @@ def main():
     # Dataset
     ds_type = args["dataset"]
     di = get_dataset_info(ds_type)
-    if args.version == "all_as_text":
+    if args["version"] == "all_as_text":
         ds_name = di.ds_name_all_text
     else:
         ds_name = di.ds_name_ordinal

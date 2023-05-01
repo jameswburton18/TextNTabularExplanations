@@ -245,7 +245,6 @@ do_train: true
 model_base: distilbert-base-uncased
 tags:
   - distilbert
-  - text_col_only
 dataset: kick
-version: text_col_only
+version: all_as_text
 batch_size: 32
