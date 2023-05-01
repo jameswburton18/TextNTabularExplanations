@@ -21,6 +21,7 @@ from utils import (
     row_to_string,
     multiple_row_to_string,
 )
+from src.utils import get_dataset_info
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -50,72 +51,27 @@ def main():
 
     # Dataset
     ds_type = args["dataset"]
-    # if ds_type == "airbnb":
-    #     ds_name = "james-burton/airbnb_summaries"
-    #     project = "Airbnb"
-    #     label_col, text_col = "scaled_label", "text"
-    #     prob_type, num_labels = "regression", 1
-    # elif ds_type == "books":
-    #     ds_name = "james-burton/books_price_prediction"
-    #     project = "Books"
-    #     label_col, text_col = "scaled_label", "text"
-    #     prob_type, num_labels = "regression", 1
-    # elif ds_type == "imdb":
-    #     ds_name = "james-burton/imdb_gross"
-    #     project = "IMDB"
-    #     label_col, text_col = "scaled_label", "text"
-    #     prob_type, num_labels = "regression", 1
-    # elif ds_type == "imdb_genre_text":
-    #     ds_name = "james-burton/imdb_genre_prediction_all_text"
-    #     project = "IMDB Genre All Text"
-    #     label_col = "Genre_is_Drama"
-    #     prob_type, num_labels = "single_label_classification", 2
-    if ds_type == "imdb_genre":
-        ds_name = "james-burton/imdb_genre_prediction2"
-        project = "IMDB Genre"
-        label_col = "Genre_is_Drama"
-        prob_type, num_labels = "single_label_classification", 2
-    elif ds_type == "prod_sent":
-        ds_name = "james-burton/product_sentiment_machine_hack"
-        project = "Product Sentiment"
-        label_col = "Sentiment"
-        prob_type, num_labels = "single_label_classification", 4
-    elif ds_type == "fake":
-        ds_name = "james-burton/fake_job_postings2"
-        project = "Fake Job Postings"
-        label_col = "fraudulent"
-        prob_type, num_labels = "single_label_classification", 2
-    elif ds_type == "kick":
-        ds_name = "james-burton/kick_starter_funding"
-        project = "Kickstarter"
-        label_col = "final_status"
-        prob_type, num_labels = "single_label_classification", 2
-    elif ds_type == "jigsaw":
-        ds_name = "james-burton/jigsaw_unintended_bias100K"
-        project = "Jigsaw"
-        label_col = "target"
-        prob_type, num_labels = "single_label_classification", 2
-    elif ds_type == "wine":
-        ds_name = "james-burton/wine_reviews"
-        project = "Wine"
-        label_col = "variety"
-        prob_type, num_labels = "single_label_classification", 30
+    di = get_dataset_info(ds_type)
+    if args.version == "all_as_text":
+        ds_name = di.ds_name_all_text
+    else:
+        ds_name = di.ds_name_ordinal
     dataset = load_dataset(ds_name)
     dataset = prepare_text(dataset, args["version"], ds_type)
-    if prob_type == "regression":
+    if di.prob_type == "regression":
         mean_price = np.mean(dataset["train"]["label"])
         std_price = np.std(dataset["train"]["label"])
 
     # Load model and tokenizer
     model = AutoModelForSequenceClassification.from_pretrained(
-        args["model_base"], num_labels=num_labels, problem_type=prob_type
+        args["model_base"], num_labels=di.num_labels, problem_type=di.prob_type
     )
     tokenizer = AutoTokenizer.from_pretrained(args["model_base"])
 
     # Tokenize the dataset
     def encode(examples):
         return {
-            "labels": np.array([examples[label_col]]),
+            "labels": np.array([examples[di.label_col]]),
             **tokenizer(examples["text"], truncation=True, padding="max_length"),
         }
 
@@ -135,7 +91,7 @@ def main():
     # If not, initialize wandb
     else:
         wandb.init(
-            project=project,
+            project=di.wandb_proj_name,
             tags=args["tags"],
             save_code=True,
             config={"my_args/" + k: v for k, v in args.items()},
@@ -206,7 +162,7 @@ def main():
         results = trainer.evaluate(dataset["test"], metric_key_prefix="test")
         preds = trainer.predict(dataset["test"]).predictions
         labels = [l[0] for l in dataset["test"]["labels"]]
-        if prob_type == "regression":
+        if di.prob_type == "regression":
             unscaled_preds = preds * std_price + mean_price
             unscaled_refs = [
                 [x[0] * std_price + mean_price] for x in dataset["test"]["label"]
@@ -216,35 +172,35 @@ def main():
             )
             results["test_rmse"] = np.sqrt(results["test_loss"])
         else:
-            if num_labels == 2:
+            if di.num_labels == 2:
                 results["test/accuracy"] = np.mean(np.argmax(preds, axis=1) == labels)
                 results["test/precision"] = precision_score(
                     labels,
                     np.argmax(preds, axis=1),
-                    labels=np.arange(num_labels),
+                    labels=np.arange(di.num_labels),
                     zero_division=0,
                 )
                 results["test/recall"] = recall_score(
                     labels,
                     np.argmax(preds, axis=1),
-                    labels=np.arange(num_labels),
+                    labels=np.arange(di.num_labels),
                     zero_division=0,
                 )
                 results["test/roc_auc"] = roc_auc_score(labels, preds[:, 1])
-            elif num_labels > 2:
+            elif di.num_labels > 2:
                 results["test/accuracy"] = np.mean(np.argmax(preds, axis=1) == labels)
                 results["test/precision"] = precision_score(
                     labels,
                     np.argmax(preds, axis=1),
                     average="macro",
-                    labels=np.arange(num_labels),
+                    labels=np.arange(di.num_labels),
                     zero_division=0,
                 )
                 results["test/recall"] = recall_score(
                     labels,
                     np.argmax(preds, axis=1),
                     average="macro",
-                    labels=np.arange(num_labels),
+                    labels=np.arange(di.num_labels),
                     zero_division=0,
                 )
 
