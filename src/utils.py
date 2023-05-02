@@ -38,7 +38,17 @@ def multiple_row_to_string(row, cols, multiplier=1, nodesc=False):
     return row
 
 
+# Create a mapping function that takes any value of None and swaps it for a string value of "None"
+def none_to_string(example):
+    for k, v in example.items():
+        if v is None:
+            example[k] = "None"
+    return example
+
+
 def prepare_text(dataset, version, ds_type):
+    """This is all for preparing the text part of the dataset"""
+    dataset = dataset.map(none_to_string)
     if "imdb" in ds_type:
         if version == "all_as_text":
             cols = [
