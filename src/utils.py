@@ -48,7 +48,6 @@ def none_to_string(example):
 
 def prepare_text(dataset, version, ds_type):
     """This is all for preparing the text part of the dataset"""
-    dataset = dataset.map(none_to_string)
     if "imdb" in ds_type:
         if version == "all_as_text":
             cols = [

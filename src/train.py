@@ -56,7 +56,7 @@ def main():
         ds_name = di.ds_name_all_text
     else:
         ds_name = di.ds_name_ordinal
-    dataset = load_dataset(ds_name)
+    dataset = load_dataset(ds_name, download_mode="force_redownload")
     dataset = prepare_text(dataset, args["version"], ds_type)
     if di.prob_type == "regression":
         mean_price = np.mean(dataset["train"]["label"])
