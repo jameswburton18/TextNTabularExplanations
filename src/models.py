@@ -7,12 +7,19 @@ from tqdm import tqdm
 
 class WeightedEnsemble:
     def __init__(
-        self, tab_model, text_pipeline, text_weight=0.5, text_to_pred_dict=None
+        self,
+        tab_model,
+        text_pipeline,
+        cols_to_str_fn,
+        text_weight=0.5,
+        text_to_pred_dict=None,
     ):
         self.text_to_pred_dict = text_to_pred_dict
         self.tab_model = tab_model
         self.text_pipeline = text_pipeline
         self.text_weight = text_weight
+        self.cols_to_str_fn = cols_to_str_fn
+        self.num_tab_cols = len(self.tab_model.feature_name_)
 
     def predict(self, examples):
         """
@@ -22,11 +29,13 @@ class WeightedEnsemble:
         """
         if len(examples.shape) == 1:
             examples = examples.reshape(1, -1)
-        tab_examples = examples[:, :-1]
-        text_examples = examples[:, -1]
+        tab_examples = examples[:, : self.num_tab_cols]
         tab_preds = self.tab_model.predict_proba(tab_examples)
+        text_examples = examples[:, self.num_tab_cols :]
+        text_examples = np.array(list(map(self.cols_to_str_fn, text_examples)))
 
         desc_dict = {}
+
         for i, desc in tqdm(enumerate(text_examples)):
             if desc not in desc_dict:
                 desc_dict[desc] = [i]
@@ -56,17 +65,27 @@ class WeightedEnsemble:
 
 
 class StackModel:
-    def __init__(self, tab_model, text_pipeline, stack_model, text_to_pred_dict=None):
+    def __init__(
+        self,
+        tab_model,
+        text_pipeline,
+        stack_model,
+        cols_to_str_fn,
+        text_to_pred_dict=None,
+    ):
         self.text_to_pred_dict = text_to_pred_dict
         self.tab_model = tab_model
         self.text_pipeline = text_pipeline
         self.stack_model = stack_model
+        self.cols_to_str_fn = cols_to_str_fn
+        self.num_tab_cols = len(self.tab_model.feature_name_)
 
     def predict(self, examples, load_from_cache=True):
         if len(examples.shape) == 1:
             examples = examples.reshape(1, -1)
-        tab_examples = examples[:, :-1]
-        text_examples = examples[:, -1]
+        tab_examples = examples[:, : self.num_tab_cols]
+        text_examples = examples[:, self.num_tab_cols :]
+        text_examples = np.array(list(map(self.cols_to_str_fn, text_examples)))
         tab_preds = self.tab_model.predict_proba(tab_examples)
 
         desc_dict = {}

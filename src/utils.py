@@ -631,8 +631,7 @@ def token_segments(s, tokenizer):
 class DatasetInfo:
     """Container for dataset information."""
 
-    ds_name_all_text: str
-    ds_name_ordinal: str
+    ds_name: str
     tab_cols: List[str]
     categorical_cols: List[str]
     text_cols: List[str]
@@ -640,9 +639,10 @@ class DatasetInfo:
     num_labels: int
     prob_type: str
     wandb_proj_name: str
+    text_model_name: str = None
 
 
-def get_dataset_info(ds_type):
+def get_dataset_info(ds_type, model_type=None):
     # if ds_type == "imdb_genre":imdb_genre_prediction
     #     return DatasetInfo(
     #         ds_name_all_text="james-burton/imdb_genre_prediction2",
@@ -664,9 +664,18 @@ def get_dataset_info(ds_type):
     #         wandb_proj_name="IMDB Genre",
     #     )
     if ds_type in ["imdb_genre", "imdb_genre_prediction"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+            case "all_text":
+                text_model_name = "james-burton/imdb_genre_0"
+                ds_name = "james-burton/imdb_genre_prediction_all_text"
+            case _:
+                text_model_name = "james-burton/imdb_genre_9"
+                ds_name = "james-burton/imdb_genre_prediction_ordinal"
         return DatasetInfo(
-            ds_name_all_text="james-burton/imdb_genre_prediction_all_text",
-            ds_name_ordinal="james-burton/imdb_genre_prediction_ordinal",
+            ds_name=ds_name,
             tab_cols=[
                 "Year",
                 "Runtime (Minutes)",
@@ -682,11 +691,21 @@ def get_dataset_info(ds_type):
             num_labels=2,
             prob_type="single_label_classification",
             wandb_proj_name="IMDB Genre",
+            text_model_name=text_model_name,
         )
     elif ds_type in ["prod_sent", "product_sentiment_machine_hack"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+            case "all_text":
+                text_model_name = "james-burton/prod_sent_0"
+                ds_name = "james-burton/product_sentiment_machine_hack_all_text"
+            case _:
+                text_model_name = "james-burton/prod_sent_9"
+                ds_name = "james-burton/product_sentiment_machine_hack_ordinal"
         return DatasetInfo(
-            ds_name_all_text="james-burton/product_sentiment_machine_hack_all_text",
-            ds_name_ordinal="james-burton/product_sentiment_machine_hack_ordinal",
+            ds_name=ds_name,
             tab_cols=["Product_Type"],
             categorical_cols=["Product_Type"],
             text_cols=["Product_Description"],
@@ -694,11 +713,21 @@ def get_dataset_info(ds_type):
             num_labels=4,
             prob_type="single_label_classification",
             wandb_proj_name="Product Sentiment",
+            text_model_name=text_model_name,
         )
     elif ds_type in ["fake", "fake_job_postings2"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+            case "all_text":
+                text_model_name = "james-burton/fake_0"
+                ds_name = "james-burton/fake_job_postings2_all_text"
+            case _:
+                text_model_name = "james-burton/fake_9"
+                ds_name = "james-burton/fake_job_postings2_ordinal"
         return DatasetInfo(
-            ds_name_all_text="james-burton/fake_job_postings2_all_text",
-            ds_name_ordinal="james-burton/fake_job_postings2_ordinal",
+            ds_name=ds_name,
             tab_cols=["required_experience", "required_education"],
             categorical_cols=["required_experience", "required_education"],
             text_cols=["title", "description", "salary_range"],
@@ -706,11 +735,21 @@ def get_dataset_info(ds_type):
             num_labels=2,
             prob_type="single_label_classification",
             wandb_proj_name="Fake Job Postings",
+            text_model_name=text_model_name,
         )
     elif ds_type in ["kick", "kick_starter_funding"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+            case "all_text":
+                text_model_name = "james-burton/kick_0"
+                ds_name = "james-burton/kick_starter_funding_all_text"
+            case _:
+                text_model_name = "james-burton/kick_9"
+                ds_name = "james-burton/kick_starter_funding_ordinal"
         return DatasetInfo(
-            ds_name_all_text="james-burton/kick_starter_funding_all_text",
-            ds_name_ordinal="james-burton/kick_starter_funding_ordinal",
+            ds_name=ds_name,
             tab_cols=[
                 "goal",
                 "disable_communication",
@@ -725,11 +764,21 @@ def get_dataset_info(ds_type):
             num_labels=2,
             prob_type="single_label_classification",
             wandb_proj_name="Kickstarter",
+            text_model_name=text_model_name,
         )
     elif ds_type in ["jigsaw", "jigsaw_unintended_bias100K"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+            case "all_text":
+                text_model_name = "james-burton/jigsaw_0"
+                ds_name = "james-burton/jigsaw_unintended_bias100K_all_text"
+            case _:
+                text_model_name = "james-burton/jigsaw_9"
+                ds_name = "james-burton/jigsaw_unintended_bias100K_ordinal"
         return DatasetInfo(
-            ds_name_all_text="james-burton/jigsaw_unintended_bias100K_all_text",
-            ds_name_ordinal="james-burton/jigsaw_unintended_bias100K_ordinal",
+            ds_name=ds_name,
             tab_cols=[
                 "asian",
                 "atheist",
@@ -767,11 +816,21 @@ def get_dataset_info(ds_type):
             num_labels=2,
             prob_type="single_label_classification",
             wandb_proj_name="Jigsaw",
+            text_model_name=text_model_name,
         )
     elif ds_type in ["wine", "wine_reviews"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+            case "all_text":
+                text_model_name = "james-burton/wine_0"
+                ds_name = "james-burton/wine_reviews_all_text"
+            case _:
+                text_model_name = "james-burton/wine_9"
+                ds_name = "james-burton/wine_reviews_ordinal"
         return DatasetInfo(
-            ds_name_all_text="james-burton/wine_reviews_all_text",
-            ds_name_ordinal="james-burton/wine_reviews_ordinal",
+            ds_name=ds_name,
             tab_cols=["points", "price"],
             categorical_cols=[],
             text_cols=["country", "description", "province"],
@@ -779,4 +838,5 @@ def get_dataset_info(ds_type):
             num_labels=30,
             prob_type="single_label_classification",
             wandb_proj_name="Wine",
+            text_model_name=text_model_name,
         )

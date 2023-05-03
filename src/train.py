@@ -50,14 +50,9 @@ def main():
     print(f"\n{args}\n")
 
     # Dataset
-    ds_type = args["dataset"]
-    di = get_dataset_info(ds_type)
-    if args["version"] == "all_as_text":
-        ds_name = di.ds_name_all_text
-    else:
-        ds_name = di.ds_name_ordinal
-    dataset = load_dataset(ds_name, download_mode="force_redownload")
-    dataset = prepare_text(dataset, args["version"], ds_type)
+    di = get_dataset_info(args["dataset"], model_type=args["version"])
+    dataset = load_dataset(di.ds_name, download_mode="force_redownload")
+    dataset = prepare_text(dataset, args["version"], args["dataset"])
     if di.prob_type == "regression":
         mean_price = np.mean(dataset["train"]["label"])
         std_price = np.std(dataset["train"]["label"])
@@ -97,7 +92,7 @@ def main():
             config={"my_args/" + k: v for k, v in args.items()},
         )
         os.environ["WANDB_LOG_MODEL"] = "True"
-        output_dir = os.path.join(args["output_root"], ds_type, wandb.run.name)
+        output_dir = os.path.join(args["output_root"], args["dataset"], wandb.run.name)
         print(f"Results will be saved @: {output_dir}")
 
     # Make output directory

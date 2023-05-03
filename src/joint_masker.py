@@ -35,12 +35,14 @@ class JointMasker(Masker):
         self,
         tab_df,
         text_cols,
+        cols_to_str_fn,
         max_samples=100,
         tokenizer=None,
         mask_token=None,
         collapse_mask_token="auto",
         output_type="string",
         tab_cluster_scale_factor=2,
+        tab_partition_tree=None,
     ):
         if tokenizer is None:
             self.tokenizer = SimpleTokenizer()
@@ -73,12 +75,15 @@ class JointMasker(Masker):
         # Tab clustering
         self.n_tab_cols = tab_df.shape[-1]
         # In order to cluster the tabular data, we replace null values with median
-        self.tab_pt = sp.cluster.hierarchy.complete(
-            sp.spatial.distance.pdist(
-                pd.DataFrame(tab_df).fillna(pd.DataFrame(tab_df).median()).values.T,
-                metric="correlation",
+        if tab_partition_tree is None:
+            self.tab_pt = sp.cluster.hierarchy.complete(
+                sp.spatial.distance.pdist(
+                    pd.DataFrame(tab_df).fillna(pd.DataFrame(tab_df).median()).values.T,
+                    metric="correlation",
+                )
             )
-        )
+        else:
+            self.tab_pt = tab_partition_tree
         self.n_tab_groups = len(self.tab_pt)
 
         if hasattr(tab_df, "shape") and tab_df.shape[0] > max_samples:
@@ -94,6 +99,7 @@ class JointMasker(Masker):
 
         # Text
         self.text_cols = text_cols
+        self.cols_to_text_fn = cols_to_str_fn
         parsed_tokenizer_dict = parse_prefix_suffix_for_tokenizer(self.tokenizer)
 
         self.keep_prefix = parsed_tokenizer_dict["keep_prefix"]
@@ -143,7 +149,9 @@ class JointMasker(Masker):
         masked_tab = self.tab_mask_call(mask[: self.n_tab_cols], x[: self.n_tab_cols])
 
         self._text_ft_index_ends(x[self.n_tab_cols :])
-        text = " ".join(x[self.n_tab_cols :])
+        # We join the text cols into a single string. This is independent of how they are joined in the model,
+        # as we are only interested in the tokenization for the masking
+        text = " ".join(str(s) for s in x[self.n_tab_cols :])
         masked_text = self.text_mask_call(mask[self.n_tab_cols :], text)
 
         # We unpack the string from the tuple and array
@@ -157,25 +165,26 @@ class JointMasker(Masker):
         for idx, col in enumerate(s):
             # First text col
             if lens == []:
-                tokens, token_ids = self.token_segments(col)
+                tokens, token_ids = self.token_segments(str(col))
                 # -1 as we don't use SEP tokens (unless it's the only text col)
                 also_last = 1 if len(s) == 1 else 0
                 token_len = len(tokens) - 1 + also_last
-                lens.append(token_len)
+                lens.append(token_len - 1)
                 sent_indices.extend([idx] * token_len)
             # Last text col
             elif idx == len(s) - 1:
-                tokens, token_ids = self.token_segments(col)
+                tokens, token_ids = self.token_segments(str(col))
                 # -1 for CLS tokens
                 token_len = len(tokens) - 1
                 lens.append(lens[-1] + token_len)
                 sent_indices.extend([idx] * token_len)
             # Middle text cols
             else:
-                tokens, token_ids = self.token_segments(col)
+                tokens, token_ids = self.token_segments(str(col))
                 # -2 for CLS and SEP tokens
                 token_len = len(tokens) - 2
                 lens.append(lens[-1] + token_len)
+                sent_indices.extend([idx] * token_len)
 
         self._sent_split_idxs = lens[:-1]
         self.sent_indices = sent_indices
@@ -250,14 +259,18 @@ class JointMasker(Masker):
                 if v or sep_token == self._segments_s[i]:
                     out_parts.append(self._segments_s[i])
                     is_previous_appended_token_mask_token = False
-                    # Change in here to show diffs between desc and titele
+                    # Change in here to show diffs between desc and title
                 else:
+                    # If we don't collapse any mask tokens then we add another mask token
+                    # Or if the previous appended token was not a mask token
                     if not self.collapse_mask_token or (
                         self.collapse_mask_token
                         and not is_previous_appended_token_mask_token
                     ):
                         out_parts.append(" " + self.mask_token)
                         is_previous_appended_token_mask_token = True
+                        # Length 9, 0,1,2,3,4 is the first group, 5,6 2nd and 7,8 3rd
+                        # All the masks are false, so
                 if i in self._sent_split_idxs:
                     out.append(" ".join(out_parts))
                     out_parts = []
@@ -347,8 +360,9 @@ class JointMasker(Masker):
 
             return tokens, token_ids
 
-    def clustering(self, s=[7.7, 398972.0, "offbeat romantic comedy"]):
-        text = " ".join(s[self.n_tab_cols :])
+    def clustering(self, s):
+        text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(text)
         special_tokens = []
         sep_token = getattr_silent(self.tokenizer, "sep_token")
@@ -430,19 +444,22 @@ class JointMasker(Masker):
 
         Note we only return a single sample, so there is no expectation averaging.
         """
-        text = " ".join(s[self.n_tab_cols :])
+        text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(text)
         return (self.max_samples, self.n_tab_cols + len(self._tokenized_s))
 
     def mask_shapes(self, s):
         """The shape of the masks we expect."""
-        text = " ".join(s[self.n_tab_cols :])
+        text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(text)
         return [(self.n_tab_cols + len(self._tokenized_s),)]
 
     def feature_names(self, s):
         """The names of the features for each mask position for the given input string."""
-        text = " ".join(s[self.n_tab_cols :])
+        text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(text)
         return [self.tab_feature_names + [v.strip() for v in self._segments_s]]
 
