@@ -311,3 +311,24 @@ Also:
 ## Steps
 
 * Shap generates a batch of masks, using the shape functions to find the correct shape for the masks.
+
+## April 25th
+
+Now works with multiple text features. Can calculate them and plot them. The next step is to compare the explanations between the different methods.
+
+## April 27th
+
+What does a paper with this work look like? What does it need?
+
+I have:
+
+* IMDB single text feature, all as text, weighted ensemble x3 , stack ensemble
+
+I should be able to get:
+
+* All text features, all as text, weighted ensemble x3, stack ensemble
+* (If I need it) Tabx2 as text, tabx5 as text
+
+Priority:
+
+* Apply to the other datasets
