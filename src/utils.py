@@ -325,204 +325,6 @@ def format_text_pred(pred):
         return np.array([pred["score"], 1 - pred["score"]])
 
 
-def select_prepare_array_fn(model_name):
-    if model_name == "imdb_genre_0":  # all as text
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-            "Description",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_1":  # tab as text
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_6":  # tabx2_nodesc
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join(
-                    [f'{col}: {(str(val) + " ")*2}' for col, val in zip(cols, array)]
-                ),
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_5":  # tabx5_nodesc
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join(
-                    [f'{col}: {(str(val) + " ")*5}' for col, val in zip(cols, array)]
-                ),
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_7":  # tabx2
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join(
-                    [
-                        f'{col}: {(str(val) + " ")*2}'
-                        for col, val in zip(cols, array[:-1])
-                    ]
-                )
-                + " | Description: "
-                + array[-1],
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_2":  # tabx5
-        cols = [
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join(
-                    [
-                        f'{col}: {(str(val) + " ")*5}'
-                        for col, val in zip(cols, array[:-1])
-                    ]
-                )
-                + " | Description: "
-                + array[-1],
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_3":  # reorder1
-        cols = [
-            "Votes",
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-            "Description",
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_4":  # reorder2
-        cols = [
-            "Description",
-            "Rank",
-            "Metascore",
-            "Revenue (Millions)",
-            "Votes",
-            "Rating",
-            "Runtime (Minutes)",
-            "Year",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_8":  # reorder3/'tab as text, exp-based reorder'
-        cols = [
-            "Revenue (Millions)",
-            "Metascore",
-            "Rank",
-            "Year",
-            "Votes",
-            "Runtime (Minutes)",
-            "Rating",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
-                dtype="<U512",
-            )
-
-    elif model_name == "imdb_genre_10":  # all_as_text_exp_reorder
-        cols = [
-            "Description",
-            "Revenue (Millions)",
-            "Votes",
-            "Rank",
-            "Metascore",
-            "Year",
-            "Runtime (Minutes)",
-            "Rating",
-        ]
-
-        def array_fn(array):
-            return np.array(
-                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
-                dtype="<U512",
-            )
-
-    else:
-        raise ValueError(f"select_prepare_array_fn not implemented for: {model_name}")
-    return array_fn
-
-
 def array_to_string(
     array,
     cols=[
@@ -840,3 +642,201 @@ def get_dataset_info(ds_type, model_type=None):
             wandb_proj_name="Wine",
             text_model_name=text_model_name,
         )
+
+
+def select_prepare_array_fn(model_name):
+    if model_name == "imdb_genre_0":  # all as text
+        cols = [
+            "Year",
+            "Runtime (Minutes)",
+            "Rating",
+            "Votes",
+            "Revenue (Millions)",
+            "Metascore",
+            "Rank",
+            "Description",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_1":  # tab as text
+        cols = [
+            "Year",
+            "Runtime (Minutes)",
+            "Rating",
+            "Votes",
+            "Revenue (Millions)",
+            "Metascore",
+            "Rank",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_6":  # tabx2_nodesc
+        cols = [
+            "Year",
+            "Runtime (Minutes)",
+            "Rating",
+            "Votes",
+            "Revenue (Millions)",
+            "Metascore",
+            "Rank",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join(
+                    [f'{col}: {(str(val) + " ")*2}' for col, val in zip(cols, array)]
+                ),
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_5":  # tabx5_nodesc
+        cols = [
+            "Year",
+            "Runtime (Minutes)",
+            "Rating",
+            "Votes",
+            "Revenue (Millions)",
+            "Metascore",
+            "Rank",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join(
+                    [f'{col}: {(str(val) + " ")*5}' for col, val in zip(cols, array)]
+                ),
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_7":  # tabx2
+        cols = [
+            "Year",
+            "Runtime (Minutes)",
+            "Rating",
+            "Votes",
+            "Revenue (Millions)",
+            "Metascore",
+            "Rank",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join(
+                    [
+                        f'{col}: {(str(val) + " ")*2}'
+                        for col, val in zip(cols, array[:-1])
+                    ]
+                )
+                + " | Description: "
+                + array[-1],
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_2":  # tabx5
+        cols = [
+            "Year",
+            "Runtime (Minutes)",
+            "Rating",
+            "Votes",
+            "Revenue (Millions)",
+            "Metascore",
+            "Rank",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join(
+                    [
+                        f'{col}: {(str(val) + " ")*5}'
+                        for col, val in zip(cols, array[:-1])
+                    ]
+                )
+                + " | Description: "
+                + array[-1],
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_3":  # reorder1
+        cols = [
+            "Votes",
+            "Revenue (Millions)",
+            "Metascore",
+            "Rank",
+            "Description",
+            "Year",
+            "Runtime (Minutes)",
+            "Rating",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_4":  # reorder2
+        cols = [
+            "Description",
+            "Rank",
+            "Metascore",
+            "Revenue (Millions)",
+            "Votes",
+            "Rating",
+            "Runtime (Minutes)",
+            "Year",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_8":  # reorder3/'tab as text, exp-based reorder'
+        cols = [
+            "Revenue (Millions)",
+            "Metascore",
+            "Rank",
+            "Year",
+            "Votes",
+            "Runtime (Minutes)",
+            "Rating",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
+                dtype="<U512",
+            )
+
+    elif model_name == "imdb_genre_10":  # all_as_text_exp_reorder
+        cols = [
+            "Description",
+            "Revenue (Millions)",
+            "Votes",
+            "Rank",
+            "Metascore",
+            "Year",
+            "Runtime (Minutes)",
+            "Rating",
+        ]
+
+        def array_fn(array):
+            return np.array(
+                " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]),
+                dtype="<U512",
+            )
+
+    else:
+        raise ValueError(f"select_prepare_array_fn not implemented for: {model_name}")
+    return array_fn
