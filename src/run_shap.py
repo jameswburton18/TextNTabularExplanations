@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="imdb_genre",
+    default="wine",
     help="Name of dataset to use",
 )
 
@@ -47,7 +47,7 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
             device="cuda:0",
             truncation=True,
             padding=True,
-            return_all_scores=True,
+            top_k=None,
         )
         # Define how to convert all columns to a single string
         cols_to_str_fn = lambda array: " | ".join(
@@ -64,7 +64,7 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
             device="cuda:0",
             truncation=True,
             padding=True,
-            return_all_scores=True,
+            top_k=None,
         )
         # Define how to convert the text columns to a single string
         if len(di.text_cols) == 1:
@@ -129,8 +129,10 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
             # add text and tabular predictions to the val_df
             stack_val_df = val_df[di.tab_cols]
             tab_val_preds = tab_model.predict_proba(stack_val_df)
-            stack_val_df["tab_preds"] = tab_val_preds[:, 1]
-            stack_val_df["text_preds"] = text_val_preds[:, 1]
+            for i in range(text_val_preds.shape[1]):
+                stack_val_df[f"text_pred_{i}"] = text_val_preds[:, i]
+            for i in range(tab_val_preds.shape[1]):
+                stack_val_df[f"tab_pred_{i}"] = tab_val_preds[:, i]
 
             stack_model = lgb.LGBMClassifier(random_state=42)
             stack_model.fit(stack_val_df, y_val)
@@ -198,9 +200,9 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
 if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
     for model_type in [
-        "ensemble_50",
-        "ensemble_75",
-        "ensemble_25",
+        # "ensemble_50",
+        # "ensemble_75",
+        # "ensemble_25",
         "stack",
         "all_text",
     ]:

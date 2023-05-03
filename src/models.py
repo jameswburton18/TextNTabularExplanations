@@ -118,9 +118,7 @@ class StackModel:
             expanded_text_preds[idxs] = text_preds[i]
 
         # Stack
-        stack_examples = np.hstack(
-            [tab_examples, tab_preds[:, 1:], expanded_text_preds[:, 1:]]
-        )
+        stack_examples = np.hstack([tab_examples, expanded_text_preds, tab_preds])
         stack_preds = self.stack_model.predict_proba(stack_examples)
 
         return stack_preds
