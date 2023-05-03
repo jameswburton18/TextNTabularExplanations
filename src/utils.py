@@ -355,22 +355,52 @@ def tokenize_lens(text_fts, tokenizer):
     return [len(tokenizer.tokenize(ft)) for ft in text_fts]
 
 
+# def text_ft_index_ends(text_fts, tokenizer):
+#     lens = []
+#     sent_indices = []
+
+#     for idx, col in enumerate(text_fts):
+#         if lens == []:
+#             tokens, token_ids = token_segments(col, tokenizer)
+#             lens.append(len(tokens) - 2)
+#         else:
+#             tokens, token_ids = token_segments(col, tokenizer)
+#             lens.append(lens[-1] + len(tokens) - 2)
+#         sent_indices.extend([idx] * (len(tokens) - 2))
+#     lens[0] += 1  # add 1 for the CLS token
+#     sent_indices = [0] + sent_indices
+#     lens[-1] += 1  # add 1 for the SEP token
+#     sent_indices = sent_indices + [sent_indices[-1]]
+
+#     return lens[:-1]
+
+
 def text_ft_index_ends(text_fts, tokenizer):
     lens = []
     sent_indices = []
-
     for idx, col in enumerate(text_fts):
+        # First text col
         if lens == []:
-            tokens, token_ids = token_segments(col, tokenizer)
-            lens.append(len(tokens) - 2)
+            tokens, token_ids = token_segments(str(col), tokenizer)
+            # -1 as we don't use SEP tokens (unless it's the only text col)
+            also_last = 1 if len(text_fts) == 1 else 0
+            token_len = len(tokens) - 1 + also_last
+            lens.append(token_len - 1)
+            sent_indices.extend([idx] * token_len)
+        # Last text col
+        elif idx == len(text_fts) - 1:
+            tokens, token_ids = token_segments(str(col), tokenizer)
+            # -1 for CLS tokens
+            token_len = len(tokens) - 1
+            lens.append(lens[-1] + token_len)
+            sent_indices.extend([idx] * token_len)
+        # Middle text cols
         else:
-            tokens, token_ids = token_segments(col, tokenizer)
-            lens.append(lens[-1] + len(tokens) - 2)
-        sent_indices.extend([idx] * (len(tokens) - 2))
-    lens[0] += 1  # add 1 for the CLS token
-    sent_indices = [0] + sent_indices
-    lens[-1] += 1  # add 1 for the SEP token
-    sent_indices = sent_indices + [sent_indices[-1]]
+            tokens, token_ids = token_segments(str(col), tokenizer)
+            # -2 for CLS and SEP tokens
+            token_len = len(tokens) - 2
+            lens.append(lens[-1] + token_len)
+            sent_indices.extend([idx] * token_len)
 
     return lens[:-1]
 

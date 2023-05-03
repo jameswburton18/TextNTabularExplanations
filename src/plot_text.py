@@ -23,7 +23,7 @@ except ImportError:
 # the force plot and the coloring to update based on mouseovers (or clicks to make it fixed) of the output text
 def text(
     shap_values,
-    linebreak_after_idxs,  # Added this parameter
+    linebreak_before_idxs,  # Added this parameter
     text_cols,  # Added this parameter
     num_starting_labels=0,
     grouping_threshold=0.01,
@@ -135,7 +135,7 @@ def text(
                 xmax=xmax,
                 cmax=cmax,
                 display=False,
-                linebreak_after_idxs=linebreak_after_idxs,
+                linebreak_before_idxs=linebreak_before_idxs,
                 text_cols=text_cols,
             )
         if display:
@@ -241,7 +241,7 @@ def text(
                 xmax=xmax,
                 cmax=cmax,
                 display=False,
-                linebreak_after_idxs=linebreak_after_idxs,
+                linebreak_before_idxs=linebreak_before_idxs,
                 text_cols=text_cols,
             )
             out += "</div>"
@@ -252,7 +252,7 @@ def text(
                 grouping_threshold=grouping_threshold,
                 separator=separator,
                 display=False,
-                linebreak_after_idxs=linebreak_after_idxs,
+                linebreak_before_idxs=linebreak_before_idxs,
                 text_cols=text_cols,
             )
             out += "</div>"
@@ -317,7 +317,7 @@ def text(
                 xmax=xmax,
                 cmax=cmax,
                 display=False,
-                linebreak_after_idxs=linebreak_after_idxs,
+                linebreak_before_idxs=linebreak_before_idxs,
                 text_cols=text_cols,
             )
         if display:
@@ -370,57 +370,62 @@ def text(
     )
 
     # Changed from shap
-    #################################
-    if linebreak_after_idxs is not None:
+    ################################
+    if linebreak_before_idxs is not None:
         lines_inserted = 0
-        for idx in linebreak_after_idxs:
+        linebreak_idxs = []
+        for idx in linebreak_before_idxs:
             tokens = np.insert(tokens, idx + lines_inserted, "")
             values = np.insert(values, idx + lines_inserted, 0)
             group_sizes = np.insert(group_sizes, idx + lines_inserted, 1)
+            linebreak_idxs.append(idx + lines_inserted)
             lines_inserted += 1
-    linebreak_on_idxs = [i + 1 for i in linebreak_after_idxs]
-    #################################
+
+    ################################
     out += "<div align='center'><div style=\"color: rgb(120,120,120); font-size: 12px; margin-top: -15px;\">inputs</div>"
     text_col_count = 0
 
     for i, token in enumerate(tokens):
         # Changed from shap
-        #################################
-        if i in linebreak_on_idxs:
-            token = f"<br>{text_cols[text_col_count]} = "
-            # we add a line break between the tabular features and the text features
-            out += f"""<div style='display: inline; text-align: center;'
-        ><div style='display: none; color: #999; padding-top: 0px; font-size: 12px;'></div
-            ><div id='_tp_{uuid}_ind_newline'
-                style='display: inline; border-radius: 3px; padding: 0px'
-            >{token}</div></div>"""
-            text_col_count += 1
-        else:
-            element_id = i - text_col_count
-            #################################
-
-            scaled_value = 0.5 + 0.5 * values[i] / (cmax + 1e-8)
-            color = colors.red_transparent_blue(scaled_value)
-            color = (color[0] * 255, color[1] * 255, color[2] * 255, color[3])
-
-            # display the labels for the most important words
-            label_display = "none"
-            wrapper_display = "inline"
-            if i in top_inds:
-                label_display = "block"
-                wrapper_display = "inline-block"
-
-            # create the value_label string
-            value_label = ""
-            if group_sizes[i] == 1:
-                value_label = str(values[i].round(3))
+        ################################
+        if linebreak_idxs is not None:
+            if i in linebreak_idxs:
+                token = f"<br>{text_cols[text_col_count]} = "
+                # we add a line break between the tabular features and the text features
+                out += f"""<div style='display: inline; text-align: center;'
+            ><div style='display: none; color: #999; padding-top: 0px; font-size: 12px;'></div
+                ><div id='_tp_{uuid}_ind_newline'
+                    style='display: inline; border-radius: 3px; padding: 0px'
+                >{token}</div></div>"""
+                text_col_count += 1
             else:
-                value_label = str(values[i].round(3)) + " / " + str(group_sizes[i])
+                element_id = i - text_col_count
+        else:
+            element_id = i
+        ################################
 
-            # Changed from shap: element_id used instead of i, nothing else changed
-            #################################
-            # the HTML for this token
-            out += f"""<div style='display: {wrapper_display}; text-align: center;'
+        scaled_value = 0.5 + 0.5 * values[i] / (cmax + 1e-8)
+        color = colors.red_transparent_blue(scaled_value)
+        color = (color[0] * 255, color[1] * 255, color[2] * 255, color[3])
+
+        # display the labels for the most important words
+        label_display = "none"
+        wrapper_display = "inline"
+        if i in top_inds:
+            label_display = "block"
+            wrapper_display = "inline-block"
+
+        # create the value_label string
+        value_label = ""
+        if group_sizes[i] == 1:
+            value_label = str(values[i].round(3))
+        else:
+            value_label = str(values[i].round(3)) + " / " + str(group_sizes[i])
+
+        # Changed from shap: element_id used instead of i, nothing else changed
+        #################################
+        # the HTML for this token
+        out += f"""<div style='display: {wrapper_display}; text-align: center;'
         ><div style='display: {label_display}; color: #999; padding-top: 0px; font-size: 12px;'>{value_label}</div
             ><div id='_tp_{uuid}_ind_{element_id}'
                 style='display: inline; background: rgba{color}; border-radius: 3px; padding: 0px'
@@ -435,7 +440,7 @@ def text(
                 onmouseover="document.getElementById('_fb_{uuid}_ind_{element_id}').style.opacity = 1; document.getElementById('_fs_{uuid}_ind_{element_id}').style.opacity = 1;"
                 onmouseout="document.getElementById('_fb_{uuid}_ind_{element_id}').style.opacity = 0; document.getElementById('_fs_{uuid}_ind_{element_id}').style.opacity = 0;"
             >{token.replace("<", "&lt;").replace(">", "&gt;").replace(' ##', '')}</div></div>"""
-            #################################
+        #################################
     out += "</div>"
 
     if display:
