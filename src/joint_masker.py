@@ -482,7 +482,7 @@ class JointMasker(Masker):
         text = " ".join(str(s) for s in s[self.n_tab_cols :])
         # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(text)
-        return [self.tab_feature_names + [v.strip() for v in self._segments_s]]
+        return [self.tab_feature_names + [v for v in self._segments_s]]
 
 
 class SimpleTokenizer:  # pylint: disable=too-few-public-methods
