@@ -74,17 +74,23 @@ class JointMasker(Masker):
 
         # Tab clustering
         self.n_tab_cols = tab_df.shape[-1]
-        # In order to cluster the tabular data, we replace null values with median
-        if tab_partition_tree is None:
-            self.tab_pt = sp.cluster.hierarchy.complete(
-                sp.spatial.distance.pdist(
-                    pd.DataFrame(tab_df).fillna(pd.DataFrame(tab_df).median()).values.T,
-                    metric="correlation",
+        if tab_df.shape[-1] > 1:
+            # In order to cluster the tabular data, we replace null values with median
+            if tab_partition_tree is None:
+                self.tab_pt = sp.cluster.hierarchy.complete(
+                    sp.spatial.distance.pdist(
+                        pd.DataFrame(tab_df)
+                        .fillna(pd.DataFrame(tab_df).median())
+                        .values.T,
+                        metric="correlation",
+                    )
                 )
-            )
+            else:
+                self.tab_pt = tab_partition_tree
+            self.n_tab_groups = len(self.tab_pt)
         else:
-            self.tab_pt = tab_partition_tree
-        self.n_tab_groups = len(self.tab_pt)
+            self.tab_pt = None
+            self.n_tab_groups = 1
 
         if hasattr(tab_df, "shape") and tab_df.shape[0] > max_samples:
             tab_df = sample(tab_df, max_samples)
@@ -272,10 +278,10 @@ class JointMasker(Masker):
                         # Length 9, 0,1,2,3,4 is the first group, 5,6 2nd and 7,8 3rd
                         # All the masks are false, so
                 if i in self._sent_split_idxs:
-                    out.append(" ".join(out_parts))
+                    out.append("".join(out_parts))
                     out_parts = []
                     is_previous_appended_token_mask_token = False
-            out.append(" ".join(out_parts))
+            out.append("".join(out_parts))
 
             for i in range(len(out)):
                 out[i] = re.sub(r"[\s]+", " ", out[i]).strip()
@@ -407,36 +413,51 @@ class JointMasker(Masker):
         n_text_leaves = len(tokens)
         n_text_groups = len(text_pt)
 
-        # References to non-leaf nodes need to be shifted by the number of new leaves
-        Z_join = np.zeros([self.n_tab_groups + n_text_groups + 1, 4])
+        if self.tab_pt is not None:
+            # References to non-leaf nodes need to be shifted by the number of new leaves
+            Z_join = np.zeros([self.n_tab_groups + n_text_groups + 1, 4])
+            # Put tab first, then text
+            Z_join[: self.n_tab_groups, :2] = np.where(
+                self.tab_pt[:, :2] >= self.n_tab_cols,
+                self.tab_pt[:, :2] + n_text_leaves,
+                self.tab_pt[:, :2],
+            )
+            Z_join[self.n_tab_groups : -1, :2] = np.where(
+                text_pt[:, :2] >= n_text_leaves,
+                text_pt[:, :2] + self.n_tab_cols + self.n_tab_groups,
+                text_pt[:, :2] + self.n_tab_cols,
+            )
 
-        # Put tab first, then text
-        Z_join[: self.n_tab_groups, :2] = np.where(
-            self.tab_pt[:, :2] >= self.n_tab_cols,
-            self.tab_pt[:, :2] + n_text_leaves,
-            self.tab_pt[:, :2],
-        )
-        Z_join[self.n_tab_groups : -1, :2] = np.where(
-            text_pt[:, :2] >= n_text_leaves,
-            text_pt[:, :2] + self.n_tab_cols + self.n_tab_groups,
-            text_pt[:, :2] + self.n_tab_cols,
-        )
+            # Scale tab_pt
+            self.tab_pt[:, 2] /= self.tab_pt[:, 2].max() * self.tab_cluster_scale_factor
 
-        # Scale tab_pt
-        self.tab_pt[:, 2] /= self.tab_pt[:, 2].max() * self.tab_cluster_scale_factor
+            # 3rd and 4th columns are left unchanged
+            Z_join[: self.n_tab_groups, 2:] = self.tab_pt[:, 2:]
+            Z_join[self.n_tab_groups : -1, 2:] = text_pt[:, 2:]
 
-        # 3rd and 4th columns are left unchanged
-        Z_join[: self.n_tab_groups, 2:] = self.tab_pt[:, 2:]
-        Z_join[self.n_tab_groups : -1, 2:] = text_pt[:, 2:]
+            # Create top join, joining the text and tab dendrograms together
+            top_tab_node = self.n_tab_cols + n_text_leaves + self.n_tab_groups - 1
+            top_text_node = top_tab_node + n_text_groups
+            # Set similarity of top node to 1.2
+            Z_join[-1, :] = np.array(
+                [top_tab_node, top_text_node, 1.2, n_text_leaves + self.n_tab_cols]
+            )
+        else:
+            # If there is no tab_pt then this means there is only one tab column. In the resulting dendogram,
+            # the single tab column will be joined to the text dendrogram on the left
+            Z_join = np.zeros([n_text_groups + self.n_tab_cols, 4])
+            Z_join[:-1, :2] = np.where(
+                text_pt[:, :2] >= n_text_leaves,
+                text_pt[:, :2] + self.n_tab_cols,
+                text_pt[:, :2] + self.n_tab_cols,
+            )
+            # 3rd and 4th columns are left unchanged
+            Z_join[:-1, 2:] = text_pt[:, 2:]
 
-        # Create top join, joining the text and tab dendrograms together
-        top_tab_node = self.n_tab_cols + n_text_leaves + self.n_tab_groups - 1
-        top_text_node = top_tab_node + n_text_groups
-        # Set similarity of top node to 1.2
-        Z_join[-1, :] = np.array(
-            [top_tab_node, top_text_node, 1.2, n_text_leaves + self.n_tab_cols]
-        )
-
+            top_text_node = n_text_leaves + n_text_groups
+            Z_join[-1, :] = np.array(
+                [0, top_text_node, 1.2, n_text_leaves + self.n_tab_cols]
+            )
         return Z_join
 
     def shape(self, s):
