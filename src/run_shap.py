@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="imdb_genre",
+    default="wine",
     help="Name of dataset to use",
 )
 
@@ -47,6 +47,7 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
             device="cuda:0",
             truncation=True,
             padding=True,
+            return_all_scores=True,
         )
         # Define how to convert all columns to a single string
         cols_to_str_fn = lambda array: " | ".join(
@@ -63,6 +64,7 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
             device="cuda:0",
             truncation=True,
             padding=True,
+            return_all_scores=True,
         )
         # Define how to convert the text columns to a single string
         if len(di.text_cols) == 1:
@@ -141,6 +143,8 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
 
     np.random.seed(1)
     x = test_df[di.tab_cols + di.text_cols].values
+    x = np.array([[85, 25.0, "US", "tough and chewy", "Oregon"]], dtype=object)
+    # x = np.array([[9.0, "Hello world"]], dtype=object)
     # x = np.array(
     #     [[5.0, 1.0, "Senior Strategist", "Cutting Edge", "None"]], dtype=object
     # )
@@ -148,14 +152,19 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
     # We need to load the ordinal dataset so that we can calculate the correlations for the masker
     ord_ds_name = get_dataset_info(ds_type, "ordinal").ds_name
     ord_train_df = load_dataset(ord_ds_name, split="train").to_pandas()
-    tab_pt = sp.cluster.hierarchy.complete(
-        sp.spatial.distance.pdist(
-            ord_train_df[di.tab_cols]
-            .fillna(ord_train_df[di.tab_cols].median())
-            .values.T,
-            metric="correlation",
+
+    # Clustering only valid if there is more than one column
+    if len(di.tab_cols) > 1:
+        tab_pt = sp.cluster.hierarchy.complete(
+            sp.spatial.distance.pdist(
+                ord_train_df[di.tab_cols]
+                .fillna(ord_train_df[di.tab_cols].median())
+                .values.T,
+                metric="correlation",
+            )
         )
-    )
+    else:
+        tab_pt = None
 
     masker = JointMasker(
         tab_df=train_df[di.tab_cols],
@@ -186,10 +195,10 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
 if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
     for model_type in [
-        # "ensemble_50",
+        "ensemble_50",
         # "ensemble_75",
         # "ensemble_25",
-        "stack",
+        # "stack",
         # "all_text",
     ]:
         # shap_vals = run_shap_multiple_text(model_type)
