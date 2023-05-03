@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="wine",
+    default="imdb_genre",
     help="Name of dataset to use",
 )
 
@@ -119,8 +119,11 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
             # Training set is the preditions from the tabular and text models on the validation set
             # plus the tabular features from the validation set
             text_val_preds = text_pipeline(val_text)
+            # text_val_preds = np.array(
+            #     [format_text_pred(pred) for pred in text_val_preds]
+            # )
             text_val_preds = np.array(
-                [format_text_pred(pred) for pred in text_val_preds]
+                [[lab["score"] for lab in pred] for pred in text_val_preds]
             )
 
             # add text and tabular predictions to the val_df
@@ -143,7 +146,7 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
 
     np.random.seed(1)
     x = test_df[di.tab_cols + di.text_cols].values
-    x = np.array([[85, 25.0, "US", "tough and chewy", "Oregon"]], dtype=object)
+    # x = np.array([[85, 25.0, "US", "tough and chewy", "Oregon"]], dtype=object)
     # x = np.array([[9.0, "Hello world"]], dtype=object)
     # x = np.array(
     #     [[5.0, 1.0, "Senior Strategist", "Cutting Edge", "None"]], dtype=object
@@ -196,10 +199,10 @@ if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
     for model_type in [
         "ensemble_50",
-        # "ensemble_75",
-        # "ensemble_25",
-        # "stack",
-        # "all_text",
+        "ensemble_75",
+        "ensemble_25",
+        "stack",
+        "all_text",
     ]:
         # shap_vals = run_shap_multiple_text(model_type)
         shap_vals = run_shap(model_type, ds_type=ds_type)
