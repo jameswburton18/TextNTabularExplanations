@@ -197,16 +197,66 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
     return shap_vals
 
 
-if __name__ == "__main__":
-    ds_type = parser.parse_args().ds_type
-    for model_type in [
-        # "ensemble_50",
-        # "ensemble_75",
-        # "ensemble_25",
-        "stack",
-        "all_text",
-    ]:
-        # shap_vals = run_shap_multiple_text(model_type)
-        shap_vals = run_shap(model_type, ds_type=ds_type)
+def run_all_text_baseline_shap(ds_type, max_samples=100, test_set_size=100):
+    di = get_dataset_info(ds_type, "all_text")
+    # Data
+    train_df = load_dataset(
+        di.ds_name, split="train", download_mode="force_redownload"
+    ).to_pandas()
+    y_train = train_df[di.label_col]
 
-        # print(shap_vals)
+    test_df = load_dataset(
+        di.ds_name, split="test", download_mode="force_redownload"
+    ).to_pandas()
+    test_df = test_df.sample(test_set_size, random_state=55)
+
+    # Models
+    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+    text_pipeline = pipeline(
+        "text-classification",
+        model=di.text_model_name,
+        tokenizer=tokenizer,
+        device="cuda:0",
+        truncation=True,
+        padding=True,
+        top_k=None,
+    )
+    # Define how to convert all columns to a single string
+    cols_to_str_fn = lambda array: " | ".join(
+        [f"{col}: {val}" for col, val in zip(di.tab_cols + di.text_cols, array)]
+    )
+
+    np.random.seed(1)
+    x = list(map(cols_to_str_fn, test_df[di.tab_cols + di.text_cols].values))
+    explainer = shap.Explainer(text_pipeline, tokenizer)
+    shap_vals = explainer(x)
+
+    # explainer = shap.explainers.Partition(model=model.predict, masker=tokenizer)
+    # shap_vals = explainer(x)
+
+    output_dir = os.path.join("models/shap_vals/", ds_type)
+    print(f"Results will be saved @: {output_dir}")
+
+    # Make output directory
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    model_type = "all_text_baseline"
+    with open(os.path.join(output_dir, f"shap_vals_{model_type}.pkl"), "wb") as f:
+        pickle.dump(shap_vals, f)
+
+    return shap_vals
+
+
+if __name__ == "__main__":
+    # ds_type = parser.parse_args().ds_type
+    # for model_type in [
+    #     # "ensemble_50",
+    #     # "ensemble_75",
+    #     # "ensemble_25",
+    #     # "stack",
+    #     "all_text",
+    # ]:
+    #     shap_vals = run_shap(model_type, ds_type=ds_type)
+
+    for ds_type in ["imdb_genre", "prod_sent", "fake", "kick", "jigsaw"]:  # , "wine"]:
+        run_all_text_baseline_shap(ds_type=ds_type)
