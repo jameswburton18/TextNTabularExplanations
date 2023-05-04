@@ -21,7 +21,7 @@ from utils import (
     row_to_string,
     multiple_row_to_string,
 )
-from src.utils import get_dataset_info
+from src.dataset_info import get_dataset_info
 
 parser = argparse.ArgumentParser()
 parser.add_argument(

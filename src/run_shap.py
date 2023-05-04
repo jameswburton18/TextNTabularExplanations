@@ -2,7 +2,7 @@ import numpy as np
 import shap
 import pickle
 from datasets import load_dataset
-from src.utils import format_text_pred, get_dataset_info
+from src.dataset_info import get_dataset_info
 from transformers import pipeline, AutoTokenizer
 import pandas as pd
 from datasets import load_dataset, Dataset
