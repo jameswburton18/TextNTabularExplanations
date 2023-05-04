@@ -343,8 +343,8 @@ def array_to_string(
 def format_fts_for_plotting(fts, tab_data):
     for i in range(len(tab_data)):
         fts[i] = fts[i] + f" = {tab_data[i]}   "
-    for j in range(len(tab_data), len(fts)):
-        fts[j] = fts[j] + " "
+    # for j in range(len(tab_data), len(fts)):
+    #     fts[j] = fts[j] + ""
     return fts
 
 
