@@ -408,7 +408,7 @@ def text(
         ################################
         if linebreak_idxs is not None:
             if i in linebreak_idxs:
-                token = f"<br>{text_cols[text_col_count]} = "
+                token = f"<br>(Text ft) {text_cols[text_col_count]} = "
                 # token = f"HELLO__{i, display}"
                 # we add a line break between the tabular features and the text features
                 out += f"""<div style='display: inline; text-align: center;'
