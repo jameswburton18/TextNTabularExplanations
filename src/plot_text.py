@@ -338,8 +338,23 @@ def text(
         cmax = cmax_new
 
     values, clustering = unpack_shap_explanation_contents(shap_values)
-    tokens, values, group_sizes = process_shap_values(
-        shap_values.data, values, grouping_threshold, separator, clustering
+    # tokens, values, group_sizes = process_shap_values(
+    #     shap_values.data, values, grouping_threshold, separator, clustering,
+    # )
+
+    (
+        tokens,
+        values,
+        group_sizes,
+        token_id_to_node_id_mapping,
+        collapsed_node_ids,
+    ) = process_shap_values(
+        shap_values.data,
+        values,
+        grouping_threshold,
+        separator,
+        clustering,
+        return_meta_data=True,
     )
 
     # build out HTML output one word one at a time
@@ -375,10 +390,13 @@ def text(
         lines_inserted = 0
         linebreak_idxs = []
         for idx in linebreak_before_idxs:
-            tokens = np.insert(tokens, idx + lines_inserted, "")
-            values = np.insert(values, idx + lines_inserted, 0)
-            group_sizes = np.insert(group_sizes, idx + lines_inserted, 1)
-            linebreak_idxs.append(idx + lines_inserted)
+            cluster_idx = np.where(
+                collapsed_node_ids == token_id_to_node_id_mapping[idx]
+            )[0][0]
+            tokens = np.insert(tokens, cluster_idx + lines_inserted, "")
+            values = np.insert(values, cluster_idx + lines_inserted, 0)
+            group_sizes = np.insert(group_sizes, cluster_idx + lines_inserted, 1)
+            linebreak_idxs.append(cluster_idx + lines_inserted)
             lines_inserted += 1
 
     ################################
@@ -391,6 +409,7 @@ def text(
         if linebreak_idxs is not None:
             if i in linebreak_idxs:
                 token = f"<br>{text_cols[text_col_count]} = "
+                # token = f"HELLO__{i, display}"
                 # we add a line break between the tabular features and the text features
                 out += f"""<div style='display: inline; text-align: center;'
             ><div style='display: none; color: #999; padding-top: 0px; font-size: 12px;'></div
@@ -398,6 +417,7 @@ def text(
                     style='display: inline; border-radius: 3px; padding: 0px'
                 >{token}</div></div>"""
                 text_col_count += 1
+                continue
             else:
                 element_id = i - text_col_count
         else:
