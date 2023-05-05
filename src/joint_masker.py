@@ -4,6 +4,16 @@ from shap.maskers import Masker
 
 # from shap.maskers._text import partition_tree, Text, SimpleTokenizer
 from shap.maskers._tabular import Tabular, _delta_masking
+from shap.maskers._text import (
+    SimpleTokenizer,
+    post_process_sentencepiece_tokenizer_output,
+    openers,
+    closers,
+    enders,
+    connectors,
+    TokenGroup,
+    merge_closest_groups,
+)
 from shap.utils import safe_isinstance, MaskedModel, sample
 from shap.utils.transformers import (
     parse_prefix_suffix_for_tokenizer,
@@ -244,10 +254,8 @@ class JointMasker(Masker):
         return (self._masked_data,)
 
     def text_mask_call(self, mask, s):
-        # text = " ".join(s[self.n_tab_cols :])
-        text = s
-        mask = self._standardize_mask(mask, text)
-        self._update_s_cache(text)
+        mask = self._standardize_mask(mask, s)
+        self._update_s_cache(s)
 
         # if we have a fixed prefix or suffix then we need to grow the mask to account for that
         if self.keep_prefix > 0 or self.keep_suffix > 0:
@@ -485,52 +493,13 @@ class JointMasker(Masker):
         return [self.tab_feature_names + [v for v in self._segments_s]]
 
 
-class SimpleTokenizer:  # pylint: disable=too-few-public-methods
-    """A basic model agnostic tokenizer."""
-
-    def __init__(self, split_pattern=r"\W+"):
-        """Create a tokenizer based on a simple splitting pattern."""
-        self.split_pattern = re.compile(split_pattern)
-
-    def __call__(self, s, return_offsets_mapping=True):
-        """Tokenize the passed string, optionally returning the offsets of each token in the original string."""
-        pos = 0
-        offset_ranges = []
-        input_ids = []
-        for m in re.finditer(self.split_pattern, s):
-            start, end = m.span(0)
-            offset_ranges.append((pos, start))
-            input_ids.append(s[pos:start])
-            pos = end
-        if pos != len(s):
-            offset_ranges.append((pos, len(s)))
-            input_ids.append(s[pos:])
-
-        out = {}
-        out["input_ids"] = input_ids
-        if return_offsets_mapping:
-            out["offset_mapping"] = offset_ranges
-        return out
-
-
-def post_process_sentencepiece_tokenizer_output(s):
-    """replaces whitespace encoded as '_' with ' ' for sentencepiece tokenizers."""
-    s = s.replace("▁", " ")
-    return s
-
-
-openers = {"(": ")"}
-closers = {")": "("}
-enders = [".", ","]
-connectors = ["but", "and", "or"]
-
-
 class Token:
-    """A token representation used for token clustering."""
+    """A token representation used for token clustering.
+    Same as Text masker but sent_no added to track which sentence the token is in"""
 
     def __init__(self, value, sent_no):
         self.s = value
-        self.sent_no = sent_no
+        self.sent_no = sent_no  # added sent_no to track which sentence the token is in
         if value in openers or value in closers:
             self.balanced = False
         else:
@@ -543,26 +512,6 @@ class Token:
         if not self.balanced:
             return self.s + "!"
         return self.s
-
-
-class TokenGroup:
-    """A token group (substring) representation used for token clustering."""
-
-    def __init__(self, group, index=None):
-        self.g = group
-        self.index = index
-
-    def __repr__(self):
-        return self.g.__repr__()
-
-    def __getitem__(self, index):
-        return self.g[index]
-
-    def __add__(self, o):
-        return TokenGroup(self.g + o.g)
-
-    def __len__(self):
-        return len(self.g)
 
 
 def merge_score(group1, group2, special_tokens):
@@ -643,36 +592,19 @@ def merge_score(group1, group2, special_tokens):
     return score
 
 
-def merge_closest_groups(groups, special_tokens):
-    """Finds the two token groups with the best merge score and merges them."""
-    scores = [
-        merge_score(groups[i], groups[i + 1], special_tokens)
-        for i in range(len(groups) - 1)
-    ]
-    # print(scores)
-    ind = np.argmax(scores)
-    groups[ind] = groups[ind] + groups[ind + 1]
-    # print(groups[ind][0].s in openers, groups[ind][0])
-    if (
-        groups[ind][0].s in openers
-        and groups[ind + 1][-1].s == openers[groups[ind][0].s]
-    ):
-        groups[ind][0].balanced = True
-        groups[ind + 1][-1].balanced = True
-
-    groups.pop(ind + 1)
-
-
 def partition_tree(decoded_tokens, special_tokens, sent_indices):
     """Build a heriarchial clustering of tokens that align with sentence structure.
 
     Note that this is fast and heuristic right now.
     TODO: Build this using a real constituency parser.
     """
+    # Only difference is that we add sent_indices to the Token class
+    #############################
     token_groups = [
         TokenGroup([Token(t, idx)], i)
         for i, (t, idx) in enumerate(zip(decoded_tokens, sent_indices))
     ]
+    #############################
     #     print(token_groups)
     M = len(decoded_tokens)
     new_index = M
