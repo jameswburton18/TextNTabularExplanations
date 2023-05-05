@@ -48,7 +48,6 @@ def get_dataset_info(ds_type, model_type=None):
                 warn(
                     f"No model type specified for {ds_type}. (This is fine during dataset creation)"
                 )
-                raise
             case "all_text":
                 text_model_name = "james-burton/imdb_genre_0"
                 ds_name = "james-burton/imdb_genre_prediction_all_text"
