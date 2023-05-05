@@ -245,6 +245,7 @@ do_train: true
 model_base: distilbert-base-uncased
 tags:
   - distilbert
-dataset: kick
+  - all_as_text
+dataset: wine
 version: all_as_text
 batch_size: 32
