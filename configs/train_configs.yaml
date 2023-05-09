@@ -1,25 +1,3 @@
---- # airbnb_0
-config: airbnb_0
-tags:
-  - bert
-dataset: airbnb
-batch_size: 32
-
---- # books_0
-config: books_0
-tags:
-  - bert
-batch_size: 32
-early_stopping_patience: 5
-
---- # imdb_0
-config: imdb_0
-tags:
-  - bert
-batch_size: 32
-dataset: imdb
-early_stopping_patience: 5
-
 --- # imdb_genre_0
 config: imdb_genre_0
 model_base: distilbert-base-uncased
@@ -30,86 +8,6 @@ dataset: imdb_genre
 version: all_as_text
 batch_size: 32
 
---- # imdb_genre_1
-config: imdb_genre_1
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - tab_as_text
-dataset: imdb_genre
-version: tab_as_text
-batch_size: 32
-
---- # imdb_genre_2
-config: imdb_genre_2
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - tabx5
-dataset: imdb_genre
-version: tabx5
-batch_size: 32
-
---- # imdb_genre_3
-config: imdb_genre_3
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - reorder1
-dataset: imdb_genre
-version: reorder1
-batch_size: 32
-
---- # imdb_genre_4
-config: imdb_genre_4
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - reorder2
-dataset: imdb_genre
-version: reorder2
-batch_size: 32
-
---- # imdb_genre_5
-config: imdb_genre_5
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - tabx5_nodesc
-dataset: imdb_genre
-version: tabx5_nodesc
-batch_size: 32
-
---- # imdb_genre_6
-config: imdb_genre_6
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - tabx2_nodesc
-dataset: imdb_genre
-version: tabx2_nodesc
-batch_size: 32
-
---- # imdb_genre_7
-config: imdb_genre_7
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - tabx2
-dataset: imdb_genre
-version: tabx2
-batch_size: 32
-
---- # imdb_genre_8
-config: imdb_genre_8
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - reorder3
-dataset: imdb_genre
-version: reorder3
-batch_size: 32
-
 --- # imdb_genre_9
 config: imdb_genre_9
 model_base: distilbert-base-uncased
@@ -118,24 +16,6 @@ tags:
   - text_col_only
 dataset: imdb_genre
 version: text_col_only
-batch_size: 32
-
---- # imdb_genre_10
-config: imdb_genre_10
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - all_as_text_exp_reorder
-dataset: imdb_genre
-version: all_as_text_exp_reorder
-batch_size: 32
-
---- # imdb_genre_text_0
-config: imdb_genre_text_0
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-dataset: imdb_genre_text
 batch_size: 32
 
 --- # prod_sent_0
@@ -236,6 +116,248 @@ tags:
   - text_col_only
 dataset: wine
 version: text_col_only
+batch_size: 32
+
+--- # imdb_genre_10
+config: imdb_genre_10
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - all_as_text
+dataset: imdb_genre
+version: all_as_text
+batch_size: 32
+
+--- # imdb_genre_19
+config: imdb_genre_19
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - text_col_only
+dataset: imdb_genre
+version: text_col_only
+batch_size: 32
+
+--- # prod_sent_10
+config: prod_sent_10
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - all_as_text
+dataset: prod_sent
+version: all_as_text
+batch_size: 32
+
+--- # prod_sent_19
+config: prod_sent_19
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - text_col_only
+dataset: prod_sent
+version: text_col_only
+batch_size: 32
+
+--- # fake_10
+config: fake_10
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - all_as_text
+dataset: fake
+version: all_as_text
+batch_size: 32
+
+--- # fake_19
+config: fake_19
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - text_col_only
+dataset: fake
+version: text_col_only
+batch_size: 32
+
+--- # kick_10
+config: kick_10
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - all_as_text
+dataset: kick
+version: all_as_text
+batch_size: 32
+
+--- # kick_19
+config: kick_19
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - text_col_only
+dataset: kick
+version: text_col_only
+batch_size: 32
+
+--- # jigsaw_10
+config: jigsaw_10
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - all_as_text
+dataset: jigsaw
+version: all_as_text
+batch_size: 32
+
+--- # jigsaw_19
+config: jigsaw_19
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - text_col_only
+dataset: jigsaw
+version: text_col_only
+batch_size: 32
+
+--- # wine_10
+config: wine_10
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - all_as_text
+dataset: wine
+version: all_as_text
+batch_size: 32
+
+--- # wine_19
+config: wine_19
+model_base: microsoft/deberta-base
+tags:
+  - deberta
+  - text_col_only
+dataset: wine
+version: text_col_only
+batch_size: 32
+
+# Old
+#####
+--- # airbnb_0
+config: airbnb_0
+tags:
+  - bert
+dataset: airbnb
+batch_size: 32
+
+--- # books_0
+config: books_0
+tags:
+  - bert
+batch_size: 32
+early_stopping_patience: 5
+
+--- # imdb_0
+config: imdb_0
+tags:
+  - bert
+batch_size: 32
+dataset: imdb
+early_stopping_patience: 5
+
+--- # imdb_genre_1
+config: imdb_genre_1
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tab_as_text
+dataset: imdb_genre
+version: tab_as_text
+batch_size: 32
+
+--- # imdb_genre_2
+config: imdb_genre_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tabx5
+dataset: imdb_genre
+version: tabx5
+batch_size: 32
+
+--- # imdb_genre_3
+config: imdb_genre_3
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - reorder1
+dataset: imdb_genre
+version: reorder1
+batch_size: 32
+
+--- # imdb_genre_4
+config: imdb_genre_4
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - reorder2
+dataset: imdb_genre
+version: reorder2
+batch_size: 32
+
+--- # imdb_genre_5
+config: imdb_genre_5
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tabx5_nodesc
+dataset: imdb_genre
+version: tabx5_nodesc
+batch_size: 32
+
+--- # imdb_genre_6
+config: imdb_genre_6
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tabx2_nodesc
+dataset: imdb_genre
+version: tabx2_nodesc
+batch_size: 32
+
+--- # imdb_genre_7
+config: imdb_genre_7
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - tabx2
+dataset: imdb_genre
+version: tabx2
+batch_size: 32
+
+--- # imdb_genre_8
+config: imdb_genre_8
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - reorder3
+dataset: imdb_genre
+version: reorder3
+batch_size: 32
+
+--- # imdb_genre_10
+config: imdb_genre_10
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_exp_reorder
+dataset: imdb_genre
+version: all_as_text_exp_reorder
+batch_size: 32
+
+--- # imdb_genre_text_0
+config: imdb_genre_text_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+dataset: imdb_genre_text
 batch_size: 32
 
 --- # TESTING
