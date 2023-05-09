@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="wine",
+    default="prod_sent",
     help="Name of dataset to use",
 )
 
@@ -28,12 +28,14 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
     di = get_dataset_info(ds_type, model_type)
     # Data
     train_df = load_dataset(
-        di.ds_name, split="train", download_mode="force_redownload"
+        di.ds_name,
+        split="train",  # download_mode="force_redownload"
     ).to_pandas()
     y_train = train_df[di.label_col]
 
     test_df = load_dataset(
-        di.ds_name, split="test", download_mode="force_redownload"
+        di.ds_name,
+        split="test",  # download_mode="force_redownload"
     ).to_pandas()
     test_df = test_df.sample(test_set_size, random_state=55)
 
@@ -201,7 +203,7 @@ def run_all_text_baseline_shap(ds_type, max_samples=100, test_set_size=100):
     di = get_dataset_info(ds_type, "all_text")
     # Data
     train_df = load_dataset(
-        di.ds_name, split="train", download_mode="force_redownload"
+        di.ds_name, split="train"  # , download_mode="force_redownload"
     ).to_pandas()
     y_train = train_df[di.label_col]
 
@@ -248,15 +250,24 @@ def run_all_text_baseline_shap(ds_type, max_samples=100, test_set_size=100):
 
 
 if __name__ == "__main__":
-    # ds_type = parser.parse_args().ds_type
-    # for model_type in [
-    #     # "ensemble_50",
-    #     # "ensemble_75",
-    #     # "ensemble_25",
-    #     # "stack",
-    #     "all_text",
-    # ]:
-    #     shap_vals = run_shap(model_type, ds_type=ds_type)
+    ds_type = parser.parse_args().ds_type
+    for model_type in [
+        # "ensemble_50",
+        # "ensemble_75",
+        # "ensemble_25",
+        # "stack",
+        "all_text",
+    ]:
+        # pass
+        shap_vals = run_shap(model_type, ds_type=ds_type)
 
-    for ds_type in ["imdb_genre", "prod_sent", "fake", "kick", "jigsaw"]:  # , "wine"]:
-        run_all_text_baseline_shap(ds_type=ds_type)
+    for ds_type in [
+        "jigsaw",
+        # "imdb_genre",
+        # "prod_sent",
+        # "fake",
+        # "kick",
+        # "wine"
+    ]:
+        pass
+        # run_all_text_baseline_shap(ds_type=ds_type)
