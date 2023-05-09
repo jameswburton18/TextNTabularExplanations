@@ -316,10 +316,13 @@ def prepare_text(dataset, version, ds_type):
 
 
 def format_text_pred(pred):
-    if pred["label"] == "LABEL_1":
-        return np.array([1 - pred["score"], pred["score"]])
-    else:
-        return np.array([pred["score"], 1 - pred["score"]])
+    # if pred["label"] == "LABEL_1":
+    #     return np.array([1 - pred["score"], pred["score"]])
+    # else:
+    #     return np.array([pred["score"], 1 - pred["score"]])
+    scores = [p["score"] for p in pred]
+    order = [int(p["label"][6:]) for p in pred]
+    return np.array([scores[i] for i in order])
 
 
 def array_to_string(

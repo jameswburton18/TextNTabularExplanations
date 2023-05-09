@@ -52,10 +52,10 @@ class WeightedEnsemble:
             dict_keys = list(desc_dict.keys())
             dict_keys = dict_keys[0] if len(dict_keys) == 1 else dict_keys
             text_preds = self.text_pipeline(dict_keys)
-            # text_preds = np.array([format_text_pred(pred) for pred in text_preds])
-            text_preds = np.array(
-                [[lab["score"] for lab in pred] for pred in text_preds]
-            )
+            text_preds = np.array([format_text_pred(pred) for pred in text_preds])
+            # text_preds = np.array(
+            #     [[lab["score"] for lab in pred] for pred in text_preds]
+            # )
 
         expanded_text_preds = np.zeros((len(text_examples), text_preds.shape[1]))
         for i, (desc, idxs) in enumerate(desc_dict.items()):
@@ -100,18 +100,19 @@ class StackModel:
                 desc_dict[desc].append(i)
 
         if self.text_to_pred_dict is not None:
-            text_preds = np.array(
-                [self.text_to_pred_dict[desc] for desc in desc_dict.keys()]
-            )
+            # text_preds = np.array(
+            #     [self.text_to_pred_dict[desc] for desc in desc_dict.keys()]
+            # )
+            raise NotImplementedError
 
         else:
             dict_keys = list(desc_dict.keys())
             dict_keys = dict_keys[0] if len(dict_keys) == 1 else dict_keys
             text_preds = self.text_pipeline(dict_keys)
-            # text_preds = np.array([format_text_pred(pred) for pred in text_preds])
-            text_preds = np.array(
-                [[lab["score"] for lab in pred] for pred in text_preds]
-            )
+            text_preds = np.array([format_text_pred(pred) for pred in text_preds])
+            # text_preds = np.array(
+            #     [[lab["score"] for lab in pred] for pred in text_preds]
+            # )
 
         expanded_text_preds = np.zeros((len(text_examples), text_preds.shape[1]))
         for i, (desc, idxs) in enumerate(desc_dict.items()):
@@ -140,7 +141,7 @@ class AllAsTextModel:
                 batch_size=64,
             )
         ]
-        # preds = np.array([format_text_pred(pred) for pred in text_preds])
-        preds = np.array([[lab["score"] for lab in pred] for pred in preds])
+        preds = np.array([format_text_pred(pred) for pred in preds])
+        # preds = np.array([[lab["score"] for lab in pred] for pred in preds])
 
         return preds
