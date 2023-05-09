@@ -120,9 +120,9 @@ batch_size: 32
 
 --- # imdb_genre_10
 config: imdb_genre_10
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - all_as_text
 dataset: imdb_genre
 version: all_as_text
@@ -130,9 +130,9 @@ batch_size: 32
 
 --- # imdb_genre_19
 config: imdb_genre_19
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - text_col_only
 dataset: imdb_genre
 version: text_col_only
@@ -140,9 +140,9 @@ batch_size: 32
 
 --- # prod_sent_10
 config: prod_sent_10
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - all_as_text
 dataset: prod_sent
 version: all_as_text
@@ -150,9 +150,9 @@ batch_size: 32
 
 --- # prod_sent_19
 config: prod_sent_19
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - text_col_only
 dataset: prod_sent
 version: text_col_only
@@ -160,9 +160,9 @@ batch_size: 32
 
 --- # fake_10
 config: fake_10
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - all_as_text
 dataset: fake
 version: all_as_text
@@ -170,9 +170,9 @@ batch_size: 32
 
 --- # fake_19
 config: fake_19
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - text_col_only
 dataset: fake
 version: text_col_only
@@ -180,9 +180,9 @@ batch_size: 32
 
 --- # kick_10
 config: kick_10
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - all_as_text
 dataset: kick
 version: all_as_text
@@ -190,9 +190,9 @@ batch_size: 32
 
 --- # kick_19
 config: kick_19
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - text_col_only
 dataset: kick
 version: text_col_only
@@ -200,9 +200,9 @@ batch_size: 32
 
 --- # jigsaw_10
 config: jigsaw_10
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - all_as_text
 dataset: jigsaw
 version: all_as_text
@@ -210,9 +210,9 @@ batch_size: 32
 
 --- # jigsaw_19
 config: jigsaw_19
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - text_col_only
 dataset: jigsaw
 version: text_col_only
@@ -220,9 +220,9 @@ batch_size: 32
 
 --- # wine_10
 config: wine_10
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - all_as_text
 dataset: wine
 version: all_as_text
@@ -230,9 +230,9 @@ batch_size: 32
 
 --- # wine_19
 config: wine_19
-model_base: microsoft/deberta-base
+model_base: bert-base-uncased
 tags:
-  - deberta
+  - bert-base-uncased
   - text_col_only
 dataset: wine
 version: text_col_only
