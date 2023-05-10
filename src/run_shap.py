@@ -26,7 +26,9 @@ parser.add_argument(
 )
 
 
-def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
+def run_shap(
+    model_type, ds_type, max_samples=100, test_set_size=100, tab_scale_factor=2
+):
     di = get_dataset_info(ds_type, model_type)
     # Data
     train_df = load_dataset(
@@ -185,12 +187,15 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
         collapse_mask_token=True,
         max_samples=max_samples,
         tab_partition_tree=tab_pt,
+        tab_cluster_scale_factor=tab_scale_factor,
     )
 
     explainer = shap.explainers.Partition(model=model.predict, masker=masker)
     shap_vals = explainer(x)
 
-    output_dir = os.path.join("models/shap_vals/", ds_type)
+    pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+
+    output_dir = os.path.join(f"models/shap_vals{pre}/", ds_type)
     print(f"Results will be saved @: {output_dir}")
 
     # Make output directory
