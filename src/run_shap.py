@@ -7,6 +7,8 @@ from transformers import pipeline, AutoTokenizer
 import pandas as pd
 from datasets import load_dataset, Dataset
 import os
+from tqdm import tqdm
+from src.utils import token_segments, text_ft_index_ends
 
 # from src.models import Model
 import lightgbm as lgb
@@ -249,6 +251,118 @@ def run_all_text_baseline_shap(ds_type, max_samples=100, test_set_size=100):
     return shap_vals
 
 
+def load_shap_vals(ds_name, add_parent_dir=True):
+    pre = "../" if add_parent_dir else ""
+    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_ensemble_25.pkl", "rb") as f:
+        shap_25 = pickle.load(f)
+    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_ensemble_50.pkl", "rb") as f:
+        shap_50 = pickle.load(f)
+    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_ensemble_75.pkl", "rb") as f:
+        shap_75 = pickle.load(f)
+    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_stack.pkl", "rb") as f:
+        shap_stack = pickle.load(f)
+    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_all_text.pkl", "rb") as f:
+        shap_all_text = pickle.load(f)
+    with open(
+        f"{pre}models/shap_vals/{ds_name}/shap_vals_all_text_baseline.pkl", "rb"
+    ) as f:
+        shap_all_text_baseline = pickle.load(f)
+    return (
+        [shap_25, shap_50, shap_75, shap_stack, shap_all_text, shap_all_text_baseline],
+        [
+            "ensemble_25",
+            "ensemble_50",
+            "ensemble_75",
+            "stack",
+            "all_text",
+            "all_text_baseline",
+        ],
+    )
+
+
+def gen_summary_shap_vals(ds_name, add_parent_dir=False):
+    di = get_dataset_info(ds_name)
+    shap_groups, names = load_shap_vals(ds_name, add_parent_dir)
+    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+
+    for shap_vals, name in zip(shap_groups[:-1], names[:-1]):
+        print(
+            f"""
+            #################
+            {name}
+            #################
+            """
+        )
+        filepath = f"models/shap_vals/{ds_name}/summed_shap_vals_{name}.pkl"
+        grouped_shap_vals = []
+        for label in range(len(di.label_names)):
+            shap_for_label = []
+            for idx in tqdm(range(100)):
+                sv = shap_vals[idx, :, label]
+                text_ft_ends = text_ft_index_ends(
+                    sv.data[len(di.tab_cols) :], tokenizer
+                )
+                text_ft_ends = [len(di.tab_cols)] + [
+                    x + len(di.tab_cols) + 1 for x in text_ft_ends
+                ]
+                val = np.append(
+                    sv.values[: len(di.tab_cols)],
+                    [
+                        np.sum(sv.values[text_ft_ends[i] : text_ft_ends[i + 1]])
+                        for i in range(len(text_ft_ends) - 1)
+                    ]
+                    + [np.sum(sv.values[text_ft_ends[-1] :])],
+                )
+
+                shap_for_label.append(val)
+            grouped_shap_vals.append(np.vstack(shap_for_label))
+        print(f"Saving to {filepath}")
+        with open(filepath, "wb") as f:
+            pickle.dump(np.array(grouped_shap_vals), f)
+
+    print(
+        f"""
+        #################
+        All as Text Baseline
+        #################
+        """
+    )
+    shap_vals = shap_groups[-1]
+    filepath = f"models/shap_vals/{ds_name}/summed_shap_vals_all_text_baseline.pkl"
+    grouped_shap_vals = []
+    for label in range(len(di.label_names)):
+        shap_for_label = []
+        for idx in tqdm(range(100)):
+            sv = shap_vals[idx, :, label]
+            text_ft_ends = [1] + list(np.where(sv.data == "| ")[0]) + [len(sv.data) + 1]
+            # Need this if there are | in the text that aren't col separators
+            if len(text_ft_ends) != len(di.text_cols + di.tab_cols) + 1:
+                text_ft_ends = (
+                    [1]
+                    + [
+                        i
+                        for i in list(np.where(sv.data == "| ")[0])
+                        if sv.data[i + 1]
+                        in [
+                            token_segments(col, tokenizer)[0][1]
+                            for col in di.tab_cols + di.text_cols
+                        ]
+                    ]
+                    + [len(sv.data) + 1]
+                )
+            val = np.array(
+                [
+                    np.sum(sv.values[text_ft_ends[i] : text_ft_ends[i + 1]])
+                    for i in range(len(text_ft_ends) - 1)
+                ]
+            )
+            shap_for_label.append(val)
+        grouped_shap_vals.append(np.vstack(shap_for_label))
+    print(f"Saving to {filepath}")
+    with open(filepath, "wb") as f:
+        pickle.dump(np.array(grouped_shap_vals), f)
+
+
 if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
     for model_type in [
@@ -260,14 +374,5 @@ if __name__ == "__main__":
     ]:
         # pass
         shap_vals = run_shap(model_type, ds_type=ds_type)
-
-    for ds_type in [
-        "jigsaw",
-        # "imdb_genre",
-        # "prod_sent",
-        # "fake",
-        # "kick",
-        # "wine"
-    ]:
-        pass
-        # run_all_text_baseline_shap(ds_type=ds_type)
+    run_all_text_baseline_shap(ds_type=ds_type)
+    gen_summary_shap_vals(ds_type)
