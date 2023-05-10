@@ -385,6 +385,7 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
 
 if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
+    sf = 1
     for model_type in [
         "ensemble_50",
         "ensemble_75",
@@ -393,6 +394,6 @@ if __name__ == "__main__":
         "all_text",
     ]:
         # pass
-        shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=1)
+        shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
     # run_all_text_baseline_shap(ds_type=ds_type)
-    gen_summary_shap_vals(ds_type)
+    gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
