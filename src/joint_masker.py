@@ -35,6 +35,7 @@ class JointMasker(Masker):
         tab_cluster_scale_factor=2,
         tab_partition_tree=None,
     ):
+        # Boiler plate from Text masker
         if tokenizer is None:
             self.tokenizer = SimpleTokenizer()
         elif callable(tokenizer):
@@ -47,14 +48,14 @@ class JointMasker(Masker):
                     "The passed tokenizer cannot be wrapped as a masker because it does not have a __call__ "
                     + "method, not can it be interpreted as a splitting regexp!"
                 )
+
         self.output_type = output_type
         self.collapse_mask_token = collapse_mask_token
         self.input_mask_token = mask_token
         self.mask_token = mask_token  # could be recomputed later in this function
         self.mask_token_id = mask_token if isinstance(mask_token, int) else None
-        self.tab_cluster_scale_factor = (
-            tab_cluster_scale_factor  # This could be important
-        )
+        # This could be important
+        self.tab_cluster_scale_factor = tab_cluster_scale_factor
 
         # Tab
         self.output_dataframe = False
@@ -63,7 +64,7 @@ class JointMasker(Masker):
             tab_df = tab_df.values
             self.output_dataframe = True
 
-        # Tab clustering
+        # Tab clustering, partition tree calculated as in Tabular masker (correlation)
         self.n_tab_cols = tab_df.shape[-1]
         if tab_df.shape[-1] > 1:
             # In order to cluster the tabular data, we replace null values with median
@@ -78,11 +79,14 @@ class JointMasker(Masker):
                 )
             else:
                 self.tab_pt = tab_partition_tree
+            # Necessary for adjusting text partition tree
             self.n_tab_groups = len(self.tab_pt)
         else:
+            # Needed to add this in to avoid errors when there is only one tabular column
             self.tab_pt = None
             self.n_tab_groups = 1
 
+        # Background dataset for tabular data set at max_samples
         if hasattr(tab_df, "shape") and tab_df.shape[0] > max_samples:
             tab_df = sample(tab_df, max_samples)
 
@@ -140,14 +144,16 @@ class JointMasker(Masker):
         """
         tab_mask_call returns a dataframe of shape (num_samples, num_tab_features)
         text_mask_call returns a tuple of an array of a string, with the mask applied to the text
-        However, if only the text is being masked, then we do not need to sample
-        from tab_df and can just take the first row
+        We join the text cols into a single string. This is independent of how they are joined in the model,
+        as we are only interested in the tokenization for the masking. This does mean that it won't work
+        for models that tokenize spaces (I think).
+
+        Possibly could do it instead by tokenizing all text features seperately, then joining them together
+        and handling the start and end tokens seperately.
         """
         masked_tab = self.tab_mask_call(mask[: self.n_tab_cols], x[: self.n_tab_cols])
 
         self._text_ft_index_ends(x[self.n_tab_cols :])
-        # We join the text cols into a single string. This is independent of how they are joined in the model,
-        # as we are only interested in the tokenization for the masking
         text = " ".join(str(s) for s in x[self.n_tab_cols :])
         masked_text = self.text_mask_call(mask[self.n_tab_cols :], text)
 
@@ -157,6 +163,10 @@ class JointMasker(Masker):
         return masked_tab.values
 
     def _text_ft_index_ends(self, s):
+        """
+        This is to seperate back out the text features so that it won't collapse the mask tokens
+        across different text features
+        """
         lens = []
         sent_indices = []
         for idx, col in enumerate(s):
@@ -187,6 +197,9 @@ class JointMasker(Masker):
         self.sent_indices = sent_indices
 
     def tab_mask_call(self, mask, x):
+        """
+        Taken from Tabular masker, with little change
+        """
         mask = self._standardize_mask(mask, x)
 
         # make sure we are given a single sample
@@ -235,6 +248,10 @@ class JointMasker(Masker):
         return (self._masked_data,)
 
     def text_mask_call(self, mask, s):
+        """
+        Taken from text masker, changed to ensure that the mask tokens are not collapsed across
+        different text features
+        """
         mask = self._standardize_mask(mask, s)
         self._update_s_cache(s)
 
@@ -356,8 +373,50 @@ class JointMasker(Masker):
             return tokens, token_ids
 
     def clustering(self, s):
+        """
+        [Dendograms explained:]
+
+        Dendrograms creation works by having each one of the base leaves as a number, then
+        labelling each one of the new created nodes a number following the last leaf number.
+        Columns 0 and 1 are the two nodes that are being joined, column 2 is the similarity
+        between the two nodes and column 3 is the number of leaves in the new node.
+
+        eg for array(
+            [[0. , 1. , 0.4, 2. ],
+            [2. , 3. , 0.4, 2. ],
+            [6. , 4. , 0.6, 3. ],
+            [5. , 7. , 1. , 5. ]]
+        )
+
+        In this case we know can see from the 4th row that there are 5 leaves in the final node:
+        [0,1,2,3,4]. Each grouping (row) is also given a number starting from one more than the
+        last leaf node. Therefore the pairing of (0,1) from row 0 is labelled as 5, (2,3) from
+        row 1 is labelled as 6, (6,4) from row 2 is labelled as 7 and (5,7) from row 3 is labelled
+        as 8. This tells the algorithm how to plot the dendrogram. For example row 3 tells us that
+        the group of (2,3) ie node 6 is joined to node 4, which is the group of (6,4) ie node 7.
+
+        With this knowledge we can adjust the text dendrogram in order to join the tabular dendrogram
+        on from the left side.
+
+        If we initially have:
+            A tabular dendogram which has:
+                * n leaves (labelled [0,n-1]
+                * m groups (labelled [n, n+m-1])
+            A text dendrogram which has:
+                * k leaves (labelled [0,k-1]
+                * l groups (labelled [k, k+l-1])
+
+        This will now become a joint dendogram which has :
+        * n tabular leaves (labelled [0,n-1]
+        * k text leaves (labelled [n, n+k-1])
+        * m tabular groups (labelled [n+k, n+k+m-1])
+        * l text groups (labelled [n+k+m, n+k+m+l-1])
+
+        """
         text = " ".join(str(s) for s in s[self.n_tab_cols :])
-        # text = self.cols_to_text_fn(s[self.n_tab_cols :])
+
+        # Same as Text masker
+        ################################
         self._update_s_cache(text)
         special_tokens = []
         sep_token = getattr_silent(self.tokenizer, "sep_token")
@@ -384,21 +443,8 @@ class JointMasker(Masker):
         text_pt = partition_tree(tokens, special_tokens, self.sent_indices)
         text_pt[:, 2] = text_pt[:, 3]
         text_pt[:, 2] /= text_pt[:, 2].max()
+        ################################
 
-        """
-        Dendrograms creation works by having each one of the base leaves as a number, then
-        labelling each one of the new created nodes a number following the last leaf number.
-        
-        eg for array([[0. , 1. , 0.4, 2. ],
-        [2. , 3. , 0.4, 2. ],
-        [6. , 4. , 0.6, 3. ],
-        [5. , 7. , 1. , 5. ]])
-        
-        In this case we know previously leaves are [0,1,2,3,4] (I don't think there is an easy
-        way to calculate this from the dendrogram itself). Therefore the pairing of (0,1) from
-        row 0 is labelled as 5, (2,3) from row 1 is labelled as 6, (6,4) from row 2 is labelled as 7
-        and (5,7) from row 3 is labelled as 8.
-        """
         n_text_leaves = len(tokens)
         n_text_groups = len(text_pt)
 
@@ -450,10 +496,7 @@ class JointMasker(Masker):
         return Z_join
 
     def shape(self, s):
-        """The shape of what we return as a masker.
-
-        Note we only return a single sample, so there is no expectation averaging.
-        """
+        """The shape of what we return as a masker."""
         text = " ".join(str(s) for s in s[self.n_tab_cols :])
         # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(text)
@@ -500,7 +543,6 @@ def merge_score(group1, group2, special_tokens):
 
     special_tokens: tokens (such as separator tokens) that should be grouped last
     """
-    # if type(group1)
 
     score = 0
 
