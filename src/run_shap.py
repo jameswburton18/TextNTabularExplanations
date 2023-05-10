@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="prod_sent",
+    default="jigsaw",
     help="Name of dataset to use",
 )
 
@@ -58,7 +58,9 @@ def run_shap(model_type, ds_type, max_samples=100, test_set_size=100):
             [f"{col}: {val}" for col, val in zip(di.tab_cols + di.text_cols, array)]
         )
         model = AllAsTextModel(
-            text_pipeline=text_pipeline, cols=di.tab_cols + di.text_cols
+            text_pipeline=text_pipeline,
+            cols_to_str_fn=cols_to_str_fn,
+            # cols=di.tab_cols + di.text_cols
         )
     else:
         text_pipeline = pipeline(
@@ -374,5 +376,5 @@ if __name__ == "__main__":
     ]:
         # pass
         shap_vals = run_shap(model_type, ds_type=ds_type)
-    run_all_text_baseline_shap(ds_type=ds_type)
-    gen_summary_shap_vals(ds_type)
+    # run_all_text_baseline_shap(ds_type=ds_type)
+    # gen_summary_shap_vals(ds_type)

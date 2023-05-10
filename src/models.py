@@ -12,9 +12,7 @@ class WeightedEnsemble:
         text_pipeline,
         cols_to_str_fn,
         text_weight=0.5,
-        text_to_pred_dict=None,
     ):
-        self.text_to_pred_dict = text_to_pred_dict
         self.tab_model = tab_model
         self.text_pipeline = text_pipeline
         self.text_weight = text_weight
@@ -42,20 +40,11 @@ class WeightedEnsemble:
             else:
                 desc_dict[desc].append(i)
 
-        if self.text_to_pred_dict is not None:
-            text_preds = np.array(
-                [self.text_to_pred_dict[desc] for desc in desc_dict.keys()]
-            )
-
-        else:
-            # Make a dictionary of the unique text examples and the indices of the examples that have that text
-            dict_keys = list(desc_dict.keys())
-            dict_keys = dict_keys[0] if len(dict_keys) == 1 else dict_keys
-            text_preds = self.text_pipeline(dict_keys)
-            text_preds = np.array([format_text_pred(pred) for pred in text_preds])
-            # text_preds = np.array(
-            #     [[lab["score"] for lab in pred] for pred in text_preds]
-            # )
+        # Make a dictionary of the unique text examples and the indices of the examples that have that text
+        dict_keys = list(desc_dict.keys())
+        dict_keys = dict_keys[0] if len(dict_keys) == 1 else dict_keys
+        text_preds = self.text_pipeline(dict_keys)
+        text_preds = np.array([format_text_pred(pred) for pred in text_preds])
 
         expanded_text_preds = np.zeros((len(text_examples), text_preds.shape[1]))
         for i, (desc, idxs) in enumerate(desc_dict.items()):
@@ -75,16 +64,14 @@ class StackModel:
         text_pipeline,
         stack_model,
         cols_to_str_fn,
-        text_to_pred_dict=None,
     ):
-        self.text_to_pred_dict = text_to_pred_dict
         self.tab_model = tab_model
         self.text_pipeline = text_pipeline
         self.stack_model = stack_model
         self.cols_to_str_fn = cols_to_str_fn
         self.num_tab_cols = len(self.tab_model.feature_name_)
 
-    def predict(self, examples, load_from_cache=True):
+    def predict(self, examples):
         if len(examples.shape) == 1:
             examples = examples.reshape(1, -1)
         tab_examples = examples[:, : self.num_tab_cols]
@@ -92,30 +79,22 @@ class StackModel:
         text_examples = np.array(list(map(self.cols_to_str_fn, text_examples)))
         tab_preds = self.tab_model.predict_proba(tab_examples)
 
-        desc_dict = {}
+        # As text and tabular are calucalted seperately, we can avoid recalculating text
+        # predictions if we have already calculated them
+        unique_texts = {}
         for i, desc in tqdm(enumerate(text_examples)):
-            if desc not in desc_dict:
-                desc_dict[desc] = [i]
+            if desc not in unique_texts:
+                unique_texts[desc] = [i]
             else:
-                desc_dict[desc].append(i)
+                unique_texts[desc].append(i)
 
-        if self.text_to_pred_dict is not None:
-            # text_preds = np.array(
-            #     [self.text_to_pred_dict[desc] for desc in desc_dict.keys()]
-            # )
-            raise NotImplementedError
-
-        else:
-            dict_keys = list(desc_dict.keys())
-            dict_keys = dict_keys[0] if len(dict_keys) == 1 else dict_keys
-            text_preds = self.text_pipeline(dict_keys)
-            text_preds = np.array([format_text_pred(pred) for pred in text_preds])
-            # text_preds = np.array(
-            #     [[lab["score"] for lab in pred] for pred in text_preds]
-            # )
+        dict_keys = list(unique_texts.keys())
+        dict_keys = dict_keys[0] if len(dict_keys) == 1 else dict_keys
+        text_preds = self.text_pipeline(dict_keys)
+        text_preds = np.array([format_text_pred(pred) for pred in text_preds])
 
         expanded_text_preds = np.zeros((len(text_examples), text_preds.shape[1]))
-        for i, (desc, idxs) in enumerate(desc_dict.items()):
+        for i, (desc, idxs) in enumerate(unique_texts.items()):
             expanded_text_preds[idxs] = text_preds[i]
 
         # Stack
@@ -126,14 +105,16 @@ class StackModel:
 
 
 class AllAsTextModel:
-    def __init__(self, text_pipeline, cols):
+    def __init__(self, text_pipeline, cols_to_str_fn):
         self.text_pipeline = text_pipeline
-        self.cols = cols
+        self.cols_to_str_fn = cols_to_str_fn
+        # self.cols = cols
 
     def predict(self, examples):
-        examples_as_strings = np.apply_along_axis(
-            lambda x: array_to_string(x, self.cols), 1, examples
-        )
+        # examples_as_strings = np.apply_along_axis(
+        #     lambda x: array_to_string(x, self.cols), 1, examples
+        # )
+        examples_as_strings = np.array(list(map(self.cols_to_str_fn, examples)))
         preds = [
             out
             for out in self.text_pipeline(
