@@ -304,7 +304,7 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False):
         grouped_shap_vals = []
         for label in range(len(di.label_names)):
             shap_for_label = []
-            for idx in tqdm(range(100)):
+            for idx in tqdm(range(len(shap_vals))):
                 sv = shap_vals[idx, :, label]
                 text_ft_ends = text_ft_index_ends(
                     sv.data[len(di.tab_cols) :], tokenizer
@@ -339,7 +339,7 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False):
     grouped_shap_vals = []
     for label in range(len(di.label_names)):
         shap_for_label = []
-        for idx in tqdm(range(100)):
+        for idx in tqdm(range(len(shap_vals))):
             sv = shap_vals[idx, :, label]
             text_ft_ends = [1] + list(np.where(sv.data == "| ")[0]) + [len(sv.data) + 1]
             # Need this if there are | in the text that aren't col separators
@@ -379,7 +379,7 @@ if __name__ == "__main__":
         # "stack",
         "all_text",
     ]:
-        # pass
-        shap_vals = run_shap(model_type, ds_type=ds_type)
+        pass
+        # shap_vals = run_shap(model_type, ds_type=ds_type)
     # run_all_text_baseline_shap(ds_type=ds_type)
-    # gen_summary_shap_vals(ds_type)
+    gen_summary_shap_vals(ds_type)
