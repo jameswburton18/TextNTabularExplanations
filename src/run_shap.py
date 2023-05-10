@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="jigsaw",
+    default="imdb_genre",
     help="Name of dataset to use",
 )
 
@@ -258,17 +258,28 @@ def run_all_text_baseline_shap(ds_type, max_samples=100, test_set_size=100):
     return shap_vals
 
 
-def load_shap_vals(ds_name, add_parent_dir=True):
-    pre = "../" if add_parent_dir else ""
-    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_ensemble_25.pkl", "rb") as f:
+def load_shap_vals(ds_name, add_parent_dir=True, tab_scale_factor=2):
+    pre = "../" if add_parent_dir else ""  # for running from notebooks
+    tab_pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    with open(
+        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_ensemble_25.pkl", "rb"
+    ) as f:
         shap_25 = pickle.load(f)
-    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_ensemble_50.pkl", "rb") as f:
+    with open(
+        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_ensemble_50.pkl", "rb"
+    ) as f:
         shap_50 = pickle.load(f)
-    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_ensemble_75.pkl", "rb") as f:
+    with open(
+        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_ensemble_75.pkl", "rb"
+    ) as f:
         shap_75 = pickle.load(f)
-    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_stack.pkl", "rb") as f:
+    with open(
+        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_stack.pkl", "rb"
+    ) as f:
         shap_stack = pickle.load(f)
-    with open(f"{pre}models/shap_vals/{ds_name}/shap_vals_all_text.pkl", "rb") as f:
+    with open(
+        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_all_text.pkl", "rb"
+    ) as f:
         shap_all_text = pickle.load(f)
     with open(
         f"{pre}models/shap_vals/{ds_name}/shap_vals_all_text_baseline.pkl", "rb"
@@ -287,10 +298,12 @@ def load_shap_vals(ds_name, add_parent_dir=True):
     )
 
 
-def gen_summary_shap_vals(ds_name, add_parent_dir=False):
+def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
     di = get_dataset_info(ds_name)
     shap_groups, names = load_shap_vals(ds_name, add_parent_dir)
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+
+    pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
 
     for shap_vals, name in zip(shap_groups[:-1], names[:-1]):
         print(
@@ -300,7 +313,7 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False):
             #################
             """
         )
-        filepath = f"models/shap_vals/{ds_name}/summed_shap_vals_{name}.pkl"
+        filepath = f"models/shap_vals{pre}/{ds_name}/summed_shap_vals_{name}.pkl"
         grouped_shap_vals = []
         for label in range(len(di.label_names)):
             shap_for_label = []
@@ -373,13 +386,13 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False):
 if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
     for model_type in [
-        # "ensemble_50",
-        # "ensemble_75",
-        # "ensemble_25",
-        # "stack",
+        "ensemble_50",
+        "ensemble_75",
+        "ensemble_25",
+        "stack",
         "all_text",
     ]:
-        pass
-        # shap_vals = run_shap(model_type, ds_type=ds_type)
+        # pass
+        shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=1)
     # run_all_text_baseline_shap(ds_type=ds_type)
     gen_summary_shap_vals(ds_type)
