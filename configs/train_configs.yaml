@@ -26,7 +26,7 @@ tags:
   - all_as_text
 dataset: prod_sent
 version: all_as_text
-batch_size: 32
+batch_size: 128
 
 --- # prod_sent_9
 config: prod_sent_9
@@ -46,7 +46,7 @@ tags:
   - all_as_text
 dataset: fake
 version: all_as_text
-batch_size: 32
+batch_size: 128
 
 --- # fake_9
 config: fake_9
@@ -66,7 +66,7 @@ tags:
   - all_as_text
 dataset: kick
 version: all_as_text
-batch_size: 32
+batch_size: 128
 
 --- # kick_9
 config: kick_9
@@ -86,7 +86,7 @@ tags:
   - all_as_text
 dataset: jigsaw
 version: all_as_text
-batch_size: 32
+batch_size: 128
 
 --- # jigsaw_9
 config: jigsaw_9
