@@ -35,16 +35,9 @@ def multiple_row_to_string(row, cols, multiplier=1, nodesc=False):
     return row
 
 
-# Create a mapping function that takes any value of None and swaps it for a string value of "None"
-def none_to_string(example):
-    for k, v in example.items():
-        if v is None:
-            example[k] = "None"
-    return example
-
-
 def prepare_text(dataset, version, ds_type):
-    """This is all for preparing the text part of the dataset"""
+    """This is all for preparing the text part of the dataset
+    Could be made more robust by referring to dataset_info.py instead"""
     if "imdb" in ds_type:
         if version == "all_as_text":
             cols = [
@@ -59,6 +52,40 @@ def prepare_text(dataset, version, ds_type):
             ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
+        elif version == "text_col_only":
+            # dataset rename column
+            dataset = dataset.rename_column("Description", "text")
+            return dataset
+        elif version == "all_as_text_base_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_tnt_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        # Less used versions
+        #########################################
         elif version == "tab_as_text":
             cols = [
                 "Year",
@@ -180,10 +207,7 @@ def prepare_text(dataset, version, ds_type):
             ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
-        elif version == "text_col_only":
-            # dataset rename column
-            dataset = dataset.rename_column("Description", "text")
-            return dataset
+        #########################################
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -195,6 +219,34 @@ def prepare_text(dataset, version, ds_type):
             return dataset
         elif version == "all_as_text":
             cols = ["Product_Type", "Product_Description"]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_base_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_tnt_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:
@@ -216,6 +268,34 @@ def prepare_text(dataset, version, ds_type):
                 "description",
             ]
 
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_base_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_tnt_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:
@@ -240,6 +320,34 @@ def prepare_text(dataset, version, ds_type):
                 "keywords",
             ]
 
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_base_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_tnt_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:
@@ -300,6 +408,34 @@ def prepare_text(dataset, version, ds_type):
 
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
+        elif version == "all_as_text_base_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_tnt_reorder":
+            raise NotImplementedError
+            cols = [
+                # "Year",
+                # "Runtime (Minutes)",
+                # "Rating",
+                # "Votes",
+                # "Revenue (Millions)",
+                # "Metascore",
+                # "Rank",
+                # "Description",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -309,10 +445,6 @@ def prepare_text(dataset, version, ds_type):
         raise ValueError(
             f"Unknown dataset type ({ds_type}) and version ({version}) combination"
         )
-
-
-# def prepare_tabular(tab_dfs, ds_type):
-#     if ds_type == "imdb_genre":
 
 
 def format_text_pred(pred):
@@ -325,54 +457,12 @@ def format_text_pred(pred):
     return np.array([scores[i] for i in order])
 
 
-def array_to_string(
-    array,
-    cols=[
-        "Year",
-        "Runtime (Minutes)",
-        "Rating",
-        "Votes",
-        "Revenue (Millions)",
-        "Metascore",
-        "Rank",
-        "Description",
-    ],
-):
-    return np.array(
-        " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]), dtype="<U512"
-    )
-
-
 def format_fts_for_plotting(fts, tab_data):
     for i in range(len(tab_data)):
         fts[i] = fts[i] + f" = {tab_data[i]}   "
     # for j in range(len(tab_data), len(fts)):
     #     fts[j] = fts[j] + ""
     return fts
-
-
-def tokenize_lens(text_fts, tokenizer):
-    return [len(tokenizer.tokenize(ft)) for ft in text_fts]
-
-
-# def text_ft_index_ends(text_fts, tokenizer):
-#     lens = []
-#     sent_indices = []
-
-#     for idx, col in enumerate(text_fts):
-#         if lens == []:
-#             tokens, token_ids = token_segments(col, tokenizer)
-#             lens.append(len(tokens) - 2)
-#         else:
-#             tokens, token_ids = token_segments(col, tokenizer)
-#             lens.append(lens[-1] + len(tokens) - 2)
-#         sent_indices.extend([idx] * (len(tokens) - 2))
-#     lens[0] += 1  # add 1 for the CLS token
-#     sent_indices = [0] + sent_indices
-#     lens[-1] += 1  # add 1 for the SEP token
-#     sent_indices = sent_indices + [sent_indices[-1]]
-
-#     return lens[:-1]
 
 
 def text_ft_index_ends(text_fts, tokenizer):
@@ -459,6 +549,8 @@ def token_segments(s, tokenizer):
         return tokens, token_ids
 
 
+# Deprecated
+###############################################
 def select_prepare_array_fn(model_name):
     if model_name == "imdb_genre_0":  # all as text
         cols = [
@@ -655,3 +747,25 @@ def select_prepare_array_fn(model_name):
     else:
         raise ValueError(f"select_prepare_array_fn not implemented for: {model_name}")
     return array_fn
+
+
+def tokenize_lens(text_fts, tokenizer):
+    return [len(tokenizer.tokenize(ft)) for ft in text_fts]
+
+
+def array_to_string(
+    array,
+    cols=[
+        "Year",
+        "Runtime (Minutes)",
+        "Rating",
+        "Votes",
+        "Revenue (Millions)",
+        "Metascore",
+        "Rank",
+        "Description",
+    ],
+):
+    return np.array(
+        " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]), dtype="<U512"
+    )
