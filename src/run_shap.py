@@ -397,5 +397,5 @@ if __name__ == "__main__":
     ]:
         # pass
         shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
-    run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sfs)
+    run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sf)
     gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
