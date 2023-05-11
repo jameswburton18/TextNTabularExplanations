@@ -48,10 +48,12 @@ def get_dataset_info(ds_type, model_type=None):
                 warn(
                     f"No model type specified for {ds_type}. (This is fine during dataset creation)"
                 )
-            case "all_text":
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
                 text_model_name = "james-burton/imdb_genre_0"
                 ds_name = "james-burton/imdb_genre_prediction_all_text"
             case _:
+                print(f"Using dataset {ds_type}, ordinal version")
                 text_model_name = "james-burton/imdb_genre_9"
                 ds_name = "james-burton/imdb_genre_prediction_ordinal"
         return DatasetInfo(
@@ -82,10 +84,12 @@ def get_dataset_info(ds_type, model_type=None):
                 warn(
                     f"No model type specified for {ds_type}. (This is fine during dataset creation)"
                 )
-            case "all_text":
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
                 text_model_name = "james-burton/prod_sent_0"
                 ds_name = "james-burton/product_sentiment_machine_hack_all_text"
             case _:
+                print(f"Using dataset {ds_type}, ordinal version")
                 text_model_name = "james-burton/prod_sent_9"
                 ds_name = "james-burton/product_sentiment_machine_hack_ordinal"
         return DatasetInfo(
@@ -108,10 +112,12 @@ def get_dataset_info(ds_type, model_type=None):
                 warn(
                     f"No model type specified for {ds_type}. (This is fine during dataset creation)"
                 )
-            case "all_text":
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
                 text_model_name = "james-burton/fake_0"
                 ds_name = "james-burton/fake_job_postings2_all_text"
             case _:
+                print(f"Using dataset {ds_type}, ordinal version")
                 text_model_name = "james-burton/fake_9"
                 ds_name = "james-burton/fake_job_postings2_ordinal"
         return DatasetInfo(
@@ -134,10 +140,12 @@ def get_dataset_info(ds_type, model_type=None):
                 warn(
                     f"No model type specified for {ds_type}. (This is fine during dataset creation)"
                 )
-            case "all_text":
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
                 text_model_name = "james-burton/kick_0"
                 ds_name = "james-burton/kick_starter_funding_all_text"
             case _:
+                print(f"Using dataset {ds_type}, ordinal version")
                 text_model_name = "james-burton/kick_9"
                 ds_name = "james-burton/kick_starter_funding_ordinal"
         return DatasetInfo(
@@ -167,10 +175,12 @@ def get_dataset_info(ds_type, model_type=None):
                 warn(
                     f"No model type specified for {ds_type}. (This is fine during dataset creation)"
                 )
-            case "all_text":
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
                 text_model_name = "james-burton/jigsaw_0"
                 ds_name = "james-burton/jigsaw_unintended_bias100K_all_text"
             case _:
+                print(f"Using dataset {ds_type}, ordinal version")
                 text_model_name = "james-burton/jigsaw_9"
                 ds_name = "james-burton/jigsaw_unintended_bias100K_ordinal"
         return DatasetInfo(
@@ -223,10 +233,12 @@ def get_dataset_info(ds_type, model_type=None):
                 warn(
                     f"No model type specified for {ds_type}. (This is fine during dataset creation)"
                 )
-            case "all_text":
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
                 text_model_name = "james-burton/wine_0"
                 ds_name = "james-burton/wine_reviews_all_text"
             case _:
+                print(f"Using dataset {ds_type}, ordinal version")
                 text_model_name = "james-burton/wine_9"
                 ds_name = "james-burton/wine_reviews_ordinal"
         return DatasetInfo(
