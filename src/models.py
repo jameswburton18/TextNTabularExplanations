@@ -1,5 +1,5 @@
 import numpy as np
-from src.utils import format_text_pred, array_to_string
+from src.utils import format_text_pred
 from datasets import Dataset
 from transformers.pipelines.pt_utils import KeyDataset
 from tqdm import tqdm

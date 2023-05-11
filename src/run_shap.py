@@ -43,7 +43,11 @@ def run_shap(
 
     # Models
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-    if model_type == "all_text":
+    if model_type in [
+        "all_text",
+        "all_as_text_tnt_reorder",
+        "all_as_text_base_reorder",
+    ]:
         text_pipeline = pipeline(
             "text-classification",
             model=di.text_model_name,
@@ -54,9 +58,21 @@ def run_shap(
             top_k=None,
         )
         # Define how to convert all columns to a single string
-        cols_to_str_fn = lambda array: " | ".join(
-            [f"{col}: {val}" for col, val in zip(di.tab_cols + di.text_cols, array)]
-        )
+        if model_type == "all_text":
+            cols_to_str_fn = lambda array: " | ".join(
+                [f"{col}: {val}" for col, val in zip(di.tab_cols + di.text_cols, array)]
+            )
+        else:
+            # Reorder based on the new index order in di
+            cols_to_str_fn = lambda array: " | ".join(
+                [
+                    f"{col}: {val}"
+                    for _, col, val in sorted(
+                        zip(di.new_idx_order, di.tab_cols + di.text_cols, array)
+                    )
+                ]
+            )
+
         model = AllAsTextModel(
             text_pipeline=text_pipeline,
             cols_to_str_fn=cols_to_str_fn,
