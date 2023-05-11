@@ -32,14 +32,12 @@ def run_shap(
     di = get_dataset_info(ds_type, model_type)
     # Data
     train_df = load_dataset(
-        di.ds_name,
-        split="train",  # download_mode="force_redownload"
+        di.ds_name, split="train", download_mode="force_redownload"
     ).to_pandas()
     y_train = train_df[di.label_col]
 
     test_df = load_dataset(
-        di.ds_name,
-        split="test",  # download_mode="force_redownload"
+        di.ds_name, split="test", download_mode="force_redownload"
     ).to_pandas()
     test_df = test_df.sample(test_set_size, random_state=55)
 
@@ -208,11 +206,13 @@ def run_shap(
     return shap_vals
 
 
-def run_all_text_baseline_shap(ds_type, max_samples=100, test_set_size=100):
+def run_all_text_baseline_shap(
+    ds_type, max_samples=100, test_set_size=100, tab_scale_factor=2
+):
     di = get_dataset_info(ds_type, "all_text")
     # Data
     train_df = load_dataset(
-        di.ds_name, split="train"  # , download_mode="force_redownload"
+        di.ds_name, split="train", download_mode="force_redownload"
     ).to_pandas()
     y_train = train_df[di.label_col]
 
@@ -245,7 +245,8 @@ def run_all_text_baseline_shap(ds_type, max_samples=100, test_set_size=100):
     # explainer = shap.explainers.Partition(model=model.predict, masker=tokenizer)
     # shap_vals = explainer(x)
 
-    output_dir = os.path.join("models/shap_vals/", ds_type)
+    pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    output_dir = os.path.join(f"models/shap_vals{pre}/", ds_type)
     print(f"Results will be saved @: {output_dir}")
 
     # Make output directory
@@ -282,7 +283,8 @@ def load_shap_vals(ds_name, add_parent_dir=True, tab_scale_factor=2):
     ) as f:
         shap_all_text = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals/{ds_name}/shap_vals_all_text_baseline.pkl", "rb"
+        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_all_text_baseline.pkl",
+        "rb",
     ) as f:
         shap_all_text_baseline = pickle.load(f)
     return (
@@ -348,7 +350,7 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
         """
     )
     shap_vals = shap_groups[-1]
-    filepath = f"models/shap_vals/{ds_name}/summed_shap_vals_all_text_baseline.pkl"
+    filepath = f"models/shap_vals{pre}/{ds_name}/summed_shap_vals_all_text_baseline.pkl"
     grouped_shap_vals = []
     for label in range(len(di.label_names)):
         shap_for_label = []
@@ -387,13 +389,13 @@ if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
     sf = 1
     for model_type in [
-        "ensemble_50",
-        "ensemble_75",
-        "ensemble_25",
-        "stack",
+        # "ensemble_50",
+        # "ensemble_75",
+        # "ensemble_25",
+        # "stack",
         "all_text",
     ]:
         # pass
         shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
-    # run_all_text_baseline_shap(ds_type=ds_type)
+    run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sfs)
     gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
