@@ -28,6 +28,30 @@ dataset: imdb_genre
 version: all_as_text_tnt_reorder
 batch_size: 32
 
+--- # imdb_genre_3
+config: imdb_genre_3
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_base_reorder
+  - reverse
+dataset: imdb_genre
+version: all_as_text_base_reorder
+batch_size: 32
+reverse: true
+
+--- # imdb_genre_4
+config: imdb_genre_4
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_tnt_reorder
+  - reverse
+dataset: imdb_genre
+version: all_as_text_tnt_reorder
+batch_size: 32
+reverse: true
+
 --- # imdb_genre_9
 config: imdb_genre_9
 model_base: distilbert-base-uncased
@@ -108,6 +132,30 @@ dataset: fake
 version: all_as_text_tnt_reorder
 batch_size: 128
 
+# --- # fake_3
+# config: fake_3
+# model_base: distilbert-base-uncased
+# tags:
+#   - distilbert
+#   - all_as_text_base_reorder
+# - reverse
+# dataset: fake
+# version: all_as_text_base_reorder
+# batch_size: 128
+reverse: true
+
+--- # fake_4
+config: fake_4
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_tnt_reorder
+  - reverse
+dataset: fake
+version: all_as_text_tnt_reorder
+batch_size: 128
+reverse: true
+
 --- # fake_9
 config: fake_9
 model_base: distilbert-base-uncased
@@ -147,6 +195,30 @@ tags:
 dataset: kick
 version: all_as_text_tnt_reorder
 batch_size: 128
+
+--- # kick_3
+config: kick_3
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_base_reorder
+  - reverse
+dataset: kick
+version: all_as_text_base_reorder
+batch_size: 128
+reverse: true
+
+--- # kick_4
+config: kick_4
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_tnt_reorder
+  - reverse
+dataset: kick
+version: all_as_text_tnt_reorder
+batch_size: 128
+reverse: true
 
 --- # kick_9
 config: kick_9
@@ -188,6 +260,30 @@ dataset: jigsaw
 version: all_as_text_tnt_reorder
 batch_size: 128
 
+--- # jigsaw_3
+config: jigsaw_3
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_base_reorder
+  - reverse
+dataset: jigsaw
+version: all_as_text_base_reorder
+batch_size: 128
+reverse: true
+
+--- # jigsaw_4
+config: jigsaw_4
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_tnt_reorder
+  - reverse
+dataset: jigsaw
+version: all_as_text_tnt_reorder
+batch_size: 128
+reverse: true
+
 --- # jigsaw_9
 config: jigsaw_9
 model_base: distilbert-base-uncased
@@ -227,6 +323,30 @@ tags:
 dataset: wine
 version: all_as_text_tnt_reorder
 batch_size: 32
+
+# --- # wine_3
+# config: wine_3
+# model_base: distilbert-base-uncased
+# tags:
+#   - distilbert
+#   - all_as_text_base_reorder
+#   - reverse
+# dataset: wine
+# version: all_as_text_base_reorder
+# batch_size: 32
+reverse: true
+
+--- # wine_4
+config: wine_4
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text_tnt_reorder
+  - reverse
+dataset: wine
+version: all_as_text_tnt_reorder
+batch_size: 32
+reverse: true
 
 --- # wine_9
 config: wine_9

@@ -35,7 +35,7 @@ def multiple_row_to_string(row, cols, multiplier=1, nodesc=False):
     return row
 
 
-def prepare_text(dataset, version, ds_type):
+def prepare_text(dataset, version, ds_type, reverse=False):
     """This is all for preparing the text part of the dataset
     Could be made more robust by referring to dataset_info.py instead"""
     if "imdb" in ds_type:
@@ -67,6 +67,7 @@ def prepare_text(dataset, version, ds_type):
                 "Votes",
                 "Year",
             ]
+            cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
@@ -80,6 +81,7 @@ def prepare_text(dataset, version, ds_type):
                 "Metascore",
                 "Rating",
             ]
+            cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         # Less used versions
@@ -256,6 +258,7 @@ def prepare_text(dataset, version, ds_type):
                 "required_experience",
                 "salary_range",
             ]
+            cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:
@@ -294,6 +297,7 @@ def prepare_text(dataset, version, ds_type):
                 "currency",
                 "country",
             ]
+            cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
@@ -308,6 +312,7 @@ def prepare_text(dataset, version, ds_type):
                 "country",
                 "disable_communication",
             ]
+            cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:
@@ -387,6 +392,7 @@ def prepare_text(dataset, version, ds_type):
                 "bisexual",
                 "asian",
             ]
+            cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
@@ -422,6 +428,7 @@ def prepare_text(dataset, version, ds_type):
                 "funny",
                 "wow",
             ]
+            cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:

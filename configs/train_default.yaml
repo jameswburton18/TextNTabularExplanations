@@ -4,7 +4,7 @@ fast_dev_run: false
 do_train: true
 do_predict: true
 tags:
-- bert
+  - bert
 batch_size: 16
 model_base: bert-base-uncased
 output_root: models/
@@ -26,3 +26,4 @@ lion_optim: false
 pytorch2.0: true
 dataset: books
 version: null
+reverse: false
