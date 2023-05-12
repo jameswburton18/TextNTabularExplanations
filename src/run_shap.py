@@ -318,7 +318,9 @@ def load_shap_vals(ds_name, add_parent_dir=True, tab_scale_factor=2):
 
 def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
     di = get_dataset_info(ds_name)
-    shap_groups, names = load_shap_vals(ds_name, add_parent_dir)
+    shap_groups, names = load_shap_vals(
+        ds_name, add_parent_dir, tab_scale_factor=tab_scale_factor
+    )
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
