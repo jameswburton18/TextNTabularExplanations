@@ -57,30 +57,28 @@ def prepare_text(dataset, version, ds_type):
             dataset = dataset.rename_column("Description", "text")
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise NotImplementedError
             cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
+                "Description",
+                "Metascore",
+                "Runtime (Minutes)",
+                "Revenue (Millions)",
+                "Rank",
+                "Rating",
+                "Votes",
+                "Year",
             ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
-            raise NotImplementedError
             cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
+                "Description",
+                "Votes",
+                "Rank",
+                "Revenue (Millions)",
+                "Runtime (Minutes)",
+                "Year",
+                "Metascore",
+                "Rating",
             ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -222,33 +220,9 @@ def prepare_text(dataset, version, ds_type):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise NotImplementedError
-            cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
+            raise Exception("Same order as original so not needed")
         elif version == "all_as_text_tnt_reorder":
-            raise NotImplementedError
-            cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
+            raise Exception("Same order as original so not needed")
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -271,30 +245,16 @@ def prepare_text(dataset, version, ds_type):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise NotImplementedError
-            cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
+            raise Exception(
+                "Different order to original but same as text and tabular order so not needed"
+            )
         elif version == "all_as_text_tnt_reorder":
-            raise NotImplementedError
             cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
+                "description",
+                "title",
+                "required_education",
+                "required_experience",
+                "salary_range",
             ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -323,30 +283,30 @@ def prepare_text(dataset, version, ds_type):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise NotImplementedError
             cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
+                "desc",
+                "goal",
+                "name",
+                "created_at",
+                "deadline",
+                "keywords",
+                "disable_communication",
+                "currency",
+                "country",
             ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
-            raise NotImplementedError
             cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
+                "desc",
+                "goal",
+                "name",
+                "keywords",
+                "created_at",
+                "deadline",
+                "currency",
+                "country",
+                "disable_communication",
             ]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -394,6 +354,76 @@ def prepare_text(dataset, version, ds_type):
 
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
+        elif version == "all_as_text_base_reorder":
+            cols = [
+                "comment_text",
+                "other_race_or_ethnicity",
+                "other_sexual_orientation",
+                "psychiatric_or_mental_illness",
+                "other_religion",
+                "intellectual_or_learning_disability",
+                "physical_disability",
+                "other_disability",
+                "homosexual_gay_or_lesbian",
+                "other_gender",
+                "funny",
+                "white",
+                "buddhist",
+                "muslim",
+                "christian",
+                "disagree",
+                "transgender",
+                "wow",
+                "male",
+                "sad",
+                "latino",
+                "jewish",
+                "heterosexual",
+                "female",
+                "hindu",
+                "likes",
+                "atheist",
+                "black",
+                "bisexual",
+                "asian",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_tnt_reorder":
+            cols = [
+                "comment_text",
+                "atheist",
+                "buddhist",
+                "hindu",
+                "other_gender",
+                "christian",
+                "other_religion",
+                "jewish",
+                "muslim",
+                "latino",
+                "heterosexual",
+                "black",
+                "male",
+                "female",
+                "other_sexual_orientation",
+                "other_race_or_ethnicity",
+                "asian",
+                "psychiatric_or_mental_illness",
+                "white",
+                "physical_disability",
+                "other_disability",
+                "intellectual_or_learning_disability",
+                "transgender",
+                "homosexual_gay_or_lesbian",
+                "bisexual",
+                "likes",
+                "disagree",
+                "sad",
+                "funny",
+                "wow",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -409,31 +439,11 @@ def prepare_text(dataset, version, ds_type):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise NotImplementedError
-            cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
+            raise Exception(
+                "Different order to original but same as text and tabular order so not needed"
+            )
         elif version == "all_as_text_tnt_reorder":
-            raise NotImplementedError
-            cols = [
-                # "Year",
-                # "Runtime (Minutes)",
-                # "Rating",
-                # "Votes",
-                # "Revenue (Millions)",
-                # "Metascore",
-                # "Rank",
-                # "Description",
-            ]
+            cols = ["description", "province", "country", "price", "points"]
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:

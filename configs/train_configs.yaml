@@ -48,25 +48,25 @@ dataset: prod_sent
 version: all_as_text
 batch_size: 128
 
---- # prod_sent_1
-config: prod_sent_1
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - all_as_text_base_reorder
-dataset: prod_sent
-version: all_as_text_base_reorder
-batch_size: 128
+# --- # prod_sent_1
+# config: prod_sent_1
+# model_base: distilbert-base-uncased
+# tags:
+#   - distilbert
+#   - all_as_text_base_reorder
+# dataset: prod_sent
+# version: all_as_text_base_reorder
+# batch_size: 128
 
---- # prod_sent_2
-config: prod_sent_2
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - all_as_text_tnt_reorder
-dataset: prod_sent
-version: all_as_text_tnt_reorder
-batch_size: 128
+# --- # prod_sent_2
+# config: prod_sent_2
+# model_base: distilbert-base-uncased
+# tags:
+#   - distilbert
+#   - all_as_text_tnt_reorder
+# dataset: prod_sent
+# version: all_as_text_tnt_reorder
+# batch_size: 128
 
 --- # prod_sent_9
 config: prod_sent_9
@@ -88,15 +88,15 @@ dataset: fake
 version: all_as_text
 batch_size: 128
 
---- # fake_1
-config: fake_1
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - all_as_text_base_reorder
-dataset: fake
-version: all_as_text_base_reorder
-batch_size: 128
+# --- # fake_1
+# config: fake_1
+# model_base: distilbert-base-uncased
+# tags:
+#   - distilbert
+#   - all_as_text_base_reorder
+# dataset: fake
+# version: all_as_text_base_reorder
+# batch_size: 128
 
 --- # fake_2
 config: fake_2
@@ -208,15 +208,15 @@ dataset: wine
 version: all_as_text
 batch_size: 32
 
---- # wine_1
-config: wine_1
-model_base: distilbert-base-uncased
-tags:
-  - distilbert
-  - all_as_text_base_reorder
-dataset: wine
-version: all_as_text_base_reorder
-batch_size: 32
+# --- # wine_1
+# config: wine_1
+# model_base: distilbert-base-uncased
+# tags:
+#   - distilbert
+#   - all_as_text_base_reorder
+# dataset: wine
+# version: all_as_text_base_reorder
+# batch_size: 32
 
 --- # wine_2
 config: wine_2
