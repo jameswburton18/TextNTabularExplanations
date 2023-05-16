@@ -369,9 +369,19 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
     )
     shap_vals = shap_groups[-1]
     filepath = f"models/shap_vals{pre}/{ds_name}/summed_shap_vals_all_text_baseline.pkl"
+    col_name_filepath = (
+        f"models/shap_vals{pre}/{ds_name}/col_names_shap_vals_all_text_baseline.pkl"
+    )
+    colon_filepath = (
+        f"models/shap_vals{pre}/{ds_name}/colon_shap_vals_all_text_baseline.pkl"
+    )
     grouped_shap_vals = []
+    grouped_col_name_shap_vals = []
+    grouped_colon_shap_vals = []
     for label in range(len(di.label_names)):
         shap_for_label = []
+        shap_for_col_name = []
+        shap_for_colon = []
         for idx in tqdm(range(len(shap_vals))):
             sv = shap_vals[idx, :, label]
             text_ft_ends = [1] + list(np.where(sv.data == "| ")[0]) + [len(sv.data) + 1]
@@ -396,11 +406,33 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
                     for i in range(len(text_ft_ends) - 1)
                 ]
             )
+            colon_idxs = np.where(sv.data == ": ")[0]
+            col_idxs_after_ft = [
+                colon_idxs[list(np.where(colon_idxs > te)[0])[0]]
+                for te in text_ft_ends[:-1]
+            ]
+            ft_name_vals = np.array(
+                [
+                    np.sum(sv.values[text_ft_ends[i] : col_idxs_after_ft[i]])
+                    for i in range(len(text_ft_ends) - 1)
+                ]
+            )
+            colon_vals = np.array(sv.values[col_idxs_after_ft])
             shap_for_label.append(val)
+            shap_for_col_name.append(ft_name_vals)
+            shap_for_colon.append(colon_vals)
         grouped_shap_vals.append(np.vstack(shap_for_label))
+        grouped_col_name_shap_vals.append(shap_for_col_name)
+        grouped_colon_shap_vals.append(shap_for_colon)
     print(f"Saving to {filepath}")
     with open(filepath, "wb") as f:
         pickle.dump(np.array(grouped_shap_vals), f)
+    print(f"Saving to {col_name_filepath}")
+    with open(col_name_filepath, "wb") as f:
+        pickle.dump(np.array(grouped_col_name_shap_vals), f)
+    print(f"Saving to {colon_filepath}")
+    with open(colon_filepath, "wb") as f:
+        pickle.dump(np.array(grouped_colon_shap_vals), f)
 
 
 if __name__ == "__main__":
