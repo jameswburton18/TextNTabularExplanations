@@ -10,17 +10,16 @@
 #SBATCH --qos short #long-high-prio
 #SBATCH -t 02-00:00
 # -x shows which ones to ignore
-# #SBATCH -x gpu[0-8] #[7,8,10,11,12]
-# #SBATCH --gres=gpu:ampere:1 #--gres gpu for normal, --gres=gpu:ampere:1 for whole 80gb card
-#SBATCH -x gpu[0-6,10-12] #[7,8,10,11,12]
-#SBATCH --gres gpu #--gres gpu for normal, --gres=gpu:ampere:1 for whole 80gb card
+#SBATCH -x gpu[0-8] #[7,8,10,11,12]
+#SBATCH --gres=gpu:ampere:1 #--gres gpu for normal, --gres=gpu:ampere:1 for whole 80gb card
+# #SBATCH -x gpu[0-6,10-12] #[7,8,10,11,12]
+# #SBATCH --gres gpu #--gres gpu for normal, --gres=gpu:ampere:1 for whole 80gb card
 
 # Job name appears in the squeue output, output is the output filename 
 #SBATCH -o logs/%x-%A.out
 
 # Pick how much memory to allocate per CPU core.
 #SBATCH --mem 8G
-#SBATCH --gres gpu
 
 source ./env/bin/activate
 
