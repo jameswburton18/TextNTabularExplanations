@@ -42,7 +42,10 @@ def run_shap(
     test_df = test_df.sample(test_set_size, random_state=55)
 
     # Models
-    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+    tokenizer = AutoTokenizer.from_pretrained(
+        # "distilbert-base-uncased"
+        "distilroberta-base"
+    )
     if model_type in [
         "all_text",
         "all_as_text_tnt_reorder",
@@ -50,7 +53,7 @@ def run_shap(
     ]:
         text_pipeline = pipeline(
             "text-classification",
-            model=di.text_model_name,
+            model=di.text_model_name[:-1] + "2" + di.text_model_name[-1],
             tokenizer=tokenizer,
             device="cuda:0",
             truncation=True,
@@ -81,7 +84,7 @@ def run_shap(
     else:
         text_pipeline = pipeline(
             "text-classification",
-            model=di.text_model_name,
+            model=di.text_model_name[:-1] + "2" + di.text_model_name[-1],
             tokenizer=tokenizer,
             device="cuda:0",
             truncation=True,
@@ -208,8 +211,9 @@ def run_shap(
     shap_vals = explainer(x)
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    text_model_name = "_drob"
 
-    output_dir = os.path.join(f"models/shap_vals{pre}/", ds_type)
+    output_dir = os.path.join(f"models/shap_vals{text_model_name}{pre}/", ds_type)
     print(f"Results will be saved @: {output_dir}")
 
     # Make output directory
@@ -238,10 +242,13 @@ def run_all_text_baseline_shap(
     test_df = test_df.sample(test_set_size, random_state=55)
 
     # Models
-    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+    tokenizer = AutoTokenizer.from_pretrained(
+        # "distilbert-base-uncased"
+        "distilroberta-base"
+    )
     text_pipeline = pipeline(
         "text-classification",
-        model=di.text_model_name,
+        model=di.text_model_name[:-1] + "2" + di.text_model_name[-1],
         tokenizer=tokenizer,
         device="cuda:0",
         truncation=True,
@@ -262,7 +269,8 @@ def run_all_text_baseline_shap(
     # shap_vals = explainer(x)
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
-    output_dir = os.path.join(f"models/shap_vals{pre}/", ds_type)
+    text_model_name = "_drob"
+    output_dir = os.path.join(f"models/shap_vals{text_model_name}{pre}/", ds_type)
     print(f"Results will be saved @: {output_dir}")
 
     # Make output directory
@@ -278,28 +286,34 @@ def run_all_text_baseline_shap(
 def load_shap_vals(ds_name, add_parent_dir=True, tab_scale_factor=2):
     pre = "../" if add_parent_dir else ""  # for running from notebooks
     tab_pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    text_model_name = "_drob"
     with open(
-        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_ensemble_25.pkl", "rb"
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_ensemble_25.pkl",
+        "rb",
     ) as f:
         shap_25 = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_ensemble_50.pkl", "rb"
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_ensemble_50.pkl",
+        "rb",
     ) as f:
         shap_50 = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_ensemble_75.pkl", "rb"
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_ensemble_75.pkl",
+        "rb",
     ) as f:
         shap_75 = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_stack.pkl", "rb"
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_stack.pkl",
+        "rb",
     ) as f:
         shap_stack = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_all_text.pkl", "rb"
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_all_text.pkl",
+        "rb",
     ) as f:
         shap_all_text = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{tab_pre}/{ds_name}/shap_vals_all_text_baseline.pkl",
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_all_text_baseline.pkl",
         "rb",
     ) as f:
         shap_all_text_baseline = pickle.load(f)
@@ -324,6 +338,7 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    text_model_name = "_drob"
 
     for shap_vals, name in zip(shap_groups[:-1], names[:-1]):
         print(
@@ -333,7 +348,7 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
             #################
             """
         )
-        filepath = f"models/shap_vals{pre}/{ds_name}/summed_shap_vals_{name}.pkl"
+        filepath = f"models/shap_vals{text_model_name}{pre}/{ds_name}/summed_shap_vals_{name}.pkl"
         grouped_shap_vals = []
         for label in range(len(di.label_names)):
             shap_for_label = []
@@ -368,13 +383,9 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
         """
     )
     shap_vals = shap_groups[-1]
-    filepath = f"models/shap_vals{pre}/{ds_name}/summed_shap_vals_all_text_baseline.pkl"
-    col_name_filepath = (
-        f"models/shap_vals{pre}/{ds_name}/col_names_shap_vals_all_text_baseline.pkl"
-    )
-    colon_filepath = (
-        f"models/shap_vals{pre}/{ds_name}/colon_shap_vals_all_text_baseline.pkl"
-    )
+    filepath = f"models/shap_vals{text_model_name}{pre}/{ds_name}/summed_shap_vals_all_text_baseline.pkl"
+    col_name_filepath = f"models/shap_vals{text_model_name}{pre}/{ds_name}/col_names_shap_vals_all_text_baseline.pkl"
+    colon_filepath = f"models/shap_vals{text_model_name}{pre}/{ds_name}/colon_shap_vals_all_text_baseline.pkl"
     grouped_shap_vals = []
     grouped_col_name_shap_vals = []
     grouped_colon_shap_vals = []
@@ -439,13 +450,13 @@ if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
     sf = 1
     for model_type in [
-        # "ensemble_50",
-        # "ensemble_75",
-        # "ensemble_25",
-        # "stack",
+        "ensemble_50",
+        "ensemble_75",
+        "ensemble_25",
+        "stack",
         "all_text",
     ]:
-        # pass
-        shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
-    run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sf)
+        pass
+    #     shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
+    # run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sf)
     gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
