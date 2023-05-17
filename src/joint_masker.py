@@ -330,7 +330,7 @@ class JointMasker(Masker):
         if self._s != joined_s:
             self._s = joined_s
             if len(s) == 1:
-                tokens, token_ids = self.token_segments(s)
+                tokens, token_ids = self.token_segments(s[0])
                 self._tokenized_s = [np.array(token_ids)]
                 self._segments_s = [np.array(tokens)]
             else:
