@@ -414,6 +414,9 @@ class JointMasker(Masker):
 
         """
         text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # joiner = getattr_silent(self.tokenizer, "sep_token")
+        # joiner = " " if joiner is None else joiner
+        # text = joiner.join(str(s) for s in s[self.n_tab_cols :])
 
         # Same as Text masker
         ################################

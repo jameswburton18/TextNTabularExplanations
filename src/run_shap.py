@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="imdb_genre",
+    default="kick",
     help="Name of dataset to use",
 )
 
@@ -32,12 +32,14 @@ def run_shap(
     di = get_dataset_info(ds_type, model_type)
     # Data
     train_df = load_dataset(
-        di.ds_name, split="train", download_mode="force_redownload"
+        di.ds_name,
+        split="train",  # download_mode="force_redownload"
     ).to_pandas()
     y_train = train_df[di.label_col]
 
     test_df = load_dataset(
-        di.ds_name, split="test", download_mode="force_redownload"
+        di.ds_name,
+        split="test",  # download_mode="force_redownload"
     ).to_pandas()
     test_df = test_df.sample(test_set_size, random_state=55)
 
@@ -172,7 +174,23 @@ def run_shap(
             raise ValueError(f"Invalid model type of {model_type}")
 
     np.random.seed(1)
-    x = test_df[di.tab_cols + di.text_cols].values
+    # x = test_df[di.tab_cols + di.text_cols].values
+    x = np.array(
+        [
+            [
+                1800.0,
+                0.0,
+                9.0,
+                8.0,
+                1413695816,
+                1406407374,
+                "Romania: Timeless Beauty 2015 Calendar",
+                "A calendar featuring the scenic and architectural beauty of Romania.",
+                "romania-timeless-beauty-calendar",
+            ]
+        ],
+        dtype=object,
+    )
     # x = np.array([[85, 25.0, "US", "tough and chewy", "Oregon"]], dtype=object)
     # x = np.array([[9.0, "Hello world"]], dtype=object)
     # x = np.array(
@@ -456,7 +474,7 @@ if __name__ == "__main__":
         "stack",
         "all_text",
     ]:
-        pass
-    #     shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
-    # run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sf)
-    gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
+        # pass
+        shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
+    run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sf)
+    # gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
