@@ -24,10 +24,21 @@ parser.add_argument(
     default="kick",
     help="Name of dataset to use",
 )
+parser.add_argument(
+    "--text_model_code",
+    type=str,
+    default="dbert",
+    help="Code name for text model to use",
+)
 
 
 def run_shap(
-    model_type, ds_type, max_samples=100, test_set_size=100, tab_scale_factor=2
+    model_type,
+    ds_type,
+    text_model_code,
+    max_samples=100,
+    test_set_size=100,
+    tab_scale_factor=2,
 ):
     di = get_dataset_info(ds_type, model_type)
     # Data
@@ -43,11 +54,18 @@ def run_shap(
     ).to_pandas()
     test_df = test_df.sample(test_set_size, random_state=55)
 
+    if text_model_code == "dbert":
+        text_model_base = "distilbert-base-uncased"
+        my_text_model = di.text_model_name
+    elif text_model_code == "drob":
+        text_model_base = "distilroberta-base"
+        # 0s and 9s become 20s and 29s
+        my_text_model = di.text_model_name[:-1] + "2" + di.text_model_name[-1]
+    else:
+        raise ValueError(f"Invalid text model code of {text_model_code}")
+
     # Models
-    tokenizer = AutoTokenizer.from_pretrained(
-        # "distilbert-base-uncased"
-        "distilroberta-base"
-    )
+    tokenizer = AutoTokenizer.from_pretrained(text_model_base)
     if model_type in [
         "all_text",
         "all_as_text_tnt_reorder",
@@ -55,7 +73,7 @@ def run_shap(
     ]:
         text_pipeline = pipeline(
             "text-classification",
-            model=di.text_model_name[:-1] + "2" + di.text_model_name[-1],
+            model=my_text_model,
             tokenizer=tokenizer,
             device="cuda:0",
             truncation=True,
@@ -86,7 +104,7 @@ def run_shap(
     else:
         text_pipeline = pipeline(
             "text-classification",
-            model=di.text_model_name[:-1] + "2" + di.text_model_name[-1],
+            model=my_text_model,
             tokenizer=tokenizer,
             device="cuda:0",
             truncation=True,
@@ -229,7 +247,7 @@ def run_shap(
     shap_vals = explainer(x)
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
-    text_model_name = "_drob"
+    text_model_name = f"_{text_model_code}"
 
     output_dir = os.path.join(f"models/shap_vals{text_model_name}{pre}/", ds_type)
     print(f"Results will be saved @: {output_dir}")
@@ -245,7 +263,7 @@ def run_shap(
 
 
 def run_all_text_baseline_shap(
-    ds_type, max_samples=100, test_set_size=100, tab_scale_factor=2
+    ds_type, text_model_code, max_samples=100, test_set_size=100, tab_scale_factor=2
 ):
     di = get_dataset_info(ds_type, "all_text")
     # Data
@@ -259,14 +277,21 @@ def run_all_text_baseline_shap(
     ).to_pandas()
     test_df = test_df.sample(test_set_size, random_state=55)
 
+    if text_model_code == "dbert":
+        text_model_base = "distilbert-base-uncased"
+        my_text_model = di.text_model_name
+    elif text_model_code == "drob":
+        text_model_base = "distilroberta-base"
+        # 0s and 9s become 20s and 29s
+        my_text_model = di.text_model_name[:-1] + "2" + di.text_model_name[-1]
+    else:
+        raise ValueError(f"Invalid text model code of {text_model_code}")
+
     # Models
-    tokenizer = AutoTokenizer.from_pretrained(
-        # "distilbert-base-uncased"
-        "distilroberta-base"
-    )
+    tokenizer = AutoTokenizer.from_pretrained(text_model_base)
     text_pipeline = pipeline(
         "text-classification",
-        model=di.text_model_name[:-1] + "2" + di.text_model_name[-1],
+        model=my_text_model,
         tokenizer=tokenizer,
         device="cuda:0",
         truncation=True,
@@ -287,7 +312,7 @@ def run_all_text_baseline_shap(
     # shap_vals = explainer(x)
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
-    text_model_name = "_drob"
+    text_model_name = f"_{text_model_code}"
     output_dir = os.path.join(f"models/shap_vals{text_model_name}{pre}/", ds_type)
     print(f"Results will be saved @: {output_dir}")
 
@@ -301,10 +326,10 @@ def run_all_text_baseline_shap(
     return shap_vals
 
 
-def load_shap_vals(ds_name, add_parent_dir=True, tab_scale_factor=2):
+def load_shap_vals(ds_name, text_model_code, add_parent_dir=True, tab_scale_factor=2):
     pre = "../" if add_parent_dir else ""  # for running from notebooks
     tab_pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
-    text_model_name = "_drob"
+    text_model_name = f"_{text_model_code}"
     with open(
         f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_ensemble_25.pkl",
         "rb",
@@ -348,15 +373,30 @@ def load_shap_vals(ds_name, add_parent_dir=True, tab_scale_factor=2):
     )
 
 
-def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
+def gen_summary_shap_vals(
+    ds_name, text_model_code, add_parent_dir=False, tab_scale_factor=2
+):
     di = get_dataset_info(ds_name)
     shap_groups, names = load_shap_vals(
-        ds_name, add_parent_dir, tab_scale_factor=tab_scale_factor
+        ds_name,
+        text_model_code=text_model_code,
+        add_parent_dict=add_parent_dir,
+        tab_scale_factor=tab_scale_factor,
     )
-    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+    if text_model_code == "dbert":
+        text_model_base = "distilbert-base-uncased"
+        my_text_model = di.text_model_name
+    elif text_model_code == "drob":
+        text_model_base = "distilroberta-base"
+        # 0s and 9s become 20s and 29s
+        my_text_model = di.text_model_name[:-1] + "2" + di.text_model_name[-1]
+    else:
+        raise ValueError(f"Invalid text model code of {text_model_code}")
+
+    tokenizer = AutoTokenizer.from_pretrained(text_model_base)
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
-    text_model_name = "_drob"
+    text_model_name = f"_{text_model_code}"
 
     for shap_vals, name in zip(shap_groups[:-1], names[:-1]):
         print(
@@ -466,6 +506,7 @@ def gen_summary_shap_vals(ds_name, add_parent_dir=False, tab_scale_factor=2):
 
 if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
+    text_model_code = parser.parse_args().text_model_code
     sf = 1
     for model_type in [
         "ensemble_50",
@@ -474,7 +515,14 @@ if __name__ == "__main__":
         "stack",
         "all_text",
     ]:
-        # pass
-        shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
-    run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sf)
-    gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
+        pass
+        shap_vals = run_shap(
+            model_type,
+            ds_type=ds_type,
+            tab_scale_factor=sf,
+            text_model_code=text_model_code,
+        )
+    run_all_text_baseline_shap(
+        ds_type=ds_type, text_model_code=text_model_code, tab_scale_factor=sf
+    )
+    gen_summary_shap_vals(ds_type, text_model_code=text_model_code, tab_scale_factor=sf)
