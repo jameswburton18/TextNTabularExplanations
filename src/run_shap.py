@@ -174,23 +174,23 @@ def run_shap(
             raise ValueError(f"Invalid model type of {model_type}")
 
     np.random.seed(1)
-    # x = test_df[di.tab_cols + di.text_cols].values
-    x = np.array(
-        [
-            [
-                1800.0,
-                0.0,
-                9.0,
-                8.0,
-                1413695816,
-                1406407374,
-                "Romania: Timeless Beauty 2015 Calendar",
-                "A calendar featuring the scenic and architectural beauty of Romania.",
-                "romania-timeless-beauty-calendar",
-            ]
-        ],
-        dtype=object,
-    )
+    x = test_df[di.tab_cols + di.text_cols].values
+    # x = np.array(
+    #     [
+    #         [
+    #             1800.0,
+    #             0.0,
+    #             9.0,
+    #             8.0,
+    #             1413695816,
+    #             1406407374,
+    #             "Romania: Timeless Beauty 2015 Calendar",
+    #             "A calendar featuring the scenic and architectural beauty of Romania.",
+    #             "romania-timeless-beauty-calendar",
+    #         ]
+    #     ],
+    #     dtype=object,
+    # )
     # x = np.array([[85, 25.0, "US", "tough and chewy", "Oregon"]], dtype=object)
     # x = np.array([[9.0, "Hello world"]], dtype=object)
     # x = np.array(
@@ -477,4 +477,4 @@ if __name__ == "__main__":
         # pass
         shap_vals = run_shap(model_type, ds_type=ds_type, tab_scale_factor=sf)
     run_all_text_baseline_shap(ds_type=ds_type, tab_scale_factor=sf)
-    # gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
+    gen_summary_shap_vals(ds_type, tab_scale_factor=sf)
