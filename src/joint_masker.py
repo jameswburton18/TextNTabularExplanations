@@ -8,6 +8,7 @@ from shap.maskers._text import (
     connectors,
     TokenGroup,
 )
+import shap
 from shap.utils import safe_isinstance, MaskedModel, sample
 from shap.utils.transformers import (
     parse_prefix_suffix_for_tokenizer,
@@ -153,48 +154,50 @@ class JointMasker(Masker):
         """
         masked_tab = self.tab_mask_call(mask[: self.n_tab_cols], x[: self.n_tab_cols])
 
-        self._text_ft_index_ends(x[self.n_tab_cols :])
-        text = " ".join(str(s) for s in x[self.n_tab_cols :])
-        masked_text = self.text_mask_call(mask[self.n_tab_cols :], text)
+        # self._text_ft_index_ends(x[self.n_tab_cols :])
+        # text = " ".join(str(s) for s in x[self.n_tab_cols :])
+        text = self.tokenizer.sep_token.join(str(s) for s in x[self.n_tab_cols :])
+        # masked_text = self.text_mask_call(mask[self.n_tab_cols :], text)
+        masked_text = self.text_mask_call(mask[self.n_tab_cols :], x[self.n_tab_cols :])
 
         # We unpack the string from the tuple and array
-        masked_tab[self.text_cols] = masked_text[0][0]
+        masked_tab[self.text_cols] = masked_text[0]
 
         return masked_tab.values
 
-    def _text_ft_index_ends(self, s):
-        """
-        This is to seperate back out the text features so that it won't collapse the mask tokens
-        across different text features
-        """
-        lens = []
-        sent_indices = []
-        for idx, col in enumerate(s):
-            # First text col
-            if lens == []:
-                tokens, token_ids = self.token_segments(str(col))
-                # -1 as we don't use SEP tokens (unless it's the only text col)
-                also_last = 1 if len(s) == 1 else 0
-                token_len = len(tokens) - 1 + also_last
-                lens.append(token_len - 1)
-                sent_indices.extend([idx] * token_len)
-            # Last text col
-            elif idx == len(s) - 1:
-                tokens, token_ids = self.token_segments(str(col))
-                # -1 for CLS tokens
-                token_len = len(tokens) - 1
-                lens.append(lens[-1] + token_len)
-                sent_indices.extend([idx] * token_len)
-            # Middle text cols
-            else:
-                tokens, token_ids = self.token_segments(str(col))
-                # -2 for CLS and SEP tokens
-                token_len = len(tokens) - 2
-                lens.append(lens[-1] + token_len)
-                sent_indices.extend([idx] * token_len)
+    # def _text_ft_index_ends(self, s):
+    #     """
+    #     This is to seperate back out the text features so that it won't collapse the mask tokens
+    #     across different text features
+    #     """
+    #     lens = []
+    #     sent_indices = []
+    #     for idx, col in enumerate(s):
+    #         # First text col
+    #         if lens == []:
+    #             tokens, token_ids = self.token_segments(str(col))
+    #             # -1 as we don't use SEP tokens (unless it's the only text col)
+    #             also_last = 1 if len(s) == 1 else 0
+    #             token_len = len(tokens) - 1 + also_last
+    #             lens.append(token_len - 1)
+    #             sent_indices.extend([idx] * token_len)
+    #         # Last text col
+    #         elif idx == len(s) - 1:
+    #             tokens, token_ids = self.token_segments(str(col))
+    #             # -1 for CLS tokens
+    #             token_len = len(tokens) - 1
+    #             lens.append(lens[-1] + token_len)
+    #             sent_indices.extend([idx] * token_len)
+    #         # Middle text cols
+    #         else:
+    #             tokens, token_ids = self.token_segments(str(col))
+    #             # -2 for CLS and SEP tokens
+    #             token_len = len(tokens) - 2
+    #             lens.append(lens[-1] + token_len)
+    #             sent_indices.extend([idx] * token_len)
 
-        self._sent_split_idxs = lens[:-1]
-        self.sent_indices = sent_indices
+    #     self._sent_split_idxs = lens[:-1]
+    #     self.sent_indices = sent_indices
 
     def tab_mask_call(self, mask, x):
         """
@@ -260,63 +263,97 @@ class JointMasker(Masker):
             mask = mask.copy()
             mask[: self.keep_prefix] = True
             mask[-self.keep_suffix :] = True
+        #  split mask into groups based on [len(col) for col in self._tokenized_s] ([9, 11, 12])
+        mask_per_col = np.split(
+            mask, np.cumsum([len(col) for col in self._tokenized_s])[:-1]
+        )
+        out = []
+        for col_idx, mask in enumerate(mask_per_col):
+            if self.output_type == "string":
+                out_parts = []
+                col_out = []
+                is_previous_appended_token_mask_token = False
+                sep_token = getattr_silent(self.tokenizer, "sep_token")
+                for i, v in enumerate(mask):
+                    # mask ignores separator tokens and keeps them unmasked
+                    if v or sep_token == self._segments_s[col_idx][i]:
+                        out_parts.append(self._segments_s[col_idx][i])
+                        is_previous_appended_token_mask_token = False
+                        # Change in here to show diffs between desc and title
+                    else:
+                        # If we don't collapse any mask tokens then we add another mask token
+                        # Or if the previous appended token was not a mask token
+                        if not self.collapse_mask_token or (
+                            self.collapse_mask_token
+                            and not is_previous_appended_token_mask_token
+                        ):
+                            out_parts.append(" " + self.mask_token)
+                            is_previous_appended_token_mask_token = True
+                            # Length 9, 0,1,2,3,4 is the first group, 5,6 2nd and 7,8 3rd
+                            # All the masks are false, so
+                    # if i in self._sent_split_idxs:
+                    #     out.append("".join(out_parts))
+                    #     out_parts = []
+                    #     is_previous_appended_token_mask_token = False
+                col_out.append("".join(out_parts))
+                # out.append("".join("".join(out_parts).split(self.tokenizer.sep_token)))
 
-        if self.output_type == "string":
-            out_parts = []
-            out = []
-            is_previous_appended_token_mask_token = False
-            sep_token = getattr_silent(self.tokenizer, "sep_token")
-            for i, v in enumerate(mask):
-                # mask ignores separator tokens and keeps them unmasked
-                if v or sep_token == self._segments_s[i]:
-                    out_parts.append(self._segments_s[i])
-                    is_previous_appended_token_mask_token = False
-                    # Change in here to show diffs between desc and title
-                else:
-                    # If we don't collapse any mask tokens then we add another mask token
-                    # Or if the previous appended token was not a mask token
-                    if not self.collapse_mask_token or (
-                        self.collapse_mask_token
-                        and not is_previous_appended_token_mask_token
-                    ):
-                        out_parts.append(" " + self.mask_token)
-                        is_previous_appended_token_mask_token = True
-                        # Length 9, 0,1,2,3,4 is the first group, 5,6 2nd and 7,8 3rd
-                        # All the masks are false, so
-                if i in self._sent_split_idxs:
-                    out.append("".join(out_parts))
-                    out_parts = []
-                    is_previous_appended_token_mask_token = False
-            out.append("".join(out_parts))
+                for i in range(len(col_out)):
+                    col_out[i] = re.sub(r"[\s]+", " ", col_out[i]).strip()
+                    if safe_isinstance(self.tokenizer, SENTENCEPIECE_TOKENIZERS):
+                        col_out[i] = col_out[i].replace("▁", " ")
 
-            for i in range(len(out)):
-                out[i] = re.sub(r"[\s]+", " ", out[i]).strip()
-                if safe_isinstance(self.tokenizer, SENTENCEPIECE_TOKENIZERS):
-                    out[i] = out[i].replace("▁", " ")
-
-        else:
-            if self.mask_token_id is None:
-                out = self._tokenized_s[mask]
             else:
-                out = np.array(
-                    [
-                        self._tokenized_s[i] if mask[i] else self.mask_token_id
-                        for i in range(len(mask))
-                    ]
-                )
-
+                if self.mask_token_id is None:
+                    col_out = self._tokenized_s[col_idx][mask]
+                else:
+                    col_out = np.array(
+                        [
+                            self._tokenized_s[col_idx][i]
+                            if mask[i]
+                            else self.mask_token_id
+                            for i in range(len(mask))
+                        ]
+                    )
+            out.extend(col_out)
         # for some sentences with strange configurations around the separator tokens, tokenizer encoding/decoding may contain
         # extra unnecessary tokens, for example ''. you may want to strip out spaces adjacent to separator tokens. Refer to PR
         # for more details.
-        return (np.array([out]),)
+        # print(out)
+        assert len(out) == len(self._tokenized_s)
+        # return
+        return (np.array(out),)
 
     def _update_s_cache(self, s):
-        """Same as Text masker"""
-        if self._s != s:
-            self._s = s
-            tokens, token_ids = self.token_segments(s)
-            self._tokenized_s = np.array(token_ids)
-            self._segments_s = np.array(tokens)
+        # """Same as Text masker"""
+        joined_s = "".join(col for col in s)
+        if self._s != joined_s:
+            self._s = joined_s
+            if len(s) == 1:
+                tokens, token_ids = self.token_segments(s[0])
+                self._tokenized_s = [np.array(token_ids)]
+                self._segments_s = [np.array(tokens)]
+            else:
+                all_tokens = []
+                all_token_ids = []
+                for col_idx, text_col in enumerate(s):
+                    col_tokens, col_token_ids = self.token_segments(text_col)
+                    # First col
+                    if col_idx == 0:
+                        col_token_ids = col_token_ids[:-1]
+                        col_tokens = col_tokens[:-1]
+                    # Middle cols
+                    elif col_idx != len(s) - 1:
+                        col_token_ids = col_token_ids[1:-1]
+                        col_tokens = col_tokens[1:-1]
+                    # Last col
+                    else:
+                        col_token_ids = col_token_ids[1:]
+                        col_tokens = col_tokens[1:]
+                    all_tokens.append(np.array(col_tokens))
+                    all_token_ids.append(np.array(col_token_ids))
+                self._tokenized_s = all_token_ids
+                self._segments_s = all_tokens
 
     def token_segments(self, s):
         """Same as Text masker"""
@@ -413,7 +450,12 @@ class JointMasker(Masker):
         * l text groups (labelled [n+k+m, n+k+m+l-1])
 
         """
-        text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = " ".join(str(s) for s in x[self.n_tab_cols :])
+        # text = self.tokenizer.sep_token.join(str(s) for s in s[self.n_tab_cols :])
+        text = s[self.n_tab_cols :]
+        # joiner = getattr_silent(self.tokenizer, "sep_token")
+        # joiner = " " if joiner is None else joiner
+        # text = joiner.join(str(s) for s in s[self.n_tab_cols :])
 
         # Same as Text masker
         ################################
@@ -425,27 +467,37 @@ class JointMasker(Masker):
         else:
             special_tokens = [sep_token]
 
-        # convert the text segments to tokens that the partition tree function expects
-        tokens = []
-        space_end = re.compile(r"^.*\W$")
-        letter_start = re.compile(r"^[A-z]")
-        for i, v in enumerate(self._segments_s):
-            if (
-                i > 0
-                and space_end.match(self._segments_s[i - 1]) is None
-                and letter_start.match(v) is not None
-                and tokens[i - 1] != ""
-            ):
-                tokens.append("##" + v.strip())
-            else:
-                tokens.append(v.strip())
+        text_pts = []
+        all_tokens = []
+        for col in range(len(self._tokenized_s)):
+            # convert the text segments to tokens that the partition tree function expects
+            tokens = []
+            space_end = re.compile(r"^.*\W$")
+            letter_start = re.compile(r"^[A-z]")
+            for i, v in enumerate(self._segments_s[col]):
+                if (
+                    i > 0
+                    and space_end.match(self._segments_s[col][i - 1]) is None
+                    and letter_start.match(v) is not None
+                    and tokens[i - 1] != ""
+                ):
+                    tokens.append("##" + v.strip())
+                else:
+                    tokens.append(v.strip())
 
-        text_pt = partition_tree(tokens, special_tokens, self.sent_indices)
-        text_pt[:, 2] = text_pt[:, 3]
-        text_pt[:, 2] /= text_pt[:, 2].max()
+            # text_pt = partition_tree(tokens, special_tokens, self.sent_indices)
+            text_pt = shap.maskers._text.partition_tree(tokens, special_tokens)
+            text_pt[:, 2] = text_pt[:, 3]
+            text_pt[:, 2] /= text_pt[:, 2].max()
+            text_pts.append(text_pt)
+            all_tokens.extend(tokens)
         ################################
 
-        n_text_leaves = len(tokens)
+        if len(text_pts) == 1:
+            text_pt = text_pts[0]
+        else:
+            text_pt = join_dendograms(text_pts)
+        n_text_leaves = len(all_tokens)
         n_text_groups = len(text_pt)
 
         if self.tab_pt is not None:
@@ -497,24 +549,33 @@ class JointMasker(Masker):
 
     def shape(self, s):
         """The shape of what we return as a masker."""
-        text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = self.tokenizer.sep_token.join(str(s) for s in s[self.n_tab_cols :])
         # text = self.cols_to_text_fn(s[self.n_tab_cols :])
-        self._update_s_cache(text)
-        return (self.max_samples, self.n_tab_cols + len(self._tokenized_s))
+        self._update_s_cache(s[self.n_tab_cols :])
+        # return (self.max_samples, self.n_tab_cols + len(self._tokenized_s))
+        return (
+            self.max_samples,
+            self.n_tab_cols + sum([len(col) for col in self._tokenized_s]),
+        )
 
     def mask_shapes(self, s):
         """The shape of the masks we expect."""
-        text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = self.tokenizer.sep_token.join(str(s) for s in s[self.n_tab_cols :])
         # text = self.cols_to_text_fn(s[self.n_tab_cols :])
-        self._update_s_cache(text)
-        return [(self.n_tab_cols + len(self._tokenized_s),)]
+        self._update_s_cache(s[self.n_tab_cols :])
+        # return [(self.n_tab_cols + len(self._tokenized_s),)]
+        return [(self.n_tab_cols + sum([len(col) for col in self._tokenized_s]),)]
 
     def feature_names(self, s):
         """The names of the features for each mask position for the given input string."""
-        text = " ".join(str(s) for s in s[self.n_tab_cols :])
+        # text = " ".join(str(s) for s in x[self.n_tab_cols :])
+        # text = self.tokenizer.sep_token.join(str(s) for s in s[self.n_tab_cols :])
         # text = self.cols_to_text_fn(s[self.n_tab_cols :])
-        self._update_s_cache(text)
-        return [self.tab_feature_names + [v for v in self._segments_s]]
+        self._update_s_cache(s[self.n_tab_cols :])
+        # return [self.tab_feature_names + [v for col in self._segments_s for v in col ]]
+        return [self.tab_feature_names + [v for col in self._segments_s for v in col]]
 
 
 class Token:
@@ -613,6 +674,57 @@ def merge_score(group1, group2, special_tokens):
     score -= len(group1) + len(group2)
     # print(group1, group2, score)
     return score
+
+
+def join_dendograms(pts):
+    n_leaves = [int(max(pt[:, 3])) for pt in pts]
+    n_groups = [len(pt) for pt in pts]
+
+    pt_join = np.zeros((sum(n_groups) + len(pts) - 1, 4))
+    # For the first partition tree the leaves (ie the words/features) are unchanged,
+    # but the group numbers need to be shifted by the total number of leaves, less
+    # the number of leaves in the first tree which are already accounted for
+    pt_join[: n_groups[0], :2] = np.where(
+        pts[0][:, :2] < n_leaves[0],
+        pts[0][:, :2],
+        pts[0][:, :2] + sum(n_leaves) - n_leaves[0],
+    )
+    # For the remaining trees the leaves need to be shifted by the sum of the leaves
+    # of the previous trees. The group numbers need to be shifted by the total number
+    # of leaves, less the number of leaves in the current tree which are already accounted for,
+    # plus the number of groups in the previous trees
+    g_cs = np.cumsum(n_groups)
+    l_cs = np.cumsum(n_leaves)
+    for pt, i in zip(pts[1:], range(1, len(pts))):
+        pt_join[g_cs[i - 1] : g_cs[i], :2] = np.where(
+            pt[:, :2] < n_leaves[i],
+            pt[:, :2] + l_cs[i - 1],
+            pt[:, :2] + sum(n_leaves) - n_leaves[i] + g_cs[i - 1],
+        )
+
+    # 3rd and 4th columns are left unchanged
+    pt_join[: -(len(pts) - 1), 2:] = np.concatenate([pt[:, 2:] for pt in pts])
+    # pt_join[:, 2] = pt_join[:, 3]
+    # pt_join[:, 2] /= pt_join[:, 2].max()
+
+    # Join the top nodes of each tree
+    top_nodes = [i + sum(n_leaves) - 1 for i in g_cs]
+    n_in_top_nodes = list(pt_join[[i + -1 for i in g_cs], -1])
+    joiner_rows = []
+    while len(top_nodes) > 1:
+        first_two = sum(n_in_top_nodes[:2])
+        joiner_row = top_nodes[:2] + [0, first_two]
+        joiner_rows.append(joiner_row)
+        top_nodes = top_nodes[2:]
+        n_in_top_nodes = n_in_top_nodes[2:]
+        if len(top_nodes) > 0:
+            top_nodes.insert(0, top_nodes[-1] + len(joiner_rows))
+            n_in_top_nodes.insert(0, first_two)
+    sum(n_leaves)
+    pt_join[g_cs[-1] :] = np.array(joiner_rows)
+    pt_join[:, 2] = pt_join[:, 3]
+    pt_join[:, 2] /= pt_join[:, 2].max()
+    return pt_join
 
 
 def partition_tree(decoded_tokens, special_tokens, sent_indices):
