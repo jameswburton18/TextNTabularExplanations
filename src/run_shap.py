@@ -388,7 +388,7 @@ def gen_summary_shap_vals(
     shap_groups, names = load_shap_vals(
         ds_name,
         text_model_code=text_model_code,
-        add_parent_dict=add_parent_dir,
+        add_parent_dir=add_parent_dir,
         tab_scale_factor=tab_scale_factor,
     )
     if text_model_code == "disbert":
