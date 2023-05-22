@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="prod_sent",
+    default="kick",
     help="Name of dataset to use",
 )
 parser.add_argument(
@@ -472,6 +472,7 @@ def gen_summary_shap_vals(
             sv = shap_vals[idx, :, label]
             text_ft_ends = [1] + list(np.where(sv.data == "| ")[0]) + [len(sv.data) + 1]
             # Need this if there are | in the text that aren't col separators
+            # Not super robust and only implemented for the current col to text mapping, but works for now
             if len(text_ft_ends) != len(di.text_cols + di.tab_cols) + 1:
                 text_ft_ends = (
                     [1]
@@ -483,9 +484,12 @@ def gen_summary_shap_vals(
                             token_segments(col, tokenizer)[0][1]
                             for col in di.tab_cols + di.text_cols
                         ]
+                        + di.tab_cols
+                        + di.text_cols
                     ]
                     + [len(sv.data) + 1]
                 )
+            assert len(text_ft_ends) == len(di.text_cols + di.tab_cols) + 1
             val = np.array(
                 [
                     np.sum(sv.values[text_ft_ends[i] : text_ft_ends[i + 1]])
@@ -533,13 +537,13 @@ if __name__ == "__main__":
         "all_text",
     ]:
         pass
-        # shap_vals = run_shap(
-        #     model_type,
-        #     ds_type=ds_type,
-        #     tab_scale_factor=sf,
-        #     text_model_code=text_model_code,
-        # )
-    # run_all_text_baseline_shap(
-    #     ds_type=ds_type, text_model_code=text_model_code, tab_scale_factor=sf
-    # )
+        shap_vals = run_shap(
+            model_type,
+            ds_type=ds_type,
+            tab_scale_factor=sf,
+            text_model_code=text_model_code,
+        )
+    run_all_text_baseline_shap(
+        ds_type=ds_type, text_model_code=text_model_code, tab_scale_factor=sf
+    )
     gen_summary_shap_vals(ds_type, text_model_code=text_model_code, tab_scale_factor=sf)
