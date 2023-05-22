@@ -66,7 +66,7 @@ def main():
     # Tokenize the dataset
     def encode(examples):
         return {
-            "labels": np.array([examples[di.label_col]]),
+            "label": np.array([examples[di.label_col]]),
             **tokenizer(examples["text"], truncation=True, padding="max_length"),
         }
 
