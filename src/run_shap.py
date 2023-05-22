@@ -57,6 +57,10 @@ def run_shap(
     if text_model_code == "disbert":
         text_model_base = "distilbert-base-uncased"
         my_text_model = di.text_model_name
+    elif text_model_code == "bert":
+        text_model_base = "bert-base-uncased"
+        # 0s and 9s become 10s and 19s
+        my_text_model = di.text_model_name[:-1] + "1" + di.text_model_name[-1]
     elif text_model_code == "drob":
         text_model_base = "distilroberta-base"
         # 0s and 9s become 20s and 29s
@@ -284,6 +288,10 @@ def run_all_text_baseline_shap(
     if text_model_code == "disbert":
         text_model_base = "distilbert-base-uncased"
         my_text_model = di.text_model_name
+    elif text_model_code == "bert":
+        text_model_base = "bert-base-uncased"
+        # 0s and 9s become 10s and 19s
+        my_text_model = di.text_model_name[:-1] + "1" + di.text_model_name[-1]
     elif text_model_code == "drob":
         text_model_base = "distilroberta-base"
         # 0s and 9s become 20s and 29s
@@ -393,6 +401,8 @@ def gen_summary_shap_vals(
     )
     if text_model_code == "disbert":
         text_model_base = "distilbert-base-uncased"
+    elif text_model_code == "bert":
+        text_model_base = "bert-base-uncased"
     elif text_model_code == "drob":
         text_model_base = "distilroberta-base"
     elif text_model_code == "deberta":
@@ -523,13 +533,13 @@ if __name__ == "__main__":
         "all_text",
     ]:
         pass
-        shap_vals = run_shap(
-            model_type,
-            ds_type=ds_type,
-            tab_scale_factor=sf,
-            text_model_code=text_model_code,
-        )
-    run_all_text_baseline_shap(
-        ds_type=ds_type, text_model_code=text_model_code, tab_scale_factor=sf
-    )
+        # shap_vals = run_shap(
+        #     model_type,
+        #     ds_type=ds_type,
+        #     tab_scale_factor=sf,
+        #     text_model_code=text_model_code,
+        # )
+    # run_all_text_baseline_shap(
+    #     ds_type=ds_type, text_model_code=text_model_code, tab_scale_factor=sf
+    # )
     gen_summary_shap_vals(ds_type, text_model_code=text_model_code, tab_scale_factor=sf)
