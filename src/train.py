@@ -66,7 +66,8 @@ def main():
     # Tokenize the dataset
     def encode(examples):
         return {
-            "label": np.array([examples[di.label_col]]),
+            # "label": np.array([examples[di.label_col]]),
+            "label": examples[di.label_col],
             **tokenizer(examples["text"], truncation=True, padding="max_length"),
         }
 
@@ -156,7 +157,7 @@ def main():
         # Test the model
         results = trainer.evaluate(dataset["test"], metric_key_prefix="test")
         preds = trainer.predict(dataset["test"]).predictions
-        labels = [l[0] for l in dataset["test"]["labels"]]
+        labels = [l[0] for l in dataset["test"]["label"]]
         if di.prob_type == "regression":
             unscaled_preds = preds * std_price + mean_price
             unscaled_refs = [
