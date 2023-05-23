@@ -66,8 +66,7 @@ def main():
     # Tokenize the dataset
     def encode(examples):
         return {
-            # "label": np.array([examples[di.label_col]]),
-            "label": examples[di.label_col],
+            "label": np.array([examples[di.label_col]]),
             **tokenizer(examples["text"], truncation=True, padding="max_length"),
         }
 
@@ -136,6 +135,7 @@ def main():
         model=model,
         optimizers=(opt, sched) if args["lion_optim"] else (None, None),
         args=training_args,
+        tokenizer=tokenizer,
         train_dataset=dataset["train"],
         eval_dataset=dataset["validation"],
         callbacks=[EarlyStoppingCallback(args["early_stopping_patience"])]
