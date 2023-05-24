@@ -67,7 +67,12 @@ def main():
     def encode(examples):
         return {
             "label": np.array([examples[di.label_col]]),
-            **tokenizer(examples["text"], truncation=True, padding="max_length"),
+            **tokenizer(
+                examples["text"],
+                truncation=True,
+                padding="max_length",
+                max_length=args["max_length"],
+            ),
         }
 
     dataset = dataset.map(encode, load_from_cache_file=True)

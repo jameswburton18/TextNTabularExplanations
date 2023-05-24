@@ -9,9 +9,9 @@
 #     done
 # done
 
-for idx in 3 4 #{1..4}
+for idx in 30 39 #{1..4}
 do
-    for cfg in  wine_${idx} prod_sent_${idx} fake_${idx} jigsaw_${idx} kick_${idx} imdb_genre_${idx}
+    for cfg in  fake_${idx} kick_${idx} imdb_genre_${idx} jigsaw_${idx} wine_${idx} prod_sent_${idx} 
     do
         # sbatch --job-name=$cfg scripts/train_office_pc.sh $cfg
         sbatch --job-name=$cfg scripts/train.sh $cfg
