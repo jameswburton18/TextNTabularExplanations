@@ -600,134 +600,134 @@ batch_size: 128
 
 --- # imdb_genre_30
 config: imdb_genre_30
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - all_as_text
 dataset: imdb_genre
 version: all_as_text
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # imdb_genre_39
 config: imdb_genre_39
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - text_col_only
 dataset: imdb_genre
 version: text_col_only
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # prod_sent_30
 config: prod_sent_30
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - all_as_text
 dataset: prod_sent
 version: all_as_text
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # prod_sent_39
 config: prod_sent_39
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - text_col_only
 dataset: prod_sent
 version: text_col_only
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # fake_30
 config: fake_30
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - all_as_text
 dataset: fake
 version: all_as_text
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # fake_39
 config: fake_39
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - text_col_only
 dataset: fake
 version: text_col_only
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # kick_30
 config: kick_30
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - all_as_text
 dataset: kick
 version: all_as_text
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # kick_39
 config: kick_39
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - text_col_only
 dataset: kick
 version: text_col_only
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # jigsaw_30
 config: jigsaw_30
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - all_as_text
 dataset: jigsaw
 version: all_as_text
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # jigsaw_39
 config: jigsaw_39
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - text_col_only
 dataset: jigsaw
 version: text_col_only
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # wine_30
 config: wine_30
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - all_as_text
 dataset: wine
 version: all_as_text
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 --- # wine_39
 config: wine_39
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
-  - microsoft/deberta-v3-base
+  - microsoft/deberta-v3-small
   - text_col_only
 dataset: wine
 version: text_col_only
-batch_size: 16
+batch_size: 32
 max_length: 512
 
 # Old
@@ -856,7 +856,7 @@ max_length: 512
 config: testing
 fast_dev_run: true
 do_train: true
-model_base: microsoft/deberta-v3-base
+model_base: microsoft/deberta-v3-small
 tags:
   - distilbert
   - all_as_text
