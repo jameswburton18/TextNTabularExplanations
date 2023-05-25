@@ -27,7 +27,7 @@ parser.add_argument(
 parser.add_argument(
     "--text_model_code",
     type=str,
-    default="bert",
+    default="disbert",
     help="Code name for text model to use",
 )
 
@@ -470,7 +470,10 @@ def gen_summary_shap_vals(
         shap_for_colon = []
         for idx in tqdm(range(len(shap_vals))):
             sv = shap_vals[idx, :, label]
-            text_ft_ends = [1] + list(np.where(sv.data == "| ")[0]) + [len(sv.data) + 1]
+            stripped_data = np.array([item.strip() for item in sv.data])
+            text_ft_ends = (
+                [1] + list(np.where(stripped_data == "|")[0]) + [len(sv.data) + 1]
+            )
             # Need this if there are | in the text that aren't col separators
             # Not super robust and only implemented for the current col to text mapping, but works for now
             if len(text_ft_ends) != len(di.text_cols + di.tab_cols) + 1:
@@ -478,10 +481,10 @@ def gen_summary_shap_vals(
                     [1]
                     + [
                         i
-                        for i in list(np.where(sv.data == "| ")[0])
-                        if sv.data[i + 1]
+                        for i in list(np.where(stripped_data == "|")[0])
+                        if sv.data[i + 1].strip()
                         in [
-                            token_segments(col, tokenizer)[0][1]
+                            token_segments(col, tokenizer)[0][1].strip()
                             for col in di.tab_cols + di.text_cols
                         ]
                         + di.tab_cols
@@ -496,7 +499,7 @@ def gen_summary_shap_vals(
                     for i in range(len(text_ft_ends) - 1)
                 ]
             )
-            colon_idxs = np.where(sv.data == ": ")[0]
+            colon_idxs = np.where(stripped_data == ":")[0]
             col_idxs_after_ft = [
                 colon_idxs[list(np.where(colon_idxs > te)[0])[0]]
                 for te in text_ft_ends[:-1]
