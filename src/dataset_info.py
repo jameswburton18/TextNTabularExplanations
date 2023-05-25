@@ -400,3 +400,233 @@ def get_dataset_info(ds_type, model_type=None):
             ],
             tnt_reorder_cols=["description", "province", "country", "price", "points"],
         )
+    elif ds_type in ["salary", "data_scientist_salary"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+                warn(
+                    f"No model type specified for {ds_type}. (This is fine during dataset creation)"
+                )
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
+                text_model_name = "james-burton/salary_0"
+                ds_name = "james-burton/data_scientist_salary_all_text"
+            case _:
+                print(f"Using dataset {ds_type}, ordinal version")
+                text_model_name = "james-burton/salary_9"
+                ds_name = "james-burton/data_scientist_salary_ordinal"
+        return DatasetInfo(
+            ds_name=ds_name,
+            tab_cols=["job_type"],
+            categorical_cols=["job_type"],
+            text_cols=[
+                "experience",
+                "job_description",
+                "job_desig",
+                "key_skills",
+                "location",
+            ],
+            label_col="salary",
+            num_labels=6,
+            prob_type="single_label_classification",
+            wandb_proj_name="Salary",
+            text_model_name=text_model_name,
+            label_names=["6to10", "10to15", "0to3", "15to25", "3to6", "25to50"],
+        )
+    elif ds_type in ["airbnb", "melbourne_airbnb"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+                warn(
+                    f"No model type specified for {ds_type}. (This is fine during dataset creation)"
+                )
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
+                text_model_name = "james-burton/melbourne_airbnb_0"
+                ds_name = "james-burton/melbourne_airbnb_all_text"
+            case _:
+                print(f"Using dataset {ds_type}, ordinal version")
+                text_model_name = "james-burton/airbnb_9"
+                ds_name = "james-burton/melbourne_airbnb_ordinal"
+        return DatasetInfo(
+            ds_name=ds_name,
+            tab_cols=[
+                "accommodates",
+                "availability_30",
+                "availability_365",
+                "availability_60",
+                "availability_90",
+                "bathrooms",
+                "bed_type",
+                "bedrooms",
+                "beds",
+                # "calculated_host_listings_count",
+                "cancellation_policy",
+                "cleaning_fee",
+                "extra_people",
+                "guests_included",
+                # "host_has_profile_pic",
+                "host_identity_verified",
+                "host_is_superhost",
+                "host_response_time",
+                # "host_verifications_email",
+                # "host_verifications_facebook",
+                # "host_verifications_google",
+                # "host_verifications_government_id",
+                # "host_verifications_identity_manual",
+                # "host_verifications_jumio",
+                # "host_verifications_kba",
+                # "host_verifications_manual_offline",
+                # "host_verifications_manual_online",
+                # "host_verifications_offline_government_id",
+                # "host_verifications_phone",
+                # "host_verifications_reviews",
+                # "host_verifications_selfie",
+                # "host_verifications_sent_id",
+                # "host_verifications_sesame",
+                # "host_verifications_sesame_offline",
+                # "host_verifications_weibo",
+                # "host_verifications_work_email",
+                # "host_verifications_zhima_selfie",
+                "instant_bookable",
+                "is_location_exact",
+                "latitude",
+                "license",
+                "longitude",
+                "maximum_nights",
+                "minimum_nights",
+                "number_of_reviews",
+                # "require_guest_phone_verification",
+                # "require_guest_profile_picture",
+                "review_scores_accuracy",
+                "review_scores_checkin",
+                "review_scores_cleanliness",
+                "review_scores_communication",
+                "review_scores_location",
+                "review_scores_rating",
+                "review_scores_value",
+                "reviews_per_month",
+                "room_type",
+                "security_deposit",
+            ],
+            categorical_cols=[
+                "bed_type",
+                "cancellation_policy",
+                "host_verifications_email",
+                "host_verifications_facebook",
+                "host_verifications_google",
+                "host_verifications_government_id",
+                "host_verifications_identity_manual",
+                "host_verifications_jumio",
+                "host_verifications_kba",
+                "host_verifications_manual_offline",
+                "host_verifications_manual_online",
+                "host_verifications_offline_government_id",
+                "host_verifications_phone",
+                "host_verifications_reviews",
+                "host_verifications_selfie",
+                "host_verifications_sent_id",
+                "host_verifications_sesame",
+                "host_verifications_sesame_offline",
+                "host_verifications_weibo",
+                "host_verifications_work_email",
+                "host_verifications_zhima_selfie",
+                "instant_bookable",
+                "is_location_exact",
+                "license",
+                "require_guest_phone_verification",
+                "require_guest_profile_picture",
+                "room_type",
+            ],
+            text_cols=[
+                # "access",
+                "amenities",
+                # "calendar_updated",
+                "city",
+                # "description",
+                # "first_review",
+                # "host_about",
+                # "host_location",
+                # "host_neighborhood",
+                "host_response_rate",
+                "host_since",
+                # "host_verifications",
+                # "house_rules",
+                # "interaction",
+                # "last_review",
+                # "name",
+                "neighborhood",
+                # "neighborhood_overview",
+                "property_type",
+                # "smart_location",
+                # "space",
+                # "state",
+                # "street",
+                # "suburb",
+                "summary",
+                # "transit",
+                # "zipcode",
+            ],
+            label_col="price_label",
+            num_labels=10,
+            prob_type="single_label_classification",
+            wandb_proj_name="Airbnb",
+            text_model_name=text_model_name,
+            label_names=[4, 3, 1, 9, 2, 7, 0, 6, 5, 8],
+        )
+    elif ds_type in ["channel", "news_channel"]:
+        match model_type:
+            case None:
+                text_model_name = None
+                ds_name = None
+                warn(
+                    f"No model type specified for {ds_type}. (This is fine during dataset creation)"
+                )
+            case "all_text" | "all_as_text":
+                print(f"Using dataset {ds_type}, all as text version")
+                text_model_name = "james-burton/channel_0"
+                ds_name = "james-burton/news_channel_all_text"
+            case _:
+                print(f"Using dataset {ds_type}, ordinal version")
+                text_model_name = "james-burton/channel_9"
+                ds_name = "james-burton/news_channel_ordinal"
+        return DatasetInfo(
+            ds_name=ds_name,
+            tab_cols=[
+                " n_tokens_content",
+                " n_unique_tokens",
+                " n_non_stop_words",
+                " n_non_stop_unique_tokens",
+                " num_hrefs",
+                " num_self_hrefs",
+                " num_imgs",
+                " num_videos",
+                " average_token_length",
+                " num_keywords",
+                " global_subjectivity",
+                " global_sentiment_polarity",
+                " global_rate_positive_words",
+                " global_rate_negative_words",
+                " rate_positive_words",
+                " rate_negative_words",
+            ],
+            categorical_cols=[],
+            text_cols=[
+                "article_title",
+            ],
+            label_col="channel",
+            num_labels=6,
+            prob_type="single_label_classification",
+            wandb_proj_name="News Channel",
+            text_model_name=text_model_name,
+            label_names=[
+                " data_channel_is_tech",
+                " data_channel_is_entertainment",
+                " data_channel_is_lifestyle",
+                " data_channel_is_bus",
+                " data_channel_is_world",
+                " data_channel_is_socmed",
+            ],
+        )

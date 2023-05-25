@@ -5,15 +5,19 @@ from src.dataset_info import get_dataset_info
 
 # ## Dataset creation here
 for dataset_name in [
-    "wine_reviews",
-    "fake_job_postings2",
-    "product_sentiment_machine_hack",
-    "kick_starter_funding",
-    "jigsaw_unintended_bias100K",
-    "imdb_genre_prediction",
+    # "wine_reviews",
+    # "fake_job_postings2",
+    # "product_sentiment_machine_hack",
+    # "kick_starter_funding",
+    # "jigsaw_unintended_bias100K",
+    # "imdb_genre_prediction",
+    # "data_scientist_salary",
+    # "melbourne_airbnb",
+    "news_channel",
 ]:
     di = get_dataset_info(dataset_name)
     train_dataset = dataset_registry.create(dataset_name, "train")
+
     test_dataset = dataset_registry.create(dataset_name, "test")
     cols = train_dataset.feature_columns + train_dataset.label_columns
 
