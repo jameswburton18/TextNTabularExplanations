@@ -4,6 +4,7 @@ from shap.utils.transformers import (
     SENTENCEPIECE_TOKENIZERS,
     getattr_silent,
 )
+from src.dataset_info import get_dataset_info
 
 
 MODEL_NAME_TO_DESC_DICT = {
@@ -39,186 +40,38 @@ def prepare_text(dataset, version, ds_type, reverse=False):
     """This is all for preparing the text part of the dataset
     Could be made more robust by referring to dataset_info.py instead"""
     if "imdb" in ds_type:
+        di = get_dataset_info("imdb")
         if version == "all_as_text":
-            cols = [
-                "Year",
-                "Runtime (Minutes)",
-                "Rating",
-                "Votes",
-                "Revenue (Millions)",
-                "Metascore",
-                "Rank",
-                "Description",
-            ]
+            cols = di.tab_cols + di.text_cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "text_col_only":
             # dataset rename column
-            dataset = dataset.rename_column("Description", "text")
+            dataset = dataset.rename_column(di.text_cols[0], "text")
             return dataset
         elif version == "all_as_text_base_reorder":
-            cols = [
-                "Description",
-                "Metascore",
-                "Runtime (Minutes)",
-                "Revenue (Millions)",
-                "Rank",
-                "Rating",
-                "Votes",
-                "Year",
-            ]
+            cols = di.base_reorder_cols
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
-            cols = [
-                "Description",
-                "Votes",
-                "Rank",
-                "Revenue (Millions)",
-                "Runtime (Minutes)",
-                "Year",
-                "Metascore",
-                "Rating",
-            ]
+            cols = di.tnt_reorder_cols
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
-        # Less used versions
-        #########################################
-        elif version == "tab_as_text":
-            cols = [
-                "Year",
-                "Runtime (Minutes)",
-                "Rating",
-                "Votes",
-                "Revenue (Millions)",
-                "Metascore",
-                "Rank",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
-        elif version == "tabx5":
-            cols = [
-                "Year",
-                "Runtime (Minutes)",
-                "Rating",
-                "Votes",
-                "Revenue (Millions)",
-                "Metascore",
-                "Rank",
-            ]
-            dataset = dataset.map(
-                multiple_row_to_string, fn_kwargs={"cols": cols, "multiplier": 5}
-            )
-            return dataset
-        elif version == "tabx5_nodesc":
-            cols = [
-                "Year",
-                "Runtime (Minutes)",
-                "Rating",
-                "Votes",
-                "Revenue (Millions)",
-                "Metascore",
-                "Rank",
-            ]
-            dataset = dataset.map(
-                multiple_row_to_string,
-                fn_kwargs={"cols": cols, "multiplier": 5, "nodesc": True},
-            )
-            return dataset
-        elif version == "tabx2_nodesc":
-            cols = [
-                "Year",
-                "Runtime (Minutes)",
-                "Rating",
-                "Votes",
-                "Revenue (Millions)",
-                "Metascore",
-                "Rank",
-            ]
-            dataset = dataset.map(
-                multiple_row_to_string,
-                fn_kwargs={"cols": cols, "multiplier": 2, "nodesc": True},
-            )
-            return dataset
-        elif version == "tabx2":
-            cols = [
-                "Year",
-                "Runtime (Minutes)",
-                "Rating",
-                "Votes",
-                "Revenue (Millions)",
-                "Metascore",
-                "Rank",
-            ]
-            dataset = dataset.map(
-                multiple_row_to_string, fn_kwargs={"cols": cols, "multiplier": 2}
-            )
-            return dataset
-        elif version == "reorder1":
-            cols = [
-                "Votes",
-                "Revenue (Millions)",
-                "Metascore",
-                "Rank",
-                "Description",
-                "Year",
-                "Runtime (Minutes)",
-                "Rating",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
-        elif version == "reorder2":
-            cols = [
-                "Description",
-                "Rank",
-                "Metascore",
-                "Revenue (Millions)",
-                "Votes",
-                "Rating",
-                "Runtime (Minutes)",
-                "Year",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
-        elif version == "reorder3":
-            cols = [
-                "Revenue (Millions)",
-                "Metascore",
-                "Rank",
-                "Year",
-                "Votes",
-                "Runtime (Minutes)",
-                "Rating",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
-        elif version == "all_as_text_exp_reorder":
-            cols = [
-                "Description",
-                "Revenue (Millions)",
-                "Votes",
-                "Rank",
-                "Metascore",
-                "Year",
-                "Runtime (Minutes)",
-                "Rating",
-            ]
-            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
-            return dataset
-        #########################################
+
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
             )
     elif "prod_sent" in ds_type:
+        di = get_dataset_info("prod_sent")
         if version == "text_col_only":
             # dataset rename column
-            dataset = dataset.rename_column("Product_Description", "text")
+            dataset = dataset.rename_column(di.text_cols[0], "text")
             return dataset
         elif version == "all_as_text":
-            cols = ["Product_Type", "Product_Description"]
+            cols = di.tab_cols + di.text_cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
@@ -230,19 +83,13 @@ def prepare_text(dataset, version, ds_type, reverse=False):
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
             )
     elif "fake" in ds_type:
+        di = get_dataset_info("fake")
         if version == "text_col_only":
-            cols = ["title", "description", "salary_range"]
+            cols = di.text_cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text":
-            cols = [
-                "title",
-                "required_experience",
-                "required_education",
-                "title",
-                "salary_range",
-                "description",
-            ]
+            cols = di.tab_cols + di.text_cols
 
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -251,13 +98,7 @@ def prepare_text(dataset, version, ds_type, reverse=False):
                 "Different order to original but same as text and tabular order so not needed"
             )
         elif version == "all_as_text_tnt_reorder":
-            cols = [
-                "description",
-                "title",
-                "required_education",
-                "required_experience",
-                "salary_range",
-            ]
+            cols = di.tnt_reorder_cols
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -267,51 +108,21 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             )
     elif "kick" in ds_type:
         if version == "text_col_only":
-            cols = ["name", "desc", "keywords"]
+            cols = di.text_cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text":
-            cols = [
-                "goal",
-                "disable_communication",
-                "country",
-                "currency",
-                "deadline",
-                "created_at",
-                "name",
-                "desc",
-                "keywords",
-            ]
+            cols = di.tab_cols + di.text_cols
 
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            cols = [
-                "desc",
-                "goal",
-                "name",
-                "created_at",
-                "deadline",
-                "keywords",
-                "disable_communication",
-                "currency",
-                "country",
-            ]
+            cols = di.base_reorder_cols
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
-            cols = [
-                "desc",
-                "goal",
-                "name",
-                "keywords",
-                "created_at",
-                "deadline",
-                "currency",
-                "country",
-                "disable_communication",
-            ]
+            cols = di.tnt_reorder_cols
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -320,114 +131,22 @@ def prepare_text(dataset, version, ds_type, reverse=False):
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
             )
     elif "jigsaw" in ds_type:
+        di = get_dataset_info("jigsaw")
         if version == "text_col_only":
-            dataset = dataset.rename_column("comment_text", "text")
+            dataset = dataset.rename_column(di.text_cols[0], "text")
             return dataset
         elif version == "all_as_text":
-            cols = [
-                "asian",
-                "atheist",
-                "bisexual",
-                "black",
-                "buddhist",
-                "christian",
-                "female",
-                "heterosexual",
-                "hindu",
-                "homosexual_gay_or_lesbian",
-                "intellectual_or_learning_disability",
-                "jewish",
-                "latino",
-                "male",
-                "muslim",
-                "other_disability",
-                "other_gender",
-                "other_race_or_ethnicity",
-                "other_religion",
-                "other_sexual_orientation",
-                "physical_disability",
-                "psychiatric_or_mental_illness",
-                "transgender",
-                "white",
-                "funny",
-                "wow",
-                "sad",
-                "likes",
-                "disagree",
-                "comment_text",
-            ]
+            cols = di.tab_cols + di.text_cols
 
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            cols = [
-                "comment_text",
-                "other_race_or_ethnicity",
-                "other_sexual_orientation",
-                "psychiatric_or_mental_illness",
-                "other_religion",
-                "intellectual_or_learning_disability",
-                "physical_disability",
-                "other_disability",
-                "homosexual_gay_or_lesbian",
-                "other_gender",
-                "funny",
-                "white",
-                "buddhist",
-                "muslim",
-                "christian",
-                "disagree",
-                "transgender",
-                "wow",
-                "male",
-                "sad",
-                "latino",
-                "jewish",
-                "heterosexual",
-                "female",
-                "hindu",
-                "likes",
-                "atheist",
-                "black",
-                "bisexual",
-                "asian",
-            ]
+            cols = di.base_reorder_cols
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
-            cols = [
-                "comment_text",
-                "atheist",
-                "buddhist",
-                "hindu",
-                "other_gender",
-                "christian",
-                "other_religion",
-                "jewish",
-                "muslim",
-                "latino",
-                "heterosexual",
-                "black",
-                "male",
-                "female",
-                "other_sexual_orientation",
-                "other_race_or_ethnicity",
-                "asian",
-                "psychiatric_or_mental_illness",
-                "white",
-                "physical_disability",
-                "other_disability",
-                "intellectual_or_learning_disability",
-                "transgender",
-                "homosexual_gay_or_lesbian",
-                "bisexual",
-                "likes",
-                "disagree",
-                "sad",
-                "funny",
-                "wow",
-            ]
+            cols = di.tnt_reorder_cols
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -436,12 +155,13 @@ def prepare_text(dataset, version, ds_type, reverse=False):
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
             )
     elif "wine" in ds_type:
+        di = get_dataset_info("wine")
         if version == "text_col_only":
-            cols = ["country", "description", "province"]
+            cols = di.text_cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text":
-            cols = ["points", "price", "country", "description", "province"]
+            cols = di.tab_cols + di.text_cols
 
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -450,9 +170,63 @@ def prepare_text(dataset, version, ds_type, reverse=False):
                 "Different order to original but same as text and tabular order so not needed"
             )
         elif version == "all_as_text_tnt_reorder":
-            cols = ["description", "province", "country", "price", "points"]
+            cols = di.tnt_reorder_cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
+    elif "airbnb" in ds_type:
+        di = get_dataset_info("airbnb")
+        if version == "text_col_only":
+            cols = di.text_cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text":
+            cols = di.tab_cols + di.text_cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_base_reorder":
+            raise Exception("Not yet implemented")
+        elif version == "all_as_text_tnt_reorder":
+            raise Exception("Not yet implemented")
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
+    elif "channel" in ds_type:
+        di = get_dataset_info("channel")
+        if version == "text_col_only":
+            cols = di.text_cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text":
+            cols = di.tab_cols + di.text_cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_base_reorder":
+            raise Exception("Not yet implemented")
+        elif version == "all_as_text_tnt_reorder":
+            raise Exception("Not yet implemented")
+        else:
+            raise ValueError(
+                f"Unknown dataset type ({ds_type}) and version ({version}) combination"
+            )
+    elif "salary" in ds_type:
+        di = get_dataset_info("salary")
+        if version == "text_col_only":
+            cols = di.text_cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text":
+            cols = di.tab_cols + di.text_cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_base_reorder":
+            raise Exception("Not yet implemented")
+        elif version == "all_as_text_tnt_reorder":
+            raise Exception("Not yet implemented")
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -786,3 +560,131 @@ def array_to_string(
     return np.array(
         " | ".join([f"{col}: {val}" for col, val in zip(cols, array)]), dtype="<U512"
     )
+
+
+"""
+# Less used versions (IMDB)
+        #########################################
+        elif version == "tab_as_text":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "tabx5":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(
+                multiple_row_to_string, fn_kwargs={"cols": cols, "multiplier": 5}
+            )
+            return dataset
+        elif version == "tabx5_nodesc":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(
+                multiple_row_to_string,
+                fn_kwargs={"cols": cols, "multiplier": 5, "nodesc": True},
+            )
+            return dataset
+        elif version == "tabx2_nodesc":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(
+                multiple_row_to_string,
+                fn_kwargs={"cols": cols, "multiplier": 2, "nodesc": True},
+            )
+            return dataset
+        elif version == "tabx2":
+            cols = [
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+            ]
+            dataset = dataset.map(
+                multiple_row_to_string, fn_kwargs={"cols": cols, "multiplier": 2}
+            )
+            return dataset
+        elif version == "reorder1":
+            cols = [
+                "Votes",
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+                "Description",
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "reorder2":
+            cols = [
+                "Description",
+                "Rank",
+                "Metascore",
+                "Revenue (Millions)",
+                "Votes",
+                "Rating",
+                "Runtime (Minutes)",
+                "Year",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "reorder3":
+            cols = [
+                "Revenue (Millions)",
+                "Metascore",
+                "Rank",
+                "Year",
+                "Votes",
+                "Runtime (Minutes)",
+                "Rating",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        elif version == "all_as_text_exp_reorder":
+            cols = [
+                "Description",
+                "Revenue (Millions)",
+                "Votes",
+                "Rank",
+                "Metascore",
+                "Year",
+                "Runtime (Minutes)",
+                "Rating",
+            ]
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
+        #########################################
+"""
