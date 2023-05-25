@@ -358,6 +358,66 @@ dataset: wine
 version: text_col_only
 batch_size: 32
 
+--- # salary_0
+config: salary_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text
+dataset: salary
+version: all_as_text
+batch_size: 32
+
+--- # salary_9
+config: salary_9
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - text_col_only
+dataset: salary
+version: text_col_only
+batch_size: 32
+
+--- # airbnb_0
+config: airbnb_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text
+dataset: airbnb
+version: all_as_text
+batch_size: 32
+
+--- # airbnb_9
+config: airbnb_9
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - text_col_only
+dataset: airbnb
+version: text_col_only
+batch_size: 32
+
+--- # channel_0
+config: channel_0
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - all_as_text
+dataset: channel
+version: all_as_text
+batch_size: 32
+
+--- # channel_9
+config: channel_9
+model_base: distilbert-base-uncased
+tags:
+  - distilbert
+  - text_col_only
+dataset: channel
+version: text_col_only
+batch_size: 32
+
 --- # imdb_genre_10
 config: imdb_genre_10
 model_base: bert-base-uncased
@@ -475,6 +535,66 @@ tags:
   - bert-base-uncased
   - text_col_only
 dataset: wine
+version: text_col_only
+batch_size: 32
+
+--- # salary_10
+config: salary_10
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text
+dataset: salary
+version: all_as_text
+batch_size: 32
+
+--- # salary_19
+config: salary_19
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - text_col_only
+dataset: salary
+version: text_col_only
+batch_size: 32
+
+--- # airbnb_10
+config: airbnb_10
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text
+dataset: airbnb
+version: all_as_text
+batch_size: 32
+
+--- # airbnb_19
+config: airbnb_19
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - text_col_only
+dataset: airbnb
+version: text_col_only
+batch_size: 32
+
+--- # channel_10
+config: channel_10
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text
+dataset: channel
+version: all_as_text
+batch_size: 32
+
+--- # channel_19
+config: channel_19
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - text_col_only
+dataset: channel
 version: text_col_only
 batch_size: 32
 
@@ -597,6 +717,66 @@ tags:
 dataset: wine
 version: text_col_only
 batch_size: 128
+
+--- # salary_20
+config: salary_20
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text
+dataset: salary
+version: all_as_text
+batch_size: 32
+
+--- # salary_29
+config: salary_29
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - text_col_only
+dataset: salary
+version: text_col_only
+batch_size: 32
+
+--- # airbnb_20
+config: airbnb_20
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text
+dataset: airbnb
+version: all_as_text
+batch_size: 32
+
+--- # airbnb_29
+config: airbnb_29
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - text_col_only
+dataset: airbnb
+version: text_col_only
+batch_size: 32
+
+--- # channel_20
+config: channel_20
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text
+dataset: channel
+version: all_as_text
+batch_size: 32
+
+--- # channel_29
+config: channel_29
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - text_col_only
+dataset: channel
+version: text_col_only
+batch_size: 32
 
 --- # imdb_genre_30
 config: imdb_genre_30
@@ -729,6 +909,66 @@ dataset: wine
 version: text_col_only
 batch_size: 32
 max_length: 512
+
+--- # salary_30
+config: salary_30
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text
+dataset: salary
+version: all_as_text
+batch_size: 32
+
+--- # salary_39
+config: salary_39
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - text_col_only
+dataset: salary
+version: text_col_only
+batch_size: 32
+
+--- # airbnb_30
+config: airbnb_30
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text
+dataset: airbnb
+version: all_as_text
+batch_size: 32
+
+--- # airbnb_39
+config: airbnb_39
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - text_col_only
+dataset: airbnb
+version: text_col_only
+batch_size: 32
+
+--- # channel_30
+config: channel_30
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text
+dataset: channel
+version: all_as_text
+batch_size: 32
+
+--- # channel_39
+config: channel_39
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - text_col_only
+dataset: channel
+version: text_col_only
+batch_size: 32
 
 # Old
 ##########################################
