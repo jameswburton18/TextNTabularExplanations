@@ -27,7 +27,7 @@ parser.add_argument(
 parser.add_argument(
     "--text_model_code",
     type=str,
-    default="drob",
+    default="bert",
     help="Code name for text model to use",
 )
 
@@ -57,23 +57,26 @@ def run_shap(
     if text_model_code == "disbert":
         text_model_base = "distilbert-base-uncased"
         my_text_model = di.text_model_name
+        tokenizer = AutoTokenizer.from_pretrained(text_model_base)
     elif text_model_code == "bert":
         text_model_base = "bert-base-uncased"
         # 0s and 9s become 10s and 19s
         my_text_model = di.text_model_name[:-1] + "1" + di.text_model_name[-1]
+        tokenizer = AutoTokenizer.from_pretrained(text_model_base)
     elif text_model_code == "drob":
         text_model_base = "distilroberta-base"
         # 0s and 9s become 20s and 29s
         my_text_model = di.text_model_name[:-1] + "2" + di.text_model_name[-1]
+        tokenizer = AutoTokenizer.from_pretrained(text_model_base)
     elif text_model_code == "deberta":
         text_model_base = "microsoft/deberta-v3-small"
         # 0s and 9s become 30s and 39s
         my_text_model = di.text_model_name[:-1] + "3" + di.text_model_name[-1]
+        tokenizer = AutoTokenizer.from_pretrained(text_model_base, model_max_length=512)
     else:
         raise ValueError(f"Invalid text model code of {text_model_code}")
 
     # Models
-    tokenizer = AutoTokenizer.from_pretrained(text_model_base)
     if model_type in [
         "all_text",
         "all_as_text_tnt_reorder",
