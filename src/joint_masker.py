@@ -487,8 +487,10 @@ class JointMasker(Masker):
 
             # text_pt = partition_tree(tokens, special_tokens, self.sent_indices)
             text_pt = shap.maskers._text.partition_tree(tokens, special_tokens)
-            text_pt[:, 2] = text_pt[:, 3]
-            text_pt[:, 2] /= text_pt[:, 2].max()
+            if len(text_pt) == 0:
+                text_pt = np.array([[0, np.inf, 0, 1]])
+                # text_pt[:, 2] = text_pt[:, 3]
+                # text_pt[:, 2] /= text_pt[:, 2].max()
             text_pts.append(text_pt)
             all_tokens.extend(tokens)
         ################################
@@ -678,9 +680,12 @@ def merge_score(group1, group2, special_tokens):
 
 def join_dendograms(pts):
     n_leaves = [int(max(pt[:, 3])) for pt in pts]
+    n_empty = sum([1 for n in n_leaves if n == 1])
     n_groups = [len(pt) for pt in pts]
+    # if n_leaves is 1, then then n_groups is set to 0
+    # n_groups = [g if l > 1 else 0 for g, l in zip(n_groups, n_leaves)]
 
-    pt_join = np.zeros((sum(n_groups) + len(pts) - 1, 4))
+    pt_join = np.zeros((sum(n_groups) + len(pts) - n_empty - 1, 4))
     # For the first partition tree the leaves (ie the words/features) are unchanged,
     # but the group numbers need to be shifted by the total number of leaves, less
     # the number of leaves in the first tree which are already accounted for
@@ -696,20 +701,40 @@ def join_dendograms(pts):
     g_cs = np.cumsum(n_groups)
     l_cs = np.cumsum(n_leaves)
     for pt, i in zip(pts[1:], range(1, len(pts))):
-        pt_join[g_cs[i - 1] : g_cs[i], :2] = np.where(
-            pt[:, :2] < n_leaves[i],
-            pt[:, :2] + l_cs[i - 1],
-            pt[:, :2] + sum(n_leaves) - n_leaves[i] + g_cs[i - 1],
-        )
+        if np.equal(pt, np.array([[0, np.inf, 0, 1]])).all():  # empty tree
+            pt_join[g_cs[i - 1] : g_cs[i], :2] = np.array([l_cs[i - 1], np.inf])
+        else:
+            pt_join[g_cs[i - 1] : g_cs[i], :2] = np.where(
+                pt[:, :2] < n_leaves[i],
+                pt[:, :2] + l_cs[i - 1],
+                pt[:, :2] + sum(n_leaves) - n_leaves[i] + g_cs[i - 1],
+            )
 
     # 3rd and 4th columns are left unchanged
-    pt_join[: -(len(pts) - 1), 2:] = np.concatenate([pt[:, 2:] for pt in pts])
-    # pt_join[:, 2] = pt_join[:, 3]
-    # pt_join[:, 2] /= pt_join[:, 2].max()
+    pt_join[: -(len(pts) - n_empty - 1), 2:] = np.concatenate([pt[:, 2:] for pt in pts])
 
-    # Join the top nodes of each tree
-    top_nodes = [i + sum(n_leaves) - 1 for i in g_cs]
-    n_in_top_nodes = list(pt_join[[i + -1 for i in g_cs], -1])
+    # If a text feature only has one word then we need to do some extra work
+    top_nodes0 = [i + sum(n_leaves) - 1 for i in g_cs]
+    n_in_top_nodes0 = list(pt_join[[i + -1 for i in g_cs], -1])
+    top_node_acntd_for = [False for _ in g_cs]
+
+    # If a text feature only has one word then we join it to the top node of the
+    # previous tree and increment the number of words in that top node
+    for i in range(1, len(n_leaves)):
+        if n_leaves[i] == 1:
+            pt_join[g_cs[i] - 1, 1] = top_nodes0[i - 1]
+            pt_join[g_cs[i] - 1, 2] = 1
+            pt_join[g_cs[i] - 1, 3] = n_in_top_nodes0[i - 1] + 1
+            top_node_acntd_for[i - 1] = True
+            n_in_top_nodes0[i] += n_in_top_nodes0[i - 1]
+
+    # Now some of the top nodes will have been accounted for, so we need to remove them
+    top_nodes = [i for idx, i in enumerate(top_nodes0) if not top_node_acntd_for[idx]]
+    n_in_top_nodes = [
+        i for idx, i in enumerate(n_in_top_nodes0) if not top_node_acntd_for[idx]
+    ]
+
+    # Now we need to join the top nodes together
     joiner_rows = []
     while len(top_nodes) > 1:
         first_two = sum(n_in_top_nodes[:2])

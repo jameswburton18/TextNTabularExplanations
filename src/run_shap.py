@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--ds_type",
     type=str,
-    default="kick",
+    default="airbnb",
     help="Name of dataset to use",
 )
 parser.add_argument(
@@ -204,23 +204,50 @@ def run_shap(
     # x = np.array(
     #     [
     #         [
-    #             1800.0,
+    #             2,
+    #             24,
+    #             173,
+    #             53,
+    #             83,
+    #             1.0,
+    #             4.0,
+    #             1.0,
+    #             1.0,
     #             0.0,
-    #             9.0,
-    #             8.0,
-    #             1413695816,
-    #             1406407374,
-    #             "Romania: Timeless Beauty 2015 Calendar",
-    #             "A calendar featuring the scenic and architectural beauty of Romania.",
-    #             "romania-timeless-beauty-calendar",
+    #             35.0,
+    #             0,
+    #             1,
+    #             0.0,
+    #             0.0,
+    #             1.0,
+    #             0.0,
+    #             1.0,
+    #             -37.83439961,
+    #             -1.0,
+    #             145.058317,
+    #             1125,
+    #             5,
+    #             0,
+    #             np.nan,
+    #             np.nan,
+    #             np.nan,
+    #             np.nan,
+    #             np.nan,
+    #             np.nan,
+    #             np.nan,
+    #             np.nan,
+    #             1.0,
+    #             0.0,
+    #             "TV Wi",
+    #             "hello world",
+    #             "100%",
+    #             "18",
+    #             "Camber",
+    #             "Apartment",
+    #             "Styl",
     #         ]
     #     ],
     #     dtype=object,
-    # )
-    # x = np.array([[85, 25.0, "US", "tough and chewy", "Oregon"]], dtype=object)
-    # x = np.array([[9.0, "Hello world"]], dtype=object)
-    # x = np.array(
-    #     [[5.0, 1.0, "Senior Strategist", "Cutting Edge", "None"]], dtype=object
     # )
 
     # We need to load the ordinal dataset so that we can calculate the correlations for the masker
