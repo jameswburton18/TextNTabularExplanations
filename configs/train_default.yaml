@@ -27,4 +27,4 @@ pytorch2.0: true
 dataset: books
 version: null
 reverse: false
-max_length: null
+max_length: 512

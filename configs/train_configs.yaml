@@ -366,7 +366,7 @@ tags:
   - all_as_text
 dataset: salary
 version: all_as_text
-batch_size: 32
+batch_size: 64
 
 --- # salary_9
 config: salary_9
@@ -376,7 +376,7 @@ tags:
   - text_col_only
 dataset: salary
 version: text_col_only
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_0
 config: airbnb_0
@@ -386,7 +386,7 @@ tags:
   - all_as_text
 dataset: airbnb
 version: all_as_text
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_9
 config: airbnb_9
@@ -396,7 +396,7 @@ tags:
   - text_col_only
 dataset: airbnb
 version: text_col_only
-batch_size: 32
+batch_size: 64
 
 --- # channel_0
 config: channel_0
@@ -406,7 +406,7 @@ tags:
   - all_as_text
 dataset: channel
 version: all_as_text
-batch_size: 32
+batch_size: 64
 
 --- # channel_9
 config: channel_9
@@ -416,7 +416,7 @@ tags:
   - text_col_only
 dataset: channel
 version: text_col_only
-batch_size: 32
+batch_size: 64
 
 --- # imdb_genre_10
 config: imdb_genre_10
@@ -726,7 +726,7 @@ tags:
   - all_as_text
 dataset: salary
 version: all_as_text
-batch_size: 32
+batch_size: 64
 
 --- # salary_29
 config: salary_29
@@ -736,7 +736,7 @@ tags:
   - text_col_only
 dataset: salary
 version: text_col_only
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_20
 config: airbnb_20
@@ -746,7 +746,7 @@ tags:
   - all_as_text
 dataset: airbnb
 version: all_as_text
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_29
 config: airbnb_29
@@ -756,7 +756,7 @@ tags:
   - text_col_only
 dataset: airbnb
 version: text_col_only
-batch_size: 32
+batch_size: 64
 
 --- # channel_20
 config: channel_20
@@ -766,7 +766,7 @@ tags:
   - all_as_text
 dataset: channel
 version: all_as_text
-batch_size: 32
+batch_size: 64
 
 --- # channel_29
 config: channel_29
@@ -776,7 +776,7 @@ tags:
   - text_col_only
 dataset: channel
 version: text_col_only
-batch_size: 32
+batch_size: 64
 
 --- # imdb_genre_30
 config: imdb_genre_30
@@ -787,7 +787,6 @@ tags:
 dataset: imdb_genre
 version: all_as_text
 batch_size: 32
-max_length: 512
 
 --- # imdb_genre_39
 config: imdb_genre_39
@@ -798,7 +797,6 @@ tags:
 dataset: imdb_genre
 version: text_col_only
 batch_size: 32
-max_length: 512
 
 --- # prod_sent_30
 config: prod_sent_30
@@ -809,7 +807,6 @@ tags:
 dataset: prod_sent
 version: all_as_text
 batch_size: 32
-max_length: 512
 
 --- # prod_sent_39
 config: prod_sent_39
@@ -820,7 +817,6 @@ tags:
 dataset: prod_sent
 version: text_col_only
 batch_size: 32
-max_length: 512
 
 --- # fake_30
 config: fake_30
@@ -831,7 +827,6 @@ tags:
 dataset: fake
 version: all_as_text
 batch_size: 32
-max_length: 512
 
 --- # fake_39
 config: fake_39
@@ -842,7 +837,6 @@ tags:
 dataset: fake
 version: text_col_only
 batch_size: 32
-max_length: 512
 
 --- # kick_30
 config: kick_30
@@ -853,7 +847,6 @@ tags:
 dataset: kick
 version: all_as_text
 batch_size: 32
-max_length: 512
 
 --- # kick_39
 config: kick_39
@@ -864,7 +857,6 @@ tags:
 dataset: kick
 version: text_col_only
 batch_size: 32
-max_length: 512
 
 --- # jigsaw_30
 config: jigsaw_30
@@ -875,7 +867,6 @@ tags:
 dataset: jigsaw
 version: all_as_text
 batch_size: 32
-max_length: 512
 
 --- # jigsaw_39
 config: jigsaw_39
@@ -886,7 +877,6 @@ tags:
 dataset: jigsaw
 version: text_col_only
 batch_size: 32
-max_length: 512
 
 --- # wine_30
 config: wine_30
@@ -897,7 +887,6 @@ tags:
 dataset: wine
 version: all_as_text
 batch_size: 32
-max_length: 512
 
 --- # wine_39
 config: wine_39
@@ -908,7 +897,6 @@ tags:
 dataset: wine
 version: text_col_only
 batch_size: 32
-max_length: 512
 
 --- # salary_30
 config: salary_30
