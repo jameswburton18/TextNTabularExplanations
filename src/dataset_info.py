@@ -464,12 +464,14 @@ def get_dataset_info(ds_type, model_type=None):
                 "beds",
                 # "calculated_host_listings_count",
                 "cancellation_policy",
+                "city",
                 "cleaning_fee",
                 "extra_people",
                 "guests_included",
                 # "host_has_profile_pic",
                 "host_identity_verified",
                 "host_is_superhost",
+                "host_response_rate",
                 "host_response_time",
                 # "host_verifications_email",
                 # "host_verifications_facebook",
@@ -514,8 +516,10 @@ def get_dataset_info(ds_type, model_type=None):
             categorical_cols=[
                 "bed_type",
                 "cancellation_policy",
+                "city",
                 "host_identity_verified",
                 "host_is_superhost",
+                "host_response_time",
                 # "host_verifications_email",
                 # "host_verifications_facebook",
                 # "host_verifications_google",
@@ -546,13 +550,11 @@ def get_dataset_info(ds_type, model_type=None):
                 # "access",
                 "amenities",
                 # "calendar_updated",
-                "city",
                 # "description",
                 # "first_review",
                 # "host_about",
                 # "host_location",
                 # "host_neighborhood",
-                "host_response_rate",
                 "host_since",
                 # "host_verifications",
                 # "house_rules",
@@ -632,3 +634,7 @@ def get_dataset_info(ds_type, model_type=None):
                 " data_channel_is_socmed",
             ],
         )
+
+
+"""
+"""
