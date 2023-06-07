@@ -444,7 +444,7 @@ def get_dataset_info(ds_type, model_type=None):
                 )
             case "all_text" | "all_as_text":
                 print(f"Using dataset {ds_type}, all as text version")
-                text_model_name = "james-burton/melbourne_airbnb_0"
+                text_model_name = "james-burton/airbnb_0"
                 ds_name = "james-burton/melbourne_airbnb_all_text"
             case _:
                 print(f"Using dataset {ds_type}, ordinal version")
