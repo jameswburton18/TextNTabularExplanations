@@ -239,13 +239,11 @@ def prepare_text(dataset, version, ds_type, reverse=False):
 
 
 def format_text_pred(pred):
-    # if pred["label"] == "LABEL_1":
-    #     return np.array([1 - pred["score"], pred["score"]])
-    # else:
-    #     return np.array([pred["score"], 1 - pred["score"]])
     scores = [p["score"] for p in pred]
     order = [int(p["label"][6:]) for p in pred]
-    return np.array([scores[i] for i in order])
+    return np.array(
+        [scores[i] for i in sorted(range(len(scores)), key=lambda x: order[x])]
+    )
 
 
 def format_fts_for_plotting(fts, tab_data):
