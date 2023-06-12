@@ -958,137 +958,669 @@ dataset: channel
 version: text_col_only
 batch_size: 32
 
-# Old
-##########################################
-# --- # airbnb_0
-# config: airbnb_0
-# tags:
-#   - bert
-# dataset: airbnb
-# batch_size: 32
+## distilbert base reorder
+--- # imdb_genre_1
+config: imdb_genre_1
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_base_reorder
+dataset: imdb_genre
+version: all_as_text_base_reorder
+batch_size: 32
 
-# --- # books_0
-# config: books_0
-# tags:
-#   - bert
-# batch_size: 32
-# early_stopping_patience: 5
+--- # imdb_genre_2
+config: imdb_genre_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: imdb_genre
+version: all_as_text_tnt_reorder
+batch_size: 32
 
-# --- # imdb_0
-# config: imdb_0
-# tags:
-#   - bert
-# batch_size: 32
-# dataset: imdb
-# early_stopping_patience: 5
+--- # jigsaw_1
+config: jigsaw_1
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_base_reorder
+dataset: jigsaw
+version: all_as_text_base_reorder
+batch_size: 32
 
-# --- # imdb_genre_1
-# config: imdb_genre_1
+--- # jigsaw_2
+config: jigsaw_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: jigsaw
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+# --- # fake_1
+# config: fake_1
 # model_base: distilbert-base-uncased
 # tags:
-#   - distilbert
-#   - tab_as_text
-# dataset: imdb_genre
-# version: tab_as_text
+#   - distilbert-base-uncased
+#   - all_as_text_base_reorder
+# dataset: fake
+# version: all_as_text_base_reorder
 # batch_size: 32
 
-# --- # imdb_genre_2
-# config: imdb_genre_2
+--- # fake_2
+config: fake_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: fake
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # kick_1
+config: kick_1
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_base_reorder
+dataset: kick
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # kick_2
+config: kick_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: kick
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+# --- # wine_1
+# config: wine_1
 # model_base: distilbert-base-uncased
 # tags:
-#   - distilbert
-#   - tabx5
-# dataset: imdb_genre
-# version: tabx5
+#   - distilbert-base-uncased
+#   - all_as_text_base_reorder
+# dataset: wine
+# version: all_as_text_base_reorder
 # batch_size: 32
 
-# --- # imdb_genre_3
-# config: imdb_genre_3
-# model_base: distilbert-base-uncased
+--- # wine_2
+config: wine_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: wine
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # salary_1
+config: salary_1
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_base_reorder
+dataset: salary
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # salary_2
+config: salary_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: salary
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # airbnb_1
+config: airbnb_1
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_base_reorder
+dataset: airbnb
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # airbnb_2
+config: airbnb_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: airbnb
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # channel_1
+config: channel_1
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_base_reorder
+dataset: channel
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # channel_2
+config: channel_2
+model_base: distilbert-base-uncased
+tags:
+  - distilbert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: channel
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+## Bert base reorder
+--- # imdb_genre_11
+config: imdb_genre_11
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_base_reorder
+dataset: imdb_genre
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # imdb_genre_12
+config: imdb_genre_12
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: imdb_genre
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # jigsaw_11
+config: jigsaw_11
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_base_reorder
+dataset: jigsaw
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # jigsaw_12
+config: jigsaw_12
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: jigsaw
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # fake_11
+config: fake_11
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_base_reorder
+dataset: fake
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # fake_12
+config: fake_12
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: fake
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # kick_11
+config: kick_11
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_base_reorder
+dataset: kick
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # kick_12
+config: kick_12
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: kick
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+# --- # wine_11
+# config: wine_11
+# model_base: bert-base-uncased
 # tags:
-#   - distilbert
-#   - reorder1
-# dataset: imdb_genre
-# version: reorder1
+#   - bert-base-uncased
+#   - all_as_text_base_reorder
+# dataset: wine
+# version: all_as_text_base_reorder
 # batch_size: 32
 
-# --- # imdb_genre_4
-# config: imdb_genre_4
-# model_base: distilbert-base-uncased
+--- # wine_12
+config: wine_12
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: wine
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # salary_11
+config: salary_11
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_base_reorder
+dataset: salary
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # salary_12
+config: salary_12
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: salary
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # airbnb_11
+config: airbnb_11
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_base_reorder
+dataset: airbnb
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # airbnb_12
+config: airbnb_12
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: airbnb
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # channel_11
+config: channel_11
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_base_reorder
+dataset: channel
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # channel_12
+config: channel_12
+model_base: bert-base-uncased
+tags:
+  - bert-base-uncased
+  - all_as_text_tnt_reorder
+dataset: channel
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+# distilroberta base reorder
+--- # imdb_genre_21
+config: imdb_genre_21
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_base_reorder
+dataset: imdb_genre
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # imdb_genre_22
+config: imdb_genre_22
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_tnt_reorder
+dataset: imdb_genre
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # jigsaw_21
+config: jigsaw_21
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_base_reorder
+dataset: jigsaw
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # jigsaw_22
+config: jigsaw_22
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_tnt_reorder
+dataset: jigsaw
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # fake_21
+config: fake_21
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_base_reorder
+dataset: fake
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # fake_22
+config: fake_22
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_tnt_reorder
+dataset: fake
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # kick_21
+config: kick_21
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_base_reorder
+dataset: kick
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # kick_22
+config: kick_22
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_tnt_reorder
+dataset: kick
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # prod_sent_21
+config: kick_21
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_base_reorder
+dataset: prod_sent_21
+version: all_as_text_base_reorder
+batch_size: 32
+
+# --- # wine_21
+# config: wine_21
+# model_base: distilroberta-base
 # tags:
-#   - distilbert
-#   - reorder2
-# dataset: imdb_genre
-# version: reorder2
+#   - distilroberta-base
+#   - all_as_text_base_reorder
+# dataset: wine
+# version: all_as_text_base_reorder
 # batch_size: 32
 
-# --- # imdb_genre_5
-# config: imdb_genre_5
-# model_base: distilbert-base-uncased
+--- # wine_22
+config: wine_22
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_tnt_reorder
+dataset: wine
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+# --- # salary_21
+# config: salary_21
+# model_base: distilroberta-base
 # tags:
-#   - distilbert
-#   - tabx5_nodesc
-# dataset: imdb_genre
-# version: tabx5_nodesc
+#   - distilroberta-base
+#   - all_as_text_base_reorder
+# dataset: salary
+# version: all_as_text_base_reorder
 # batch_size: 32
 
-# --- # imdb_genre_6
-# config: imdb_genre_6
-# model_base: distilbert-base-uncased
-# tags:
-#   - distilbert
-#   - tabx2_nodesc
-# dataset: imdb_genre
-# version: tabx2_nodesc
-# batch_size: 32
+--- # salary_22
+config: salary_22
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_tnt_reorder
+dataset: salary
+version: all_as_text_tnt_reorder
+batch_size: 32
 
-# --- # imdb_genre_7
-# config: imdb_genre_7
-# model_base: distilbert-base-uncased
-# tags:
-#   - distilbert
-#   - tabx2
-# dataset: imdb_genre
-# version: tabx2
-# batch_size: 32
+--- # airbnb_21
+config: airbnb_21
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_base_reorder
+dataset: airbnb
+version: all_as_text_base_reorder
+batch_size: 32
 
-# --- # imdb_genre_8
-# config: imdb_genre_8
-# model_base: distilbert-base-uncased
-# tags:
-#   - distilbert
-#   - reorder3
-# dataset: imdb_genre
-# version: reorder3
-# batch_size: 32
+--- # airbnb_22
+config: airbnb_22
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_tnt_reorder
+dataset: airbnb
+version: all_as_text_tnt_reorder
+batch_size: 32
 
-# --- # imdb_genre_10
-# config: imdb_genre_10
-# model_base: distilbert-base-uncased
-# tags:
-#   - distilbert
-#   - all_as_text_exp_reorder
-# dataset: imdb_genre
-# version: all_as_text_exp_reorder
-# batch_size: 32
+--- # channel_21
+config: channel_21
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_base_reorder
+dataset: channel
+version: all_as_text_base_reorder
+batch_size: 32
 
-# --- # imdb_genre_text_0
-# config: imdb_genre_text_0
-# model_base: distilbert-base-uncased
-# tags:
-#   - distilbert
-# dataset: imdb_genre_text
-# batch_size: 32
+--- # channel_22
+config: channel_22
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text_tnt_reorder
+dataset: channel
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+# deberta base reorder
+--- # imdb_genre_31
+config: imdb_genre_31
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_base_reorder
+dataset: imdb_genre
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # imdb_genre_32
+config: imdb_genre_32
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_tnt_reorder
+dataset: imdb_genre
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # jigsaw_31
+config: jigsaw_31
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_base_reorder
+dataset: jigsaw
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # jigsaw_32
+config: jigsaw_32
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_tnt_reorder
+dataset: jigsaw
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # fake_31
+config: fake_31
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_base_reorder
+dataset: fake
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # fake_32
+config: fake_32
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_tnt_reorder
+dataset: fake
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # kick_31
+config: kick_31
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_base_reorder
+dataset: kick
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # kick_32
+config: kick_32
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_tnt_reorder
+dataset: kick
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # wine_31
+config: wine_31
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_base_reorder
+dataset: wine
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # wine_32
+config: wine_32
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_tnt_reorder
+dataset: wine
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # salary_31
+config: salary_31
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_base_reorder
+dataset: salary
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # salary_32
+config: salary_32
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_tnt_reorder
+dataset: salary
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # airbnb_31
+config: airbnb_31
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_base_reorder
+dataset: airbnb
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # airbnb_32
+config: airbnb_32
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_tnt_reorder
+dataset: airbnb
+version: all_as_text_tnt_reorder
+batch_size: 32
+
+--- # channel_31
+config: channel_31
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_base_reorder
+dataset: channel
+version: all_as_text_base_reorder
+batch_size: 32
+
+--- # channel_32
+config: channel_32
+model_base: microsoft/deberta-v3-small
+tags:
+  - microsoft/deberta-v3-small
+  - all_as_text_tnt_reorder
+dataset: channel
+version: all_as_text_tnt_reorder
+batch_size: 32
 
 --- # TESTING
 config: testing
 fast_dev_run: true
-do_train: true
-model_base: microsoft/deberta-v3-small
+do_train: false
+model_base: james-burton/channel_0
 tags:
   - distilbert
   - all_as_text
-dataset: imdb_genre
+dataset: channel
 version: all_as_text
 batch_size: 32
-pytorch2.0: false
+pytorch2.0: true
