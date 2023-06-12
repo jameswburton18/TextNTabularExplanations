@@ -53,7 +53,10 @@ def main():
     di = get_dataset_info(args["dataset"], model_type=args["version"])
     dataset = load_dataset(di.ds_name)  # , download_mode="force_redownload")
     dataset = prepare_text(
-        dataset, args["version"], args["dataset"], args["model_base"]
+        dataset=dataset,
+        version=args["version"],
+        ds_type=args["dataset"],
+        model_name=args["model_base"],
     )
     if di.prob_type == "regression":
         mean_price = np.mean(dataset["train"]["label"])
