@@ -75,7 +75,7 @@ def main():
             ),
         }
 
-    dataset = dataset.map(encode, load_from_cache_file=True)
+    dataset = dataset.map(encode)  # , load_from_cache_file=True)
 
     # Fast dev run if want to run quickly and not save to wandb
     if args["fast_dev_run"]:
