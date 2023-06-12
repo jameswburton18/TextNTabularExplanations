@@ -36,9 +36,22 @@ def multiple_row_to_string(row, cols, multiplier=1, nodesc=False):
     return row
 
 
-def prepare_text(dataset, version, ds_type, reverse=False):
+def prepare_text(dataset, version, ds_type, reverse=False, model_name=None):
     """This is all for preparing the text part of the dataset
     Could be made more robust by referring to dataset_info.py instead"""
+
+    # Used for reorder versions
+    if model_name == "bert-base-uncased":
+        model_code = "bert"
+    elif model_name == "distilbert-base-uncased":
+        model_code = "disbert"
+    elif model_name == "distilroberta-base":
+        model_code = "drob"
+    elif model_name == "microsoft/deberta-v3-small":
+        model_code = "deberta"
+    else:
+        model_code = None
+
     if "imdb" in ds_type:
         di = get_dataset_info("imdb")
         if version == "all_as_text":
@@ -50,12 +63,12 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.rename_column(di.text_cols[0], "text")
             return dataset
         elif version == "all_as_text_base_reorder":
-            cols = di.base_reorder_cols
+            cols = di.base_reorder_cols[model_code]
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
-            cols = di.tnt_reorder_cols
+            cols = di.tnt_reorder_cols[model_code]
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -75,9 +88,15 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise Exception("Same order as original so not needed")
+            cols = di.base_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         elif version == "all_as_text_tnt_reorder":
-            raise Exception("Same order as original so not needed")
+            cols = di.tnt_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -94,11 +113,12 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise Exception(
-                "Different order to original but same as text and tabular order so not needed"
-            )
+            cols = di.base_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         elif version == "all_as_text_tnt_reorder":
-            cols = di.tnt_reorder_cols
+            cols = di.tnt_reorder_cols[model_code]
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -117,12 +137,12 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            cols = di.base_reorder_cols
+            cols = di.base_reorder_cols[model_code]
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
-            cols = di.tnt_reorder_cols
+            cols = di.tnt_reorder_cols[model_code]
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -141,12 +161,12 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            cols = di.base_reorder_cols
+            cols = di.base_reorder_cols[model_code]
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_tnt_reorder":
-            cols = di.tnt_reorder_cols
+            cols = di.tnt_reorder_cols[model_code]
             cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
@@ -166,11 +186,13 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise Exception(
-                "Different order to original but same as text and tabular order so not needed"
-            )
+            cols = di.base_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         elif version == "all_as_text_tnt_reorder":
-            cols = di.tnt_reorder_cols
+            cols = di.tnt_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         else:
@@ -188,9 +210,15 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise Exception("Not yet implemented")
+            cols = di.base_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         elif version == "all_as_text_tnt_reorder":
-            raise Exception("Not yet implemented")
+            cols = di.tnt_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -206,9 +234,15 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise Exception("Not yet implemented")
+            cols = di.base_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         elif version == "all_as_text_tnt_reorder":
-            raise Exception("Not yet implemented")
+            cols = di.tnt_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
@@ -224,9 +258,15 @@ def prepare_text(dataset, version, ds_type, reverse=False):
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
             return dataset
         elif version == "all_as_text_base_reorder":
-            raise Exception("Not yet implemented")
+            cols = di.base_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         elif version == "all_as_text_tnt_reorder":
-            raise Exception("Not yet implemented")
+            cols = di.tnt_reorder_cols[model_code]
+            cols = cols[::-1] if reverse else cols
+            dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
+            return dataset
         else:
             raise ValueError(
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
