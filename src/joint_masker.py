@@ -153,14 +153,9 @@ class JointMasker(Masker):
         and handling the start and end tokens seperately.
         """
         masked_tab = self.tab_mask_call(mask[: self.n_tab_cols], x[: self.n_tab_cols])
-
-        # self._text_ft_index_ends(x[self.n_tab_cols :])
-        # text = " ".join(str(s) for s in x[self.n_tab_cols :])
-        text = self.tokenizer.sep_token.join(str(s) for s in x[self.n_tab_cols :])
-        # masked_text = self.text_mask_call(mask[self.n_tab_cols :], text)
         masked_text = self.text_mask_call(mask[self.n_tab_cols :], x[self.n_tab_cols :])
 
-        # We unpack the string from the tuple and array
+        # We unpack the string from the tuple and array and extend the masked_tab dataframe
         masked_tab[self.text_cols] = masked_text[0]
 
         return masked_tab.values
@@ -551,11 +546,7 @@ class JointMasker(Masker):
 
     def shape(self, s):
         """The shape of what we return as a masker."""
-        # text = " ".join(str(s) for s in s[self.n_tab_cols :])
-        # text = self.tokenizer.sep_token.join(str(s) for s in s[self.n_tab_cols :])
-        # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(s[self.n_tab_cols :])
-        # return (self.max_samples, self.n_tab_cols + len(self._tokenized_s))
         return (
             self.max_samples,
             self.n_tab_cols + sum([len(col) for col in self._tokenized_s]),
@@ -563,20 +554,12 @@ class JointMasker(Masker):
 
     def mask_shapes(self, s):
         """The shape of the masks we expect."""
-        # text = " ".join(str(s) for s in s[self.n_tab_cols :])
-        # text = self.tokenizer.sep_token.join(str(s) for s in s[self.n_tab_cols :])
-        # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(s[self.n_tab_cols :])
-        # return [(self.n_tab_cols + len(self._tokenized_s),)]
         return [(self.n_tab_cols + sum([len(col) for col in self._tokenized_s]),)]
 
     def feature_names(self, s):
         """The names of the features for each mask position for the given input string."""
-        # text = " ".join(str(s) for s in x[self.n_tab_cols :])
-        # text = self.tokenizer.sep_token.join(str(s) for s in s[self.n_tab_cols :])
-        # text = self.cols_to_text_fn(s[self.n_tab_cols :])
         self._update_s_cache(s[self.n_tab_cols :])
-        # return [self.tab_feature_names + [v for col in self._segments_s for v in col ]]
         return [self.tab_feature_names + [v for col in self._segments_s for v in col]]
 
 
