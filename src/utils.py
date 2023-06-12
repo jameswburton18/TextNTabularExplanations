@@ -52,7 +52,7 @@ def prepare_text(dataset, version, ds_type, reverse=False, model_name=None):
     else:
         model_code = None
 
-    if "imdb" in ds_type:
+    if ds_type in ["imdb", "imdb_genre"]:
         di = get_dataset_info("imdb")
         if version == "all_as_text":
             cols = di.tab_cols + di.text_cols
@@ -127,6 +127,7 @@ def prepare_text(dataset, version, ds_type, reverse=False, model_name=None):
                 f"Unknown dataset type ({ds_type}) and version ({version}) combination"
             )
     elif "kick" in ds_type:
+        di = get_dataset_info("kick")
         if version == "text_col_only":
             cols = di.text_cols
             dataset = dataset.map(row_to_string, fn_kwargs={"cols": cols})
