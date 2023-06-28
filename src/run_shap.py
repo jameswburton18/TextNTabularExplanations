@@ -163,7 +163,8 @@ def run_shap(
             tabular features, when to trust the tabular model and when to trust the text model.
             """
             val_df = load_dataset(
-                di.ds_name, split="validation", download_mode="force_redownload"
+                di.ds_name,
+                split="validation",  # download_mode="force_redownload"
             ).to_pandas()
             val_df[di.categorical_cols] = val_df[di.categorical_cols].astype("category")
             y_val = val_df[di.label_col]
