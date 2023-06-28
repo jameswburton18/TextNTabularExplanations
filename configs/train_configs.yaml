@@ -1,3 +1,16 @@
+# Pattern:
+# 0s: distilbert
+# 10s: bert-base-uncased
+# 20s: distilroberta-base
+# 30s: microsoft/deberta-v3-small
+
+# #0: all_as_text
+# #1: all_as_text_base_reorder
+# #2: all_as_text_tnt_reorder
+# #3: all_as_text_base_reorder, reversed
+# #4: all_as_text_tnt_reorder, reversed
+# #9: text_col_only
+
 --- # imdb_genre_0
 config: imdb_genre_0
 model_base: distilbert-base-uncased
@@ -967,7 +980,7 @@ tags:
   - all_as_text_base_reorder
 dataset: imdb_genre
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # imdb_genre_2
 config: imdb_genre_2
@@ -977,7 +990,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: imdb_genre
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # jigsaw_1
 config: jigsaw_1
@@ -987,7 +1000,7 @@ tags:
   - all_as_text_base_reorder
 dataset: jigsaw
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # jigsaw_2
 config: jigsaw_2
@@ -997,7 +1010,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: jigsaw
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 # --- # fake_1
 # config: fake_1
@@ -1007,7 +1020,7 @@ batch_size: 32
 #   - all_as_text_base_reorder
 # dataset: fake
 # version: all_as_text_base_reorder
-# batch_size: 32
+# batch_size: 64
 
 --- # fake_2
 config: fake_2
@@ -1017,7 +1030,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: fake
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # kick_1
 config: kick_1
@@ -1027,7 +1040,7 @@ tags:
   - all_as_text_base_reorder
 dataset: kick
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # kick_2
 config: kick_2
@@ -1037,7 +1050,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: kick
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 # --- # wine_1
 # config: wine_1
@@ -1047,7 +1060,7 @@ batch_size: 32
 #   - all_as_text_base_reorder
 # dataset: wine
 # version: all_as_text_base_reorder
-# batch_size: 32
+# batch_size: 64
 
 --- # wine_2
 config: wine_2
@@ -1057,7 +1070,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: wine
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # salary_1
 config: salary_1
@@ -1067,7 +1080,7 @@ tags:
   - all_as_text_base_reorder
 dataset: salary
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # salary_2
 config: salary_2
@@ -1077,7 +1090,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: salary
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_1
 config: airbnb_1
@@ -1087,7 +1100,7 @@ tags:
   - all_as_text_base_reorder
 dataset: airbnb
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_2
 config: airbnb_2
@@ -1097,7 +1110,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: airbnb
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # channel_1
 config: channel_1
@@ -1107,7 +1120,7 @@ tags:
   - all_as_text_base_reorder
 dataset: channel
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # channel_2
 config: channel_2
@@ -1117,7 +1130,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: channel
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 ## Bert base reorder
 --- # imdb_genre_11
@@ -1128,7 +1141,7 @@ tags:
   - all_as_text_base_reorder
 dataset: imdb_genre
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # imdb_genre_12
 config: imdb_genre_12
@@ -1138,7 +1151,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: imdb_genre
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # jigsaw_11
 config: jigsaw_11
@@ -1148,7 +1161,7 @@ tags:
   - all_as_text_base_reorder
 dataset: jigsaw
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # jigsaw_12
 config: jigsaw_12
@@ -1158,7 +1171,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: jigsaw
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # fake_11
 config: fake_11
@@ -1168,7 +1181,7 @@ tags:
   - all_as_text_base_reorder
 dataset: fake
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # fake_12
 config: fake_12
@@ -1178,7 +1191,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: fake
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # kick_11
 config: kick_11
@@ -1188,7 +1201,7 @@ tags:
   - all_as_text_base_reorder
 dataset: kick
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # kick_12
 config: kick_12
@@ -1198,7 +1211,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: kick
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 # --- # wine_11
 # config: wine_11
@@ -1208,7 +1221,7 @@ batch_size: 32
 #   - all_as_text_base_reorder
 # dataset: wine
 # version: all_as_text_base_reorder
-# batch_size: 32
+# batch_size: 64
 
 --- # wine_12
 config: wine_12
@@ -1218,7 +1231,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: wine
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # salary_11
 config: salary_11
@@ -1228,7 +1241,7 @@ tags:
   - all_as_text_base_reorder
 dataset: salary
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # salary_12
 config: salary_12
@@ -1238,7 +1251,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: salary
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_11
 config: airbnb_11
@@ -1248,7 +1261,7 @@ tags:
   - all_as_text_base_reorder
 dataset: airbnb
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_12
 config: airbnb_12
@@ -1258,7 +1271,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: airbnb
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # channel_11
 config: channel_11
@@ -1268,7 +1281,7 @@ tags:
   - all_as_text_base_reorder
 dataset: channel
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # channel_12
 config: channel_12
@@ -1278,7 +1291,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: channel
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 # distilroberta base reorder
 --- # imdb_genre_21
@@ -1289,7 +1302,7 @@ tags:
   - all_as_text_base_reorder
 dataset: imdb_genre
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # imdb_genre_22
 config: imdb_genre_22
@@ -1299,7 +1312,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: imdb_genre
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # jigsaw_21
 config: jigsaw_21
@@ -1309,7 +1322,7 @@ tags:
   - all_as_text_base_reorder
 dataset: jigsaw
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # jigsaw_22
 config: jigsaw_22
@@ -1319,7 +1332,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: jigsaw
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # fake_21
 config: fake_21
@@ -1329,7 +1342,7 @@ tags:
   - all_as_text_base_reorder
 dataset: fake
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # fake_22
 config: fake_22
@@ -1339,7 +1352,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: fake
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # kick_21
 config: kick_21
@@ -1349,7 +1362,7 @@ tags:
   - all_as_text_base_reorder
 dataset: kick
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # kick_22
 config: kick_22
@@ -1359,17 +1372,17 @@ tags:
   - all_as_text_tnt_reorder
 dataset: kick
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # prod_sent_21
-config: kick_21
+config: prod_sent_21
 model_base: distilroberta-base
 tags:
   - distilroberta-base
   - all_as_text_base_reorder
-dataset: prod_sent_21
+dataset: prod_sent
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 # --- # wine_21
 # config: wine_21
@@ -1379,7 +1392,7 @@ batch_size: 32
 #   - all_as_text_base_reorder
 # dataset: wine
 # version: all_as_text_base_reorder
-# batch_size: 32
+# batch_size: 64
 
 --- # wine_22
 config: wine_22
@@ -1389,7 +1402,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: wine
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 # --- # salary_21
 # config: salary_21
@@ -1399,7 +1412,7 @@ batch_size: 32
 #   - all_as_text_base_reorder
 # dataset: salary
 # version: all_as_text_base_reorder
-# batch_size: 32
+# batch_size: 64
 
 --- # salary_22
 config: salary_22
@@ -1409,7 +1422,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: salary
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_21
 config: airbnb_21
@@ -1419,7 +1432,7 @@ tags:
   - all_as_text_base_reorder
 dataset: airbnb
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_22
 config: airbnb_22
@@ -1429,7 +1442,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: airbnb
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # channel_21
 config: channel_21
@@ -1439,7 +1452,7 @@ tags:
   - all_as_text_base_reorder
 dataset: channel
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # channel_22
 config: channel_22
@@ -1449,7 +1462,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: channel
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 # deberta base reorder
 --- # imdb_genre_31
@@ -1460,7 +1473,7 @@ tags:
   - all_as_text_base_reorder
 dataset: imdb_genre
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # imdb_genre_32
 config: imdb_genre_32
@@ -1470,7 +1483,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: imdb_genre
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # jigsaw_31
 config: jigsaw_31
@@ -1480,7 +1493,7 @@ tags:
   - all_as_text_base_reorder
 dataset: jigsaw
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # jigsaw_32
 config: jigsaw_32
@@ -1490,7 +1503,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: jigsaw
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # fake_31
 config: fake_31
@@ -1500,7 +1513,7 @@ tags:
   - all_as_text_base_reorder
 dataset: fake
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # fake_32
 config: fake_32
@@ -1510,7 +1523,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: fake
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # kick_31
 config: kick_31
@@ -1520,7 +1533,7 @@ tags:
   - all_as_text_base_reorder
 dataset: kick
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # kick_32
 config: kick_32
@@ -1530,7 +1543,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: kick
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # wine_31
 config: wine_31
@@ -1540,7 +1553,7 @@ tags:
   - all_as_text_base_reorder
 dataset: wine
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # wine_32
 config: wine_32
@@ -1550,7 +1563,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: wine
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # salary_31
 config: salary_31
@@ -1560,7 +1573,7 @@ tags:
   - all_as_text_base_reorder
 dataset: salary
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # salary_32
 config: salary_32
@@ -1570,7 +1583,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: salary
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_31
 config: airbnb_31
@@ -1580,7 +1593,7 @@ tags:
   - all_as_text_base_reorder
 dataset: airbnb
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # airbnb_32
 config: airbnb_32
@@ -1590,7 +1603,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: airbnb
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # channel_31
 config: channel_31
@@ -1600,7 +1613,7 @@ tags:
   - all_as_text_base_reorder
 dataset: channel
 version: all_as_text_base_reorder
-batch_size: 32
+batch_size: 64
 
 --- # channel_32
 config: channel_32
@@ -1610,7 +1623,7 @@ tags:
   - all_as_text_tnt_reorder
 dataset: channel
 version: all_as_text_tnt_reorder
-batch_size: 32
+batch_size: 64
 
 --- # TESTING
 config: testing
