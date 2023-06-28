@@ -12,7 +12,7 @@
 # -x shows which ones to ignore
 # #SBATCH -x gpu[0-8] #[7,8,10,11,12]
 # #SBATCH --gres=gpu:ampere:1 #--gres gpu for normal, --gres=gpu:ampere:1 for whole 80gb card
-#SBATCH -x gpu[0-3,10-12] #[0-6,7,8,10,11,12]
+#SBATCH -x gpu[0-6,10-12] #[0-6,7,8,10,11,12]
 #SBATCH --gres gpu #--gres gpu for normal, --gres=gpu:ampere:1 for whole 80gb card
 
 # Job name appears in the squeue output, output is the output filename 
