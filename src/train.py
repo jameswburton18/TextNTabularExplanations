@@ -134,6 +134,7 @@ def main():
         save_strategy="epoch",
         save_total_limit=args["save_total_limit"],
         load_best_model_at_end=True,
+        seed=args["seed"],
         torch_compile=args["pytorch2.0"],  # Needs to be true if PyTorch 2.0
     )
 

@@ -12,7 +12,7 @@ weight_decay: 0.3
 num_epochs: 50
 early_stopping_patience: 3
 grad_accumulation_steps: 1
-seed: 43
+seed: 42
 logging_steps: 10
 lr_scheduler: linear
 warmup_ratio: 0

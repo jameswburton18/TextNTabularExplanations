@@ -1625,6 +1625,61 @@ dataset: channel
 version: all_as_text_tnt_reorder
 batch_size: 64
 
+--- # kick_20_1
+config: kick_20_1
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text
+dataset: kick
+version: all_as_text
+batch_size: 128
+seed: 23838
+
+--- # kick_20_2
+config: kick_20_2
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text
+dataset: kick
+version: all_as_text
+batch_size: 128
+seed: 51866
+
+--- # kick_20_3
+config: kick_20_3
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text
+dataset: kick
+version: all_as_text
+batch_size: 128
+seed: 94390
+
+--- # kick_20_4
+config: kick_20_4
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text
+dataset: kick
+version: all_as_text
+batch_size: 128
+seed: 80256
+
+--- # kick_20_5
+config: kick_20_5
+model_base: distilroberta-base
+tags:
+  - distilroberta-base
+  - all_as_text
+dataset: kick
+version: all_as_text
+batch_size: 128
+seed: 53995
+
 --- # TESTING
 config: testing
 fast_dev_run: true
