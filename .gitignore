@@ -12,3 +12,4 @@ archive/artifacts
 /my_package.egg-info
 /shap_vals
 *__pycache__
+notebooks/results/
