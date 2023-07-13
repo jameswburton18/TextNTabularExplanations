@@ -339,3 +339,12 @@ How do I get this into a paper?
 
 So I like the current start:
 An introduction of the problem which illustrates the two main issues: all as text baseline does it this way, which I am saying is wrong, and also if you want to combine it in any other way then it is not possible
+
+## July 11th
+
+Random numbers:
+23838
+51866
+94390
+80256
+53995
