@@ -1,8 +1,31 @@
 library(ggstatsplot)
 library(tidyverse)
-# df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/notebooks/instance_df.csv")
+library(dplyr)
+library(irr)
+
+# Data creation
+#######################################
 df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/models/shap_vals_instance_df.csv")
-sal <- subset(df, ds_name = salary)
+# Convert the method column to character type
+df$method <- as.character(df$method)
+# Rename the methods in your dataframe
+df$method <- ifelse(df$method == "baseline", "all_text_baseline", df$method)
+df$method <- ifelse(df$method == "all_text", "all_text_corrected", df$method)
+df$method <- factor(df$method, levels = c(
+  "ensemble_25", "ensemble_50", "ensemble_75", "all_text_baseline", "all_text_corrected", "stack"
+))
+
+df$text_model <- as.character(df$text_model)
+df$text_model <- ifelse(df$text_model == "bert", "BERT", df$text_model)
+df$text_model <- ifelse(df$text_model == "disbert", "DistilBERT", df$text_model)
+df$text_model <- ifelse(df$text_model == "drob", "DistilRoBERTa", df$text_model)
+df$text_model <- ifelse(df$text_model == "deberta", "DeBERTa", df$text_model)
+
+# Filtering out the poorly performing models
+df <- df %>%
+  filter(!(ds_name == "channel" & (method == "all_text_corrected" | method == "all_text_baseline"))) %>%
+  filter(!(ds_name %in% c("salary", "wine") & method == "stack")) %>%
+  filter(!(ds_name == "prod_sent" & (text_model == "DistilBERT" | method == "stack")))
 
 # Create a list to store the separate dataframes
 df_list <- list()
@@ -19,67 +42,74 @@ for (value in unique_values) {
 
 # Creating a list of strings of unique values
 unique_values_list <- as.character(unique_values)
-ds <- 'imdb_genre'
-ggwithinstats(
-  data = df_list[[ds]],
-  x = text_model,
-  y = text.tab,
-  type = "nonparametric", # ANOVA or Kruskal-Wallis
-  # plot.type = "box",
-  package = "ggsci",
-  palette = "default_jco",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "all",
-  ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
-  xlab = "Combination Method",
-  title = "Do Models Assign More Importance to Text or Tabular Features?
-Difference in Median Absolute Feature Importance, by Combination Method",
-  caption = paste("Dataset: ", ds),
-  mean.plotting = FALSE,
+caption_list <- c(
+  "kick", "jigsaw",
+  "wine *stack models excluded", "fake", "imdb_genre", "channel *all_text_baseline and all_text_corrected models excluded", "airbnb",
+  "salary *stack models excluded",
+  "prod *Distilbert and stack models excluded"
 )
 
+features_df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/notebooks/unranked_df_no_template.csv")
+# Convert the method column to character type
+features_df$method <- as.character(features_df$method)
+# Rename the methods in your dataframe
+features_df$method <- ifelse(features_df$method == "baseline", "all_text_baseline", features_df$method)
+features_df$method <- ifelse(features_df$method == "all_text", "all_text_corrected", features_df$method)
+features_df$method <- factor(features_df$method, levels = c(
+  "ensemble_25", "ensemble_50", "ensemble_75", "all_text_baseline", "all_text_corrected", "stack"
+))
 
-ggbetweenstats(
-  data = df_list[[ds]],
-  x = method,
-  y = text.tab,
-  type = "nonparametric", # ANOVA or Kruskal-Wallis
-  # plot.type = "box",
-  package = "ggsci",
-  palette = "default_jco",
-  pairwise.comparisons = TRUE,
-  pairwise.display = "ns",
-  ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
-  xlab = "Combination Method",
-  title = "Do Models Assign More Importance to Text or Tabular Features?
-Difference in Median Absolute Feature Importance, by Combination Method",
-  caption = paste("Dataset: ", ds),
-  mean.plotting = FALSE,
-)
+features_df$text_model <- as.character(features_df$text_model)
+features_df$text_model <- ifelse(features_df$text_model == "bert", "BERT", features_df$text_model)
+features_df$text_model <- ifelse(features_df$text_model == "disbert", "DistilBERT", features_df$text_model)
+features_df$text_model <- ifelse(features_df$text_model == "drob", "DistilRoBERTa", features_df$text_model)
+features_df$text_model <- ifelse(features_df$text_model == "deberta", "DeBERTa", features_df$text_model)
 
 
-for (ds in unique_values_list) {
-  p <- ggwithinstats(
+# Filtering out the poorly performing models
+features_df <- features_df %>%
+  filter(!(ds_name == "channel" & (method == "all_text_corrected" | method == "all_text_baseline"))) %>%
+  filter(!(ds_name %in% c("salary", "wine") & method == "stack")) %>%
+  filter(!(ds_name == "prod_sent" & (text_model == "DistilBERT" | method == "stack")))
+
+feature_df_list <- list()
+for (value in unique_values) {
+  df_subset <- features_df[features_df$ds_name == value, ]
+  df_subset <- df_subset[, !names(df_subset) %in% "ds_name"] # Drop the ds_name column
+  feature_df_list[[value]] <- df_subset
+}
+
+unique_text_models <- unique(features_df$text_model)
+unique_methods <- unique(features_df$method)
+
+# Produce charts
+####################################################
+
+
+Map(function(ds, caption) {
+  p <- ggbetweenstats(
     data = df_list[[ds]],
     x = method,
     y = text.tab,
-    type = "nonparametric", # ANOVA or Kruskal-Wallis
-    # plot.type = "box",
+    type = "nonparametric",
     package = "ggsci",
     palette = "default_jco",
-    pairwise.comparisons = TRUE,
     pairwise.display = "ns",
     ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
     xlab = "Combination Method",
-    title = "Do Models Assign More Importance to Text or Tabular Features?
-Difference in Median Absolute Feature Importance, by Combination Method",
-    caption = paste("Dataset: ", ds),
-    mean.plotting = FALSE,
+    title = "Are Text or Tabular Features Assigned More Importance?
+Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
+    caption = paste("Dataset: ", caption),
   )
-  print(p)
-}
 
-for (ds in unique_values_list) {
+  # Save the plot to a PDF file
+  file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/text_tab_comb_", ds, ".pdf", sep = "")
+  ggsave(file = file_name, plot = p, width = 8, height = 5)
+
+  print(p)
+}, unique_values_list, caption_list)
+
+Map(function(ds, caption) {
   p <- ggbetweenstats(
     data = df_list[[ds]],
     x = text_model,
@@ -91,27 +121,18 @@ for (ds in unique_values_list) {
     pairwise.comparisons = TRUE,
     pairwise.display = "ns",
     ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
-    xlab = "Combination Method",
-    title = "Do Models Assign More Importance to Text or Tabular Features?
-Difference in Median Absolute Feature Importance, by Text Model",
-    caption = paste("Dataset: ", ds),
-    mean.plotting = FALSE,
+    xlab = "Text Model",
+    title = "Are Text or Tabular Features Assigned More Importance?
+Difference in Median Absolute Feature Importance (SHAP), by Text Model",
+    caption = paste("Dataset: ", caption),
   )
+  # Save the plot to a PDF file
+  file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/text_tab_mod_", ds, ".pdf", sep = "")
+  ggsave(file = file_name, plot = p, width = 8, height = 5)
   print(p)
-}
+}, unique_values_list, caption_list)
 
-features_df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/notebooks/unranked_df_no_template.csv")
-
-feature_df_list <- list()
-for (value in unique_values) {
-  df_subset <- features_df[features_df$ds_name == value, ]
-  df_subset <- df_subset[, !names(df_subset) %in% "ds_name"] # Drop the ds_name column
-  feature_df_list[[value]] <- df_subset
-}
-
-
-
-for (ds in unique_values_list) {
+Map(function(ds, caption) {
   p <- ggwithinstats(
     data = feature_df_list[[ds]],
     x = text_model,
@@ -120,19 +141,19 @@ for (ds in unique_values_list) {
     # plot.type = "box",
     package = "ggsci",
     palette = "default_jco",
-    pairwise.comparisons = TRUE,
-    pairwise.display = "ns",
-    ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
-    xlab = "Combination Method",
-    title = "Do Models Assign More Importance to Text or Tabular Features?
-Difference in Median Absolute Feature Importance, by Combination Method",
-    caption = paste("Dataset: ", ds),
-    mean.plotting = FALSE,
+    pairwise.display = "sig",
+    ylab = "|Feature Importance (SHAP)|",
+    xlab = "Text Model",
+    title = "Are the Same Features Always the Most Important? Absolute Feature Importance (SHAP) Compared, by Text Model",
+    caption = paste("Dataset: ", caption),
   )
+  # Save the plot to a PDF file
+  file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/ft_order_mod_", ds, ".pdf", sep = "")
+  ggsave(file = file_name, plot = p, width = 8, height = 5)
   print(p)
-}
+}, unique_values_list, caption_list)
 
-for (ds in unique_values_list) {
+Map(function(ds, caption) {
   p <- ggwithinstats(
     data = feature_df_list[[ds]],
     x = method,
@@ -141,15 +162,97 @@ for (ds in unique_values_list) {
     # plot.type = "box",
     package = "ggsci",
     palette = "default_jco",
-    pairwise.comparisons = TRUE,
-    pairwise.display = "ns",
-    ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+    pairwise.comparisons =  FALSE ,
+    ylab = "|Feature Importance (SHAP)|",
     xlab = "Combination Method",
-    title = "Do Models Assign More Importance to Text or Tabular Features?
-Difference in Median Absolute Feature Importance, by Combination Method",
-    caption = paste("Dataset: ", ds),
-    mean.plotting = FALSE,
+    title = "Are the Same Features Always the Most Important? Absolute Feature Importance (SHAP) Compared, by Combination Method",
+    caption = paste("Dataset: ", caption),
   )
+  # Save the plot to a PDF file
+  file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/ft_order_comb_", ds, ".pdf", sep = "")
+  ggsave(file = file_name, plot = p, width = 8, height = 5)
   print(p)
+}, unique_values_list, caption_list)
+
+
+
+# Take each dataset, model combo as unique, save results to csv
+#################################################
+# Create an empty data frame to store the results
+tm_result_df <- data.frame(ds = character(), tm = character(), kendall_value = numeric(), stringsAsFactors = FALSE)
+m_result_df <- data.frame(ds = character(), m = character(), kendall_value = numeric(), stringsAsFactors = FALSE)
+
+
+# Break it up by both text model and method
+for (ds in unique_values_list) {
+  for (tm in unique_text_models) {
+    tryCatch(
+      {
+        df_pivot <- feature_df_list[[ds]] %>%
+          filter(text_model == tm) %>%
+          select(-text_model) %>%
+          pivot_wider(names_from = method, values_from = feature_importance, names_prefix = "")
+        kendall_value <- kendall(df_pivot)$value
+
+        # Append the result to the tm_result_df
+        tm_result_df[nrow(tm_result_df) + 1, ] <- c(ds, tm, kendall_value)
+      },
+      error = function(e) {
+        print(paste("Error occurred for Dataset:", ds, "Text Model:", tm))
+        print(e) # Print the error message for debugging
+        # Append NA if there is an error
+        # tm_result_df[nrow(tm_result_df) + 1, ] <- c(ds, tm, NA)
+      }
+    )
+  }
+  for (m in unique_methods) {
+    tryCatch(
+      {
+        df_pivot <- feature_df_list[[ds]] %>%
+          filter(method == m) %>%
+          select(-method) %>%
+          pivot_wider(names_from = text_model, values_from = feature_importance, names_prefix = "")
+        kendall_value <- kendall(df_pivot)$value
+
+        # Append the result to the m_result_df
+        m_result_df[nrow(m_result_df) + 1, ] <- c(ds, m, kendall_value)
+      },
+      error = function(e) {
+        print(paste("Error occurred for Dataset:", ds, "Method:", m))
+        print(e) # Print the error message for debugging
+        # Append NA if there is an error
+        # m_result_df[nrow(m_result_df) + 1, ] <- c(ds, m, NA)
+      }
+    )
+  }
 }
+
+# Write the result_df to a CSV file
+write.csv(tm_result_df, "/home/james/CodingProjects/TextNTabularExplanations/notebooks/text_model_kendall.csv", row.names = FALSE)
+write.csv(m_result_df, "/home/james/CodingProjects/TextNTabularExplanations/notebooks/method_kendall.csv", row.names = FALSE)
+
+
+sal_df <- df_list[["kick"]]
+grouped_ggbetweenstats(
+  data = sal_df,
+  x = method,
+  y = text.tab,
+  type = "nonparametric", # ANOVA or Kruskal-Wallis
+  grouping.var = text_model,
+  package = "ggsci",
+  palette = "default_jco",
+  pairwise.display = "ns",
+  ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+  xlab = "Text Model",
+  # title = "Are Text or Tabular Features Assigned More Importance?",
+  # caption = "Dataset: salary",
+  # conf.level = FALSE,
+  # pairwise.comparisons = FALSE,
+  # centrality.plotting = FALSE
+  centrality.point.args = list(size = 2, color = "darkred"),
+  # centrality.label.args = list(data=n),
+  centrality.path.args = list(linewidth = 1, color = "red", alpha = 0.5),
+  centrality.label.args = list(size = 2.5, nudge_x = 0.4, segment.linetype = 4),
+  # ggsignif.args = list(textsize = 2, tip_length = 0.01, na.rm = TRUE),
+)
 
