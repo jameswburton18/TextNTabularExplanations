@@ -39,6 +39,7 @@ def run_shap(
     max_samples=100,
     test_set_size=100,
     tab_scale_factor=2,
+    repeat_idx=None,
 ):
     di = get_dataset_info(ds_type, model_type)
     # Data
@@ -71,6 +72,8 @@ def run_shap(
         my_text_model = di.text_model_name[:-1] + "3" + di.text_model_name[-1]
     else:
         raise ValueError(f"Invalid text model code of {text_model_code}")
+    if repeat_idx is not None:
+        my_text_model = my_text_model + f"_{repeat_idx}"
 
     # Models
     tokenizer = AutoTokenizer.from_pretrained(text_model_base, model_max_length=512)
@@ -202,54 +205,6 @@ def run_shap(
 
     np.random.seed(1)
     x = test_df[di.tab_cols + di.text_cols].values
-    # x = np.array(
-    #     [
-    #         [
-    #             2,
-    #             24,
-    #             173,
-    #             53,
-    #             83,
-    #             1.0,
-    #             4.0,
-    #             1.0,
-    #             1.0,
-    #             0.0,
-    #             35.0,
-    #             0,
-    #             1,
-    #             0.0,
-    #             0.0,
-    #             1.0,
-    #             0.0,
-    #             1.0,
-    #             -37.83439961,
-    #             -1.0,
-    #             145.058317,
-    #             1125,
-    #             5,
-    #             0,
-    #             np.nan,
-    #             np.nan,
-    #             np.nan,
-    #             np.nan,
-    #             np.nan,
-    #             np.nan,
-    #             np.nan,
-    #             np.nan,
-    #             1.0,
-    #             0.0,
-    #             "TV Wi",
-    #             "hello world",
-    #             "100%",
-    #             "18",
-    #             "Camber",
-    #             "Apartment",
-    #             "Styl",
-    #         ]
-    #     ],
-    #     dtype=object,
-    # )
 
     # We need to load the ordinal dataset so that we can calculate the correlations for the masker
     ord_ds_name = get_dataset_info(ds_type, "ordinal").ds_name
@@ -283,9 +238,12 @@ def run_shap(
     shap_vals = explainer(x)
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    repeat_idx_str = f"_{repeat_idx}" if repeat_idx is not None else ""
     text_model_name = f"_{text_model_code}"
 
-    output_dir = os.path.join(f"models/shap_vals{text_model_name}{pre}/", ds_type)
+    output_dir = os.path.join(
+        f"models/shap_vals{text_model_name}{pre}{repeat_idx_str}/", ds_type
+    )
     print(f"Results will be saved @: {output_dir}")
 
     # Make output directory
@@ -299,7 +257,12 @@ def run_shap(
 
 
 def run_all_text_baseline_shap(
-    ds_type, text_model_code, max_samples=100, test_set_size=100, tab_scale_factor=2
+    ds_type,
+    text_model_code,
+    max_samples=100,
+    test_set_size=100,
+    tab_scale_factor=2,
+    repeat_idx=None,
 ):
     di = get_dataset_info(ds_type, "all_text")
     # Data
@@ -330,6 +293,8 @@ def run_all_text_baseline_shap(
         my_text_model = di.text_model_name[:-1] + "3" + di.text_model_name[-1]
     else:
         raise ValueError(f"Invalid text model code of {text_model_code}")
+    if repeat_idx is not None:
+        my_text_model = my_text_model + f"_{repeat_idx}"
 
     # Models
     tokenizer = AutoTokenizer.from_pretrained(text_model_base, model_max_length=512)
@@ -356,8 +321,11 @@ def run_all_text_baseline_shap(
     # shap_vals = explainer(x)
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    repeat_idx_str = f"_{repeat_idx}" if repeat_idx is not None else ""
     text_model_name = f"_{text_model_code}"
-    output_dir = os.path.join(f"models/shap_vals{text_model_name}{pre}/", ds_type)
+    output_dir = os.path.join(
+        f"models/shap_vals{text_model_name}{pre}{repeat_idx_str}/", ds_type
+    )
     print(f"Results will be saved @: {output_dir}")
 
     # Make output directory
@@ -370,37 +338,44 @@ def run_all_text_baseline_shap(
     return shap_vals
 
 
-def load_shap_vals(ds_name, text_model_code, add_parent_dir=True, tab_scale_factor=2):
+def load_shap_vals(
+    ds_name,
+    text_model_code,
+    add_parent_dir=True,
+    tab_scale_factor=2,
+    repeat_idx=None,
+):
     pre = "../" if add_parent_dir else ""  # for running from notebooks
     tab_pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    repeat_idx_str = f"_{repeat_idx}" if repeat_idx is not None else ""
     text_model_name = f"_{text_model_code}"
     with open(
-        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_ensemble_25.pkl",
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}{repeat_idx_str}/{ds_name}/shap_vals_ensemble_25.pkl",
         "rb",
     ) as f:
         shap_25 = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_ensemble_50.pkl",
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}{repeat_idx_str}/{ds_name}/shap_vals_ensemble_50.pkl",
         "rb",
     ) as f:
         shap_50 = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_ensemble_75.pkl",
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}{repeat_idx_str}/{ds_name}/shap_vals_ensemble_75.pkl",
         "rb",
     ) as f:
         shap_75 = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_stack.pkl",
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}{repeat_idx_str}/{ds_name}/shap_vals_stack.pkl",
         "rb",
     ) as f:
         shap_stack = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_all_text.pkl",
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}{repeat_idx_str}/{ds_name}/shap_vals_all_text.pkl",
         "rb",
     ) as f:
         shap_all_text = pickle.load(f)
     with open(
-        f"{pre}models/shap_vals{text_model_name}{tab_pre}/{ds_name}/shap_vals_all_text_baseline.pkl",
+        f"{pre}models/shap_vals{text_model_name}{tab_pre}{repeat_idx_str}/{ds_name}/shap_vals_all_text_baseline.pkl",
         "rb",
     ) as f:
         shap_all_text_baseline = pickle.load(f)
@@ -418,7 +393,7 @@ def load_shap_vals(ds_name, text_model_code, add_parent_dir=True, tab_scale_fact
 
 
 def gen_summary_shap_vals(
-    ds_name, text_model_code, add_parent_dir=False, tab_scale_factor=2
+    ds_name, text_model_code, add_parent_dir=False, tab_scale_factor=2, repeat_idx=None
 ):
     di = get_dataset_info(ds_name)
     shap_groups, names = load_shap_vals(
@@ -441,6 +416,7 @@ def gen_summary_shap_vals(
     tokenizer = AutoTokenizer.from_pretrained(text_model_base, model_max_length=512)
 
     pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
+    repeat_idx_str = f"_{repeat_idx}" if repeat_idx is not None else ""
     text_model_name = f"_{text_model_code}"
 
     for shap_vals, name in zip(shap_groups[:-1], names[:-1]):
@@ -451,7 +427,7 @@ def gen_summary_shap_vals(
             #################
             """
         )
-        filepath = f"models/shap_vals{text_model_name}{pre}/{ds_name}/summed_shap_vals_{name}.pkl"
+        filepath = f"models/shap_vals{text_model_name}{pre}{repeat_idx_str}/{ds_name}/summed_shap_vals_{name}.pkl"
         grouped_shap_vals = []
         for label in range(len(di.label_names)):
             shap_for_label = []
@@ -486,9 +462,9 @@ def gen_summary_shap_vals(
         """
     )
     shap_vals = shap_groups[-1]
-    filepath = f"models/shap_vals{text_model_name}{pre}/{ds_name}/summed_shap_vals_all_text_baseline.pkl"
-    col_name_filepath = f"models/shap_vals{text_model_name}{pre}/{ds_name}/col_names_shap_vals_all_text_baseline.pkl"
-    colon_filepath = f"models/shap_vals{text_model_name}{pre}/{ds_name}/colon_shap_vals_all_text_baseline.pkl"
+    filepath = f"models/shap_vals{text_model_name}{pre}{repeat_idx_str}/{ds_name}/summed_shap_vals_all_text_baseline.pkl"
+    col_name_filepath = f"models/shap_vals{text_model_name}{pre}{repeat_idx_str}/{ds_name}/col_names_shap_vals_all_text_baseline.pkl"
+    colon_filepath = f"models/shap_vals{text_model_name}{pre}{repeat_idx_str}/{ds_name}/colon_shap_vals_all_text_baseline.pkl"
     grouped_shap_vals = []
     grouped_col_name_shap_vals = []
     grouped_colon_shap_vals = []
@@ -578,3 +554,33 @@ if __name__ == "__main__":
         ds_type=ds_type, text_model_code=text_model_code, tab_scale_factor=sf
     )
     gen_summary_shap_vals(ds_type, text_model_code=text_model_code, tab_scale_factor=sf)
+
+    for repeat_idx in [1, 2, 3, 4]:
+        for model_type in [
+            # "ensemble_50",
+            # "ensemble_75",
+            # "ensemble_25",
+            # "stack",
+            "all_text",
+        ]:
+            pass
+            shap_vals = run_shap(
+                model_type,
+                ds_type=ds_type,
+                tab_scale_factor=sf,
+                text_model_code=text_model_code,
+                test_set_size=1000,  # 100 normal, 1000 for exp consistency,
+                repeat_idx=repeat_idx,
+            )
+        run_all_text_baseline_shap(
+            ds_type=ds_type,
+            text_model_code=text_model_code,
+            tab_scale_factor=sf,
+            repeat_idx=repeat_idx,
+        )
+        gen_summary_shap_vals(
+            ds_type,
+            text_model_code=text_model_code,
+            tab_scale_factor=sf,
+            repeat_idx=repeat_idx,
+        )
