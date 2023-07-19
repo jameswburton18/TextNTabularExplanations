@@ -25,7 +25,7 @@ df$text_model <- ifelse(df$text_model == "deberta", "DeBERTa", df$text_model)
 df <- df %>%
   filter(!(ds_name == "channel" & (method == "all_text_corrected" | method == "all_text_baseline"))) %>%
   filter(!(ds_name %in% c("salary", "wine") & method == "stack")) %>%
-  filter(!(ds_name == "prod_sent" & (text_model == "DistilBERT" | method == "stack")))
+  filter(!(ds_name == "prod_sent" & text_model == "DistilBERT" & method == "stack"))
 
 # Create a list to store the separate dataframes
 df_list <- list()
@@ -46,7 +46,7 @@ caption_list <- c(
   "kick", "jigsaw",
   "wine *stack models excluded", "fake", "imdb_genre", "channel *all_text_baseline and all_text_corrected models excluded", "airbnb",
   "salary *stack models excluded",
-  "prod *Distilbert and stack models excluded"
+  "prod *Distilbert-stack model excluded"
 )
 
 features_df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/notebooks/unranked_df_no_template.csv")
@@ -70,7 +70,7 @@ features_df$text_model <- ifelse(features_df$text_model == "deberta", "DeBERTa",
 features_df <- features_df %>%
   filter(!(ds_name == "channel" & (method == "all_text_corrected" | method == "all_text_baseline"))) %>%
   filter(!(ds_name %in% c("salary", "wine") & method == "stack")) %>%
-  filter(!(ds_name == "prod_sent" & (text_model == "DistilBERT" | method == "stack")))
+  filter(!(ds_name == "prod_sent" & text_model == "DistilBERT" & method == "stack"))
 
 feature_df_list <- list()
 for (value in unique_values) {
@@ -87,91 +87,134 @@ unique_methods <- unique(features_df$method)
 
 
 Map(function(ds, caption) {
-  p <- ggbetweenstats(
-    data = df_list[[ds]],
-    x = method,
-    y = text.tab,
-    type = "nonparametric",
-    package = "ggsci",
-    palette = "default_jco",
-    pairwise.display = "ns",
-    ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
-    xlab = "Combination Method",
-    title = "Are Text or Tabular Features Assigned More Importance?
+  tryCatch(
+    {
+      p <- ggbetweenstats(
+        data = df_list[[ds]],
+        x = text_model,
+        y = text.tab,
+        type = "nonparametric", # ANOVA or Kruskal-Wallis
+        # plot.type = "box",
+        package = "ggsci",
+        palette = "default_jco",
+        pairwise.display = "ns",
+        ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+        xlab = "Text Model",
+        title = "Are Text or Tabular Features Assigned More Importance?,
 Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
-    caption = paste("Dataset: ", caption),
+        caption = paste("Dataset: ", caption),
+      )
+
+      # Save the plot to a PDF file
+      file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/text_tab_mod_", ds, ".pdf", sep = "")
+      ggsave(file = file_name, plot = p, width = 8, height = 5)
+
+      # save as jpeg
+      file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/jpegs/text_tab_mod_", ds, ".jpeg", sep = "")
+      ggsave(file = file_name, plot = p, width = 8, height = 5)
+    },
+    error = function(e) {
+      print(paste("Error occurred for Dataset:", ds))
+      print(e) # Print the error message for debugging
+    }
   )
-
-  # Save the plot to a PDF file
-  file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/text_tab_comb_", ds, ".pdf", sep = "")
-  ggsave(file = file_name, plot = p, width = 8, height = 5)
-
-  print(p)
 }, unique_values_list, caption_list)
 
 Map(function(ds, caption) {
-  p <- ggbetweenstats(
-    data = df_list[[ds]],
-    x = text_model,
-    y = text.tab,
-    type = "nonparametric", # ANOVA or Kruskal-Wallis
-    # plot.type = "box",
-    package = "ggsci",
-    palette = "default_jco",
-    pairwise.comparisons = TRUE,
-    pairwise.display = "ns",
-    ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
-    xlab = "Text Model",
-    title = "Are Text or Tabular Features Assigned More Importance?
+  tryCatch(
+    {
+      p <- ggbetweenstats(
+        data = df_list[[ds]],
+        x = method,
+        y = text.tab,
+        type = "nonparametric", # ANOVA or Kruskal-Wallis
+        # plot.type = "box",
+        package = "ggsci",
+        palette = "default_jco",
+        pairwise.comparisons = TRUE,
+        pairwise.display = "ns",
+        ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+        xlab = "Text Model",
+        title = "Are Text or Tabular Features Assigned More Importance?
 Difference in Median Absolute Feature Importance (SHAP), by Text Model",
-    caption = paste("Dataset: ", caption),
+        caption = paste("Dataset: ", caption),
+      )
+      # Save the plot to a PDF file
+      file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/text_tab_comb_", ds, ".pdf", sep = "")
+      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      # print(p)
+      file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/jpegs/text_tab_comb_", ds, ".jpeg", sep = "")
+      ggsave(file = file_name, plot = p, width = 8, height = 5)
+    },
+    error = function(e) {
+      print(paste("Error occurred for Dataset:", ds))
+      print(e) # Print the error message for debugging
+    }
   )
-  # Save the plot to a PDF file
-  file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/text_tab_mod_", ds, ".pdf", sep = "")
-  ggsave(file = file_name, plot = p, width = 8, height = 5)
-  print(p)
 }, unique_values_list, caption_list)
 
 Map(function(ds, caption) {
-  p <- ggwithinstats(
-    data = feature_df_list[[ds]],
-    x = text_model,
-    y = feature_importance,
-    type = "nonparametric", # ANOVA or Kruskal-Wallis
-    # plot.type = "box",
-    package = "ggsci",
-    palette = "default_jco",
-    pairwise.display = "sig",
-    ylab = "|Feature Importance (SHAP)|",
-    xlab = "Text Model",
-    title = "Are the Same Features Always the Most Important? Absolute Feature Importance (SHAP) Compared, by Text Model",
-    caption = paste("Dataset: ", caption),
+  tryCatch(
+    {
+      p <- ggwithinstats(
+        data = feature_df_list[[ds]],
+        x = text_model,
+        y = feature_importance,
+        type = "nonparametric", # ANOVA or Kruskal-Wallis
+        # plot.type = "box",
+        package = "ggsci",
+        palette = "default_jco",
+        pairwise.display = "sig",
+        ylab = "|Feature Importance (SHAP)|",
+        xlab = "Text Model",
+        title = "Are the Same Features Always the Most Important?
+Absolute Feature Importance (SHAP) Compared, by Text Model",
+        caption = paste("Dataset: ", caption),
+      )
+      # Save the plot to a PDF file
+      file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/ft_order_mod_", ds, ".pdf", sep = "")
+      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      # print(p)
+      file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/jpegs/ft_order_mod_", ds, ".jpeg", sep = "")
+      ggsave(file = file_name, plot = p, width = 8, height = 5)
+    },
+    error = function(e) {
+      print(paste("Error occurred for Dataset:", ds))
+      print(e) # Print the error message for debugging
+    }
   )
-  # Save the plot to a PDF file
-  file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/ft_order_mod_", ds, ".pdf", sep = "")
-  ggsave(file = file_name, plot = p, width = 8, height = 5)
-  print(p)
 }, unique_values_list, caption_list)
 
 Map(function(ds, caption) {
-  p <- ggwithinstats(
-    data = feature_df_list[[ds]],
-    x = method,
-    y = feature_importance,
-    type = "nonparametric", # ANOVA or Kruskal-Wallis
-    # plot.type = "box",
-    package = "ggsci",
-    palette = "default_jco",
-    pairwise.comparisons =  FALSE ,
-    ylab = "|Feature Importance (SHAP)|",
-    xlab = "Combination Method",
-    title = "Are the Same Features Always the Most Important? Absolute Feature Importance (SHAP) Compared, by Combination Method",
-    caption = paste("Dataset: ", caption),
+  tryCatch(
+    {
+      p <- ggwithinstats(
+        data = feature_df_list[[ds]],
+        x = method,
+        y = feature_importance,
+        type = "nonparametric", # ANOVA or Kruskal-Wallis
+        # plot.type = "box",
+        package = "ggsci",
+        palette = "default_jco",
+        pairwise.display = "sig",
+        ylab = "|Feature Importance (SHAP)|",
+        xlab = "Combination Method",
+        title = "Are the Same Features Always the Most Important?
+Absolute Feature Importance (SHAP) Compared, by Combination Method",
+        caption = paste("Dataset: ", caption),
+      )
+      # Save the plot to a PDF file
+      file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/ft_order_comb_", ds, ".pdf", sep = "")
+      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      # print(p)
+      file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/jpegs/ft_order_comb_", ds, ".jpeg", sep = "")
+      ggsave(file = file_name, plot = p, width = 8, height = 5)
+    },
+    error = function(e) {
+      print(paste("Error occurred for Dataset:", ds))
+      print(e) # Print the error message for debugging
+    }
   )
-  # Save the plot to a PDF file
-  file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/ft_order_comb_", ds, ".pdf", sep = "")
-  ggsave(file = file_name, plot = p, width = 8, height = 5)
-  print(p)
 }, unique_values_list, caption_list)
 
 
@@ -198,8 +241,8 @@ for (ds in unique_values_list) {
         tm_result_df[nrow(tm_result_df) + 1, ] <- c(ds, tm, kendall_value)
       },
       error = function(e) {
-        print(paste("Error occurred for Dataset:", ds, "Text Model:", tm))
-        print(e) # Print the error message for debugging
+        # print(paste("Error occurred for Dataset:", ds, "Text Model:", tm))
+        # print(e) # Print the error message for debugging
         # Append NA if there is an error
         # tm_result_df[nrow(tm_result_df) + 1, ] <- c(ds, tm, NA)
       }
@@ -218,8 +261,8 @@ for (ds in unique_values_list) {
         m_result_df[nrow(m_result_df) + 1, ] <- c(ds, m, kendall_value)
       },
       error = function(e) {
-        print(paste("Error occurred for Dataset:", ds, "Method:", m))
-        print(e) # Print the error message for debugging
+        # print(paste("Error occurred for Dataset:", ds, "Method:", m))
+        # print(e) # Print the error message for debugging
         # Append NA if there is an error
         # m_result_df[nrow(m_result_df) + 1, ] <- c(ds, m, NA)
       }
@@ -255,4 +298,3 @@ grouped_ggbetweenstats(
   centrality.label.args = list(size = 2.5, nudge_x = 0.4, segment.linetype = 4),
   # ggsignif.args = list(textsize = 2, tip_length = 0.01, na.rm = TRUE),
 )
-
