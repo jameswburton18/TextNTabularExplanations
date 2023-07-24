@@ -9,10 +9,10 @@ df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/models/shap_
 # Convert the method column to character type
 df$method <- as.character(df$method)
 # Rename the methods in your dataframe
-df$method <- ifelse(df$method == "baseline", "all_text_baseline", df$method)
-df$method <- ifelse(df$method == "all_text", "all_text_corrected", df$method)
+df$method <- ifelse(df$method == "baseline", "all as text", df$method)
+df$method <- ifelse(df$method == "all_text", "all as text \n(corrected)", df$method)
 df$method <- factor(df$method, levels = c(
-  "ensemble_25", "ensemble_50", "ensemble_75", "all_text_baseline", "all_text_corrected", "stack"
+  "ensemble_25", "ensemble_50", "ensemble_75", "all as text", "all as text \n(corrected)", "stack"
 ))
 
 df$text_model <- as.character(df$text_model)
@@ -23,7 +23,7 @@ df$text_model <- ifelse(df$text_model == "deberta", "DeBERTa", df$text_model)
 
 # Filtering out the poorly performing models
 df <- df %>%
-  filter(!(ds_name == "channel" & (method == "all_text_corrected" | method == "all_text_baseline"))) %>%
+  filter(!(ds_name == "channel" & (method == "all as text \n(corrected)" | method == "all as text"))) %>%
   filter(!(ds_name %in% c("salary", "wine") & method == "stack")) %>%
   filter(!(ds_name == "prod_sent" & text_model == "DistilBERT" & method == "stack"))
 
@@ -41,22 +41,22 @@ for (value in unique_values) {
 }
 
 # Creating a list of strings of unique values
-unique_values_list <- as.character(unique_values)
+unique_values_list <- c("kick", "jigsaw", "wine", "fake", "imdb_genre", "channel", "airbnb", "salary", "prod_sent")
 caption_list <- c(
   "kick", "jigsaw",
-  "wine *stack models excluded", "fake", "imdb_genre", "channel *all_text_baseline and all_text_corrected models excluded", "airbnb",
+  "wine *stack models excluded", "fake", "imdb_genre", "channel *all as text and all as text (corrected) models excluded", "airbnb",
   "salary *stack models excluded",
-  "prod *Distilbert-stack model excluded"
+  "prod *DistilBERT-stack model excluded"
 )
 
 features_df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/notebooks/unranked_df_no_template.csv")
 # Convert the method column to character type
 features_df$method <- as.character(features_df$method)
 # Rename the methods in your dataframe
-features_df$method <- ifelse(features_df$method == "baseline", "all_text_baseline", features_df$method)
-features_df$method <- ifelse(features_df$method == "all_text", "all_text_corrected", features_df$method)
+features_df$method <- ifelse(features_df$method == "baseline", "all as text", features_df$method)
+features_df$method <- ifelse(features_df$method == "all_text", "all as text \n(corrected)", features_df$method)
 features_df$method <- factor(features_df$method, levels = c(
-  "ensemble_25", "ensemble_50", "ensemble_75", "all_text_baseline", "all_text_corrected", "stack"
+  "ensemble_25", "ensemble_50", "ensemble_75", "all as text", "all as text \n(corrected)", "stack"
 ))
 
 features_df$text_model <- as.character(features_df$text_model)
@@ -68,7 +68,7 @@ features_df$text_model <- ifelse(features_df$text_model == "deberta", "DeBERTa",
 
 # Filtering out the poorly performing models
 features_df <- features_df %>%
-  filter(!(ds_name == "channel" & (method == "all_text_corrected" | method == "all_text_baseline"))) %>%
+  filter(!(ds_name == "channel" & (method == "all as text \n(corrected)" | method == "all as text"))) %>%
   filter(!(ds_name %in% c("salary", "wine") & method == "stack")) %>%
   filter(!(ds_name == "prod_sent" & text_model == "DistilBERT" & method == "stack"))
 
@@ -134,9 +134,9 @@ Map(function(ds, caption) {
         pairwise.comparisons = TRUE,
         pairwise.display = "ns",
         ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
-        xlab = "Text Model",
+        xlab = "Combination Method",
         title = "Are Text or Tabular Features Assigned More Importance?
-Difference in Median Absolute Feature Importance (SHAP), by Text Model",
+Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
         caption = paste("Dataset: ", caption),
       )
       # Save the plot to a PDF file
@@ -274,27 +274,150 @@ for (ds in unique_values_list) {
 write.csv(tm_result_df, "/home/james/CodingProjects/TextNTabularExplanations/notebooks/text_model_kendall.csv", row.names = FALSE)
 write.csv(m_result_df, "/home/james/CodingProjects/TextNTabularExplanations/notebooks/method_kendall.csv", row.names = FALSE)
 
+# Calculate pairwise Kendall tau
+#################################################
 
-sal_df <- df_list[["kick"]]
-grouped_ggbetweenstats(
-  data = sal_df,
-  x = method,
-  y = text.tab,
-  type = "nonparametric", # ANOVA or Kruskal-Wallis
-  grouping.var = text_model,
-  package = "ggsci",
-  palette = "default_jco",
-  pairwise.display = "ns",
-  ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
-  xlab = "Text Model",
-  # title = "Are Text or Tabular Features Assigned More Importance?",
-  # caption = "Dataset: salary",
-  # conf.level = FALSE,
-  # pairwise.comparisons = FALSE,
-  # centrality.plotting = FALSE
-  centrality.point.args = list(size = 2, color = "darkred"),
-  # centrality.label.args = list(data=n),
-  centrality.path.args = list(linewidth = 1, color = "red", alpha = 0.5),
-  centrality.label.args = list(size = 2.5, nudge_x = 0.4, segment.linetype = 4),
-  # ggsignif.args = list(textsize = 2, tip_length = 0.01, na.rm = TRUE),
-)
+# Create an empty list to store the pairwise Kendall values
+method_kendall_values <- list()
+model_kendall_values <- list()
+
+# Break it up by both text model and method
+for (ds in unique_values_list) {
+  for (tm in unique_text_models) {
+    df_pivot <- feature_df_list[[ds]] %>%
+      filter(text_model == tm) %>%
+      select(-text_model) %>%
+      pivot_wider(names_from = method, values_from = feature_importance, names_prefix = "")
+
+    # Get the list of treatments from the column names of df_pivot
+    treatments <- colnames(df_pivot)[-1] # Exclude the first column (blocks)
+    # Calculate Kendall correlation for each pair of treatments
+    for (i in 1:(length(treatments) - 1)) {
+      for (j in (i + 1):length(treatments)) {
+        tryCatch(
+          {
+            treatment_A <- treatments[i]
+            treatment_B <- treatments[j]
+
+            # Select the columns corresponding to the two treatments
+            df_pair <- df_pivot %>%
+              select(feature_name, !!treatment_A, !!treatment_B)
+
+            # Calculate Kendall correlation for the pair and store the result in the list
+            kendall_value <- cor.test(df_pair[[2]], df_pair[[3]], method = "kendall")
+            pair_name <- paste(ds, tm, treatment_A, treatment_B, sep = ",")
+            method_kendall_values[[pair_name]] <- unname(kendall_value$estimate)
+          },
+          error = function(e) {
+            print(paste("Error occurred for Dataset:", ds, "Method:", m))
+            print(e) # Print the error message for debugging
+            # Append NA if there is an error
+            pair_name <- paste(ds, tm, treatment_A, treatment_B, sep = ",")
+            method_kendall_values[[pair_name]] <- NA
+          }
+        )
+      }
+    }
+  }
+  for (m in unique_methods) {
+    df_pivot <- feature_df_list[[ds]] %>%
+      filter(method == m) %>%
+      select(-method) %>%
+      pivot_wider(names_from = text_model, values_from = feature_importance, names_prefix = "")
+
+    # Get the list of treatments from the column names of df_pivot
+    treatments <- colnames(df_pivot)[-1] # Exclude the first column (blocks)
+    # Calculate Kendall correlation for each pair of treatments
+    for (i in 1:(length(treatments) - 1)) {
+      for (j in (i + 1):length(treatments)) {
+        tryCatch(
+          {
+            treatment_A <- treatments[i]
+            treatment_B <- treatments[j]
+
+            # Select the columns corresponding to the two treatments
+            df_pair <- df_pivot %>%
+              select(feature_name, !!treatment_A, !!treatment_B)
+
+            # Calculate Kendall correlation for the pair and store the result in the list
+            kendall_value <- cor.test(df_pair[[2]], df_pair[[3]], method = "kendall")
+            pair_name <- paste(ds, m, treatment_A, treatment_B, sep = ",")
+            model_kendall_values[[pair_name]] <- unname(kendall_value$estimate)
+          },
+          error = function(e) {
+            print(paste("Error occurred for Dataset:", ds, "Method:", m))
+            print(e) # Print the error message for debugging
+            # Append NA if there is an error
+            pair_name <- paste(ds, m, treatment_A, treatment_B, sep = ",")
+            model_kendall_values[[pair_name]] <- NA
+          }
+        )
+      }
+    }
+  }
+}
+
+write.csv(method_kendall_values, "/home/james/CodingProjects/TextNTabularExplanations/notebooks/method_kendall_values.csv", row.names = FALSE)
+write.csv(model_kendall_values, "/home/james/CodingProjects/TextNTabularExplanations/notebooks/model_kendall_values.csv", row.names = FALSE)
+
+# Testing
+#################################################
+# ds <- "kick"
+# m <- "ensemble_25"
+
+# df_pivot <- feature_df_list[[ds]] %>%
+#   filter(method == m) %>%
+#   select(-method) %>%
+#   pivot_wider(names_from = text_model, values_from = feature_importance, names_prefix = "")
+# kendall_value <- kendall(df_pivot)$value
+
+# # Get the list of treatments from the column names of df_pivot
+# treatments <- colnames(df_pivot)[-1] # Exclude the first column (blocks)
+
+# # Create an empty list to store the pairwise Kendall values
+# kendall_values <- list()
+
+# # Calculate Kendall correlation for each pair of treatments
+# for (i in 1:(length(treatments) - 1)) {
+#   for (j in (i + 1):length(treatments)) {
+#     treatment_A <- treatments[i]
+#     treatment_B <- treatments[j]
+
+#     # Select the columns corresponding to the two treatments
+#     df_pair <- df_pivot %>%
+#       select(feature_name, !!treatment_A, !!treatment_B)
+
+#     # Calculate Kendall correlation for the pair and store the result in the list
+#     kendall_value <- cor.test(df_pair[[2]], df_pair[[3]], method = "kendall")
+#     pair_name <- paste(ds, m, treatment_A, treatment_B, sep = ",")
+#     kendall_values[[pair_name]] <- unname(kendall_value$estimate)
+#   }
+# }
+# kendall(df_pair)$value
+# k <- cor.test(df_pair[[2]], df_pair[[3]], method = "kendall")
+# ke <- unname(k$statistic)
+
+
+# sal_df <- df_list[["kick"]]
+# grouped_ggbetweenstats(
+#   data = sal_df,
+#   x = method,
+#   y = text.tab,
+#   type = "nonparametric", # ANOVA or Kruskal-Wallis
+#   grouping.var = text_model,
+#   package = "ggsci",
+#   palette = "default_jco",
+#   pairwise.display = "ns",
+#   ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+#   xlab = "Text Model",
+#   # title = "Are Text or Tabular Features Assigned More Importance?",
+#   # caption = "Dataset: salary",
+#   # conf.level = FALSE,
+#   # pairwise.comparisons = FALSE,
+#   # centrality.plotting = FALSE
+#   centrality.point.args = list(size = 2, color = "darkred"),
+#   # centrality.label.args = list(data=n),
+#   centrality.path.args = list(linewidth = 1, color = "red", alpha = 0.5),
+#   centrality.label.args = list(size = 2.5, nudge_x = 0.4, segment.linetype = 4),
+#   # ggsignif.args = list(textsize = 2, tip_length = 0.01, na.rm = TRUE),
+# )
