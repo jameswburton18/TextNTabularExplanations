@@ -9,10 +9,14 @@ df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/models/shap_
 # Convert the method column to character type
 df$method <- as.character(df$method)
 # Rename the methods in your dataframe
-df$method <- ifelse(df$method == "baseline", "all as text", df$method)
-df$method <- ifelse(df$method == "all_text", "all as text \n(corrected)", df$method)
+df$method <- ifelse(df$method == "baseline", "All-Text (Unimodal)", df$method)
+df$method <- ifelse(df$method == "all_text", "All-Text", df$method)
+df$method <- ifelse(df$method == "ensemble_25", "WE (w=.25)", df$method)
+df$method <- ifelse(df$method == "ensemble_50", "WE (w=.50)", df$method)
+df$method <- ifelse(df$method == "ensemble_75", "WE (w=.75)", df$method)
+df$method <- ifelse(df$method == "stack", "Stack", df$method)
 df$method <- factor(df$method, levels = c(
-  "ensemble_25", "ensemble_50", "ensemble_75", "all as text", "all as text \n(corrected)", "stack"
+  "All-Text (Unimodal)", "All-Text", "WE (w=.25)", "WE (w=.50)", "WE (w=.75)", "Stack"
 ))
 
 df$text_model <- as.character(df$text_model)
@@ -23,9 +27,9 @@ df$text_model <- ifelse(df$text_model == "deberta", "DeBERTa", df$text_model)
 
 # Filtering out the poorly performing models
 df <- df %>%
-  filter(!(ds_name == "channel" & (method == "all as text \n(corrected)" | method == "all as text"))) %>%
-  filter(!(ds_name %in% c("salary", "wine") & method == "stack")) %>%
-  filter(!(ds_name == "prod_sent" & text_model == "DistilBERT" & method == "stack"))
+  filter(!(ds_name == "channel" & (method == "All-Text" | method == "All-Text (Unimodal)"))) %>%
+  filter(!(ds_name %in% c("salary", "wine") & method == "Stack")) %>%
+  filter(!(ds_name == "prod_sent" & text_model == "DistilBERT" & method == "Stack"))
 
 # Create a list to store the separate dataframes
 df_list <- list()
@@ -44,19 +48,23 @@ for (value in unique_values) {
 unique_values_list <- c("kick", "jigsaw", "wine", "fake", "imdb_genre", "channel", "airbnb", "salary", "prod_sent")
 caption_list <- c(
   "kick", "jigsaw",
-  "wine *stack models excluded", "fake", "imdb_genre", "channel *all as text and all as text (corrected) models excluded", "airbnb",
-  "salary *stack models excluded",
-  "prod *DistilBERT-stack model excluded"
+  "wine *Stack models excluded", "fake", "imdb_genre", "channel *All-Text (Unimodal and Multimodal) models excluded", "airbnb",
+  "salary *Stack models excluded",
+  "prod *DistilBERT-Stack model excluded"
 )
 
 features_df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/notebooks/unranked_df_no_template.csv")
 # Convert the method column to character type
 features_df$method <- as.character(features_df$method)
 # Rename the methods in your dataframe
-features_df$method <- ifelse(features_df$method == "baseline", "all as text", features_df$method)
-features_df$method <- ifelse(features_df$method == "all_text", "all as text \n(corrected)", features_df$method)
+features_df$method <- ifelse(features_df$method == "baseline", "All-Text (Unimodal)", features_df$method)
+features_df$method <- ifelse(features_df$method == "all_text", "All-Text", features_df$method)
+features_df$method <- ifelse(features_df$method == "ensemble_25", "WE (w=.25)", features_df$method)
+features_df$method <- ifelse(features_df$method == "ensemble_50", "WE (w=.50)", features_df$method)
+features_df$method <- ifelse(features_df$method == "ensemble_75", "WE (w=.75)", features_df$method)
+features_df$method <- ifelse(features_df$method == "stack", "Stack", features_df$method)
 features_df$method <- factor(features_df$method, levels = c(
-  "ensemble_25", "ensemble_50", "ensemble_75", "all as text", "all as text \n(corrected)", "stack"
+  "All-Text (Unimodal)", "All-Text", "WE (w=.25)", "WE (w=.50)", "WE (w=.75)", "Stack"
 ))
 
 features_df$text_model <- as.character(features_df$text_model)
@@ -68,9 +76,9 @@ features_df$text_model <- ifelse(features_df$text_model == "deberta", "DeBERTa",
 
 # Filtering out the poorly performing models
 features_df <- features_df %>%
-  filter(!(ds_name == "channel" & (method == "all as text \n(corrected)" | method == "all as text"))) %>%
-  filter(!(ds_name %in% c("salary", "wine") & method == "stack")) %>%
-  filter(!(ds_name == "prod_sent" & text_model == "DistilBERT" & method == "stack"))
+  filter(!(ds_name == "channel" & (method == "All-Text" | method == "All-Text (Unimodal)"))) %>%
+  filter(!(ds_name %in% c("salary", "wine") & method == "Stack")) %>%
+  filter(!(ds_name == "prod_sent" & text_model == "DistilBERT" & method == "Stack"))
 
 feature_df_list <- list()
 for (value in unique_values) {
@@ -81,6 +89,7 @@ for (value in unique_values) {
 
 unique_text_models <- unique(features_df$text_model)
 unique_methods <- unique(features_df$method)
+
 
 # Produce charts
 ####################################################
@@ -151,6 +160,80 @@ Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
       print(e) # Print the error message for debugging
     }
   )
+}, unique_values_list, caption_list)
+# Do one for each experiment
+Map(function(ds, caption) {
+  Map(function(cm) {
+    tryCatch(
+      {
+        data <- df_list[[ds]][df_list[[ds]]$method == cm, ]
+        p <- ggbetweenstats(
+          data = data,
+          x = text_model,
+          y = text.tab,
+          type = "nonparametric", # ANOVA or Kruskal-Wallis
+          # plot.type = "box",
+          package = "ggsci",
+          palette = "default_jco",
+          pairwise.display = "ns",
+          ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+          xlab = "Text Model",
+          title = "Are Text or Tabular Features Assigned More Importance?,
+Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
+          caption = paste("Dataset: ", ds, "Combination Method: ", cm),
+        )
+
+        # Save the plot to a PDF file
+        file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/pdfs/text_tab_mod_", ds, "_", cm, ".pdf", sep = "")
+        ggsave(file = file_name, plot = p, width = 8, height = 5)
+
+        # save as jpeg
+        file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/jpegs/text_tab_mod_", ds, "_", cm, ".jpeg", sep = "")
+        ggsave(file = file_name, plot = p, width = 8, height = 5)
+      },
+      error = function(e) {
+        print(paste("Error occurred for Dataset:", ds, "Combination Method:", cm))
+        # print(e) # Print the error message for debugging
+      }
+    )
+  }, unique(df_list[[ds]]$method))
+}, unique_values_list, caption_list)
+
+Map(function(ds, caption) {
+  Map(function(tm) {
+    tryCatch(
+      {
+        data <- df_list[[ds]][df_list[[ds]]$text_model == tm, ]
+        p <- ggbetweenstats(
+          data = data,
+          x = method,
+          y = text.tab,
+          type = "nonparametric", # ANOVA or Kruskal-Wallis
+          # plot.type = "box",
+          package = "ggsci",
+          palette = "default_jco",
+          pairwise.display = "ns",
+          ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+          xlab = "Combination Method",
+          title = "Are Text or Tabular Features Assigned More Importance?,
+Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
+          caption = paste("Dataset: ", ds, "Text Model: ", tm),
+        )
+
+        # Save the plot to a PDF file
+        file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/pdfs/text_tab_method_", ds, "_", tm, ".pdf", sep = "")
+        ggsave(file = file_name, plot = p, width = 8, height = 5)
+
+        # save as jpeg
+        file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/jpegs/indiv_text_tab_method_", ds, "_", tm, ".jpeg", sep = "")
+        ggsave(file = file_name, plot = p, width = 8, height = 5)
+      },
+      error = function(e) {
+        print(paste("Error occurred for Dataset:", ds, "Text Model:", tm))
+        # print(e) # Print the error message for debugging
+      }
+    )
+  }, unique(df_list[[ds]]$text_model))
 }, unique_values_list, caption_list)
 
 Map(function(ds, caption) {
@@ -363,7 +446,7 @@ write.csv(model_kendall_values, "/home/james/CodingProjects/TextNTabularExplanat
 # Testing
 #################################################
 # ds <- "kick"
-# m <- "ensemble_25"
+# m <- "WE (w=25)"
 
 # df_pivot <- feature_df_list[[ds]] %>%
 #   filter(method == m) %>%
@@ -421,3 +504,38 @@ write.csv(model_kendall_values, "/home/james/CodingProjects/TextNTabularExplanat
 #   centrality.label.args = list(size = 2.5, nudge_x = 0.4, segment.linetype = 4),
 #   # ggsignif.args = list(textsize = 2, tip_length = 0.01, na.rm = TRUE),
 # )
+ds <- "wine"
+tm <- "DeBERTa"
+data <- df_list[[ds]][df_list[[ds]]$text_model == tm, ]
+# Get the median of the text.tab column, grouped by method
+data %>%
+  group_by(method) %>%
+  summarise(median = median(text.tab)) %>%
+  arrange(desc(median))
+
+# Create a function to calculate the median for a given dataset
+calculate_median <- function(dataset) {
+  df <- df_list[[dataset]][df_list[[dataset]]$text_model == tm, ]
+  median_value <- df %>%
+    group_by(method) %>%
+    summarise(median = median(text.tab)) %>%
+    filter(!is.na(median)) # Remove rows with NA medians
+  return(median_value)
+}
+
+# Apply the function to all datasets and store the results in a list
+median_results <- lapply(sort(unique_values_list), calculate_median)
+
+# Combine the results into a single data frame
+combined_df <- bind_rows(median_results, .id = "Dataset")
+
+# Pivot the data to get it in the desired format
+wide_format <- combined_df %>%
+  pivot_wider(names_from = "Dataset", values_from = "median")
+
+# Reorder the columns in the desired way (optional)
+# desired_column_order <- c("wine", "other_ds1", "other_ds2", ...)
+# wide_format <- wide_format[, c("method", unique_values_list)]
+
+# Print the resulting data frame
+print(wide_format)
