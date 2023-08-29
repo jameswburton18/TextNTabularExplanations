@@ -107,10 +107,10 @@ Map(function(ds, caption) {
         package = "ggsci",
         palette = "default_jco",
         pairwise.display = "ns",
-        ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+        ylab = "Median(Text FI) - Median(Tabular FI)",
         xlab = "Text Model",
         title = "Are Text or Tabular Features Assigned More Importance?,
-Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
+Difference in Median Feature Importance (SHAP), by Combination Method",
         caption = paste("Dataset: ", caption),
       )
 
@@ -142,10 +142,10 @@ Map(function(ds, caption) {
         palette = "default_jco",
         pairwise.comparisons = TRUE,
         pairwise.display = "ns",
-        ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+        ylab = "Median(Text FI) - Median(Tabular FI)",
         xlab = "Combination Method",
         title = "Are Text or Tabular Features Assigned More Importance?
-Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
+Difference in Median Feature Importance (SHAP), by Combination Method",
         caption = paste("Dataset: ", caption),
       )
       # Save the plot to a PDF file
@@ -176,10 +176,10 @@ Map(function(ds, caption) {
           package = "ggsci",
           palette = "default_jco",
           pairwise.display = "ns",
-          ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+          ylab = "Median(Text FI) - Median(Tabular FI)",
           xlab = "Text Model",
           title = "Are Text or Tabular Features Assigned More Importance?,
-Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
+Difference in Median Feature Importance (SHAP), by Combination Method",
           caption = paste("Dataset: ", ds, "Combination Method: ", cm),
         )
 
@@ -213,10 +213,10 @@ Map(function(ds, caption) {
           package = "ggsci",
           palette = "default_jco",
           pairwise.display = "ns",
-          ylab = "med(|Text F.I.|) - med(|Tabular F.I.|)",
+          ylab = "Median(Text FI) - Median(Tabular FI)",
           xlab = "Combination Method",
           title = "Are Text or Tabular Features Assigned More Importance?,
-Difference in Median Absolute Feature Importance (SHAP), by Combination Method",
+Difference in Median Feature Importance (SHAP), by Combination Method",
           caption = paste("Dataset: ", ds, "Text Model: ", tm),
         )
 
@@ -248,10 +248,10 @@ Map(function(ds, caption) {
         package = "ggsci",
         palette = "default_jco",
         pairwise.display = "sig",
-        ylab = "|Feature Importance (SHAP)|",
+        ylab = "Feature Importance",
         xlab = "Text Model",
         title = "Are the Same Features Always the Most Important?
-Absolute Feature Importance (SHAP) Compared, by Text Model",
+Feature Importance (SHAP) Compared, by Text Model",
         caption = paste("Dataset: ", caption),
       )
       # Save the plot to a PDF file
@@ -280,10 +280,10 @@ Map(function(ds, caption) {
         package = "ggsci",
         palette = "default_jco",
         pairwise.display = "sig",
-        ylab = "|Feature Importance (SHAP)|",
+        ylab = "Feature Importance",
         xlab = "Combination Method",
         title = "Are the Same Features Always the Most Important?
-Absolute Feature Importance (SHAP) Compared, by Combination Method",
+Feature Importance (SHAP) Compared, by Combination Method",
         caption = paste("Dataset: ", caption),
       )
       # Save the plot to a PDF file
