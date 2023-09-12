@@ -160,40 +160,6 @@ class JointMasker(Masker):
 
         return masked_tab.values
 
-    # def _text_ft_index_ends(self, s):
-    #     """
-    #     This is to seperate back out the text features so that it won't collapse the mask tokens
-    #     across different text features
-    #     """
-    #     lens = []
-    #     sent_indices = []
-    #     for idx, col in enumerate(s):
-    #         # First text col
-    #         if lens == []:
-    #             tokens, token_ids = self.token_segments(str(col))
-    #             # -1 as we don't use SEP tokens (unless it's the only text col)
-    #             also_last = 1 if len(s) == 1 else 0
-    #             token_len = len(tokens) - 1 + also_last
-    #             lens.append(token_len - 1)
-    #             sent_indices.extend([idx] * token_len)
-    #         # Last text col
-    #         elif idx == len(s) - 1:
-    #             tokens, token_ids = self.token_segments(str(col))
-    #             # -1 for CLS tokens
-    #             token_len = len(tokens) - 1
-    #             lens.append(lens[-1] + token_len)
-    #             sent_indices.extend([idx] * token_len)
-    #         # Middle text cols
-    #         else:
-    #             tokens, token_ids = self.token_segments(str(col))
-    #             # -2 for CLS and SEP tokens
-    #             token_len = len(tokens) - 2
-    #             lens.append(lens[-1] + token_len)
-    #             sent_indices.extend([idx] * token_len)
-
-    #     self._sent_split_idxs = lens[:-1]
-    #     self.sent_indices = sent_indices
-
     def tab_mask_call(self, mask, x):
         """
         Taken from Tabular masker, with little change
