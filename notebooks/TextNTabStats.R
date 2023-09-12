@@ -110,17 +110,17 @@ Map(function(ds, caption) {
         ylab = "Median(Text FI) - Median(Tabular FI)",
         xlab = "Text Model",
         title = "Are Text or Tabular Features Assigned More Importance?,
-Difference in Median Feature Importance (SHAP), by Combination Method",
+Difference in Median Feature Importance (SHAP), by Text Model",
         caption = paste("Dataset: ", caption),
       )
 
       # Save the plot to a PDF file
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/text_tab_mod_", ds, ".pdf", sep = "")
-      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      ggsave(file = file_name, plot = p, width = 8.5, height = 5)
 
       # save as jpeg
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/jpegs/text_tab_mod_", ds, ".jpeg", sep = "")
-      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      ggsave(file = file_name, plot = p, width = 8.5, height = 5)
     },
     error = function(e) {
       print(paste("Error occurred for Dataset:", ds))
@@ -150,10 +150,10 @@ Difference in Median Feature Importance (SHAP), by Combination Method",
       )
       # Save the plot to a PDF file
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/text_tab_comb_", ds, ".pdf", sep = "")
-      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      ggsave(file = file_name, plot = p, width = 8.5, height = 5)
       # print(p)
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/jpegs/text_tab_comb_", ds, ".jpeg", sep = "")
-      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      ggsave(file = file_name, plot = p, width = 8.5, height = 5)
     },
     error = function(e) {
       print(paste("Error occurred for Dataset:", ds))
@@ -179,17 +179,17 @@ Map(function(ds, caption) {
           ylab = "Median(Text FI) - Median(Tabular FI)",
           xlab = "Text Model",
           title = "Are Text or Tabular Features Assigned More Importance?,
-Difference in Median Feature Importance (SHAP), by Combination Method",
+Difference in Median Feature Importance (SHAP), by Text Model",
           caption = paste("Dataset: ", ds, "Combination Method: ", cm),
         )
 
         # Save the plot to a PDF file
         file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/pdfs/text_tab_mod_", ds, "_", cm, ".pdf", sep = "")
-        ggsave(file = file_name, plot = p, width = 8, height = 5)
+        ggsave(file = file_name, plot = p, width = 8.5, height = 5)
 
         # save as jpeg
         file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/jpegs/text_tab_mod_", ds, "_", cm, ".jpeg", sep = "")
-        ggsave(file = file_name, plot = p, width = 8, height = 5)
+        ggsave(file = file_name, plot = p, width = 8.5, height = 5)
       },
       error = function(e) {
         print(paste("Error occurred for Dataset:", ds, "Combination Method:", cm))
@@ -222,11 +222,11 @@ Difference in Median Feature Importance (SHAP), by Combination Method",
 
         # Save the plot to a PDF file
         file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/pdfs/text_tab_method_", ds, "_", tm, ".pdf", sep = "")
-        ggsave(file = file_name, plot = p, width = 8, height = 5)
+        ggsave(file = file_name, plot = p, width = 8.5, height = 5)
 
         # save as jpeg
         file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/jpegs/indiv_text_tab_method_", ds, "_", tm, ".jpeg", sep = "")
-        ggsave(file = file_name, plot = p, width = 8, height = 5)
+        ggsave(file = file_name, plot = p, width = 8.5, height = 5)
       },
       error = function(e) {
         print(paste("Error occurred for Dataset:", ds, "Text Model:", tm))
@@ -256,10 +256,10 @@ Feature Importance (SHAP) Compared, by Text Model",
       )
       # Save the plot to a PDF file
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/ft_order_mod_", ds, ".pdf", sep = "")
-      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      ggsave(file = file_name, plot = p, width = 8.5, height = 5)
       # print(p)
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/jpegs/ft_order_mod_", ds, ".jpeg", sep = "")
-      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      ggsave(file = file_name, plot = p, width = 8.5, height = 5)
     },
     error = function(e) {
       print(paste("Error occurred for Dataset:", ds))
@@ -288,10 +288,10 @@ Feature Importance (SHAP) Compared, by Combination Method",
       )
       # Save the plot to a PDF file
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/ft_order_comb_", ds, ".pdf", sep = "")
-      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      ggsave(file = file_name, plot = p, width = 8.5, height = 5)
       # print(p)
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/jpegs/ft_order_comb_", ds, ".jpeg", sep = "")
-      ggsave(file = file_name, plot = p, width = 8, height = 5)
+      ggsave(file = file_name, plot = p, width = 8.5, height = 5)
     },
     error = function(e) {
       print(paste("Error occurred for Dataset:", ds))
