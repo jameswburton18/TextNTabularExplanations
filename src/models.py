@@ -12,12 +12,16 @@ class WeightedEnsemble:
         text_pipeline,
         cols_to_str_fn,
         text_weight=0.5,
+        num_tab_cols=None,
     ):
         self.tab_model = tab_model
         self.text_pipeline = text_pipeline
         self.text_weight = text_weight
         self.cols_to_str_fn = cols_to_str_fn
-        self.num_tab_cols = len(self.tab_model.feature_name_)
+        if num_tab_cols is None:
+            self.num_tab_cols = len(self.tab_model.feature_name_)
+        else:
+            self.num_tab_cols = num_tab_cols
 
     def predict(self, examples):
         """
@@ -99,6 +103,53 @@ class StackModel:
 
         # Stack
         stack_examples = np.hstack([tab_examples, expanded_text_preds, tab_preds])
+        stack_preds = self.stack_model.predict_proba(stack_examples)
+
+        return stack_preds
+
+
+class StackModel3:
+    def __init__(
+        self, tab_model, text_pipeline, stack_model, cols_to_str_fn, num_cat_cols=0
+    ):
+        self.tab_model = tab_model
+        self.text_pipeline = text_pipeline
+        self.stack_model = stack_model
+        self.cols_to_str_fn = cols_to_str_fn
+        self.num_tab_cols = len(self.tab_model.feature_name_)
+        self.num_cat_cols = num_cat_cols
+
+    def predict(self, examples):
+        if len(examples.shape) == 1:
+            examples = examples.reshape(1, -1)
+        tab_examples = examples[:, : self.num_tab_cols]
+        num_examples = examples[:, self.num_cat_cols : self.num_tab_cols]
+        text_examples = examples[:, self.num_tab_cols :]
+        text_examples = np.array(list(map(self.cols_to_str_fn, text_examples)))
+        tab_preds = self.tab_model.predict_proba(tab_examples)
+
+        # As text and tabular are calucalted seperately, we can avoid recalculating text
+        # predictions if we have already calculated them
+        unique_texts = {}
+        for i, desc in tqdm(enumerate(text_examples)):
+            if desc not in unique_texts:
+                unique_texts[desc] = [i]
+            else:
+                unique_texts[desc].append(i)
+
+        dict_keys = list(unique_texts.keys())
+        dict_keys = dict_keys[0] if len(dict_keys) == 1 else dict_keys
+        text_preds = self.text_pipeline(dict_keys)
+        text_preds = np.array([format_text_pred(pred) for pred in text_preds])
+
+        expanded_text_preds = np.zeros((len(text_examples), text_preds.shape[1]))
+        for i, (desc, idxs) in enumerate(unique_texts.items()):
+            expanded_text_preds[idxs] = text_preds[i]
+
+        # Stack
+        stack_examples = np.hstack(
+            [num_examples, expanded_text_preds[:, 1:], tab_preds[:, 1:]]
+        )
         stack_preds = self.stack_model.predict_proba(stack_examples)
 
         return stack_preds
