@@ -18,6 +18,11 @@ try:
 except ImportError:
     have_ipython = False
 
+"""
+NOTE: This file is a modified version of the shap plot function. The bits that are 
+different are surrounded by the comment: # Changed from shap
+"""
+
 
 # TODO: we should support text output explanations (from models that output text not numbers), this would require the force
 # the force plot and the coloring to update based on mouseovers (or clicks to make it fixed) of the output text
