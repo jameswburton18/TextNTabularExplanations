@@ -5,6 +5,7 @@ from shap.utils.transformers import (
     getattr_silent,
 )
 from src.dataset_info import get_dataset_info
+import yaml
 
 
 MODEL_NAME_TO_DESC_DICT = {
@@ -20,6 +21,25 @@ MODEL_NAME_TO_DESC_DICT = {
     "imdb_genre_9": "text col only",
     "imdb_genre_10": "all as text exp-based reorder",
 }
+
+
+class ConfigLoader:
+    def __init__(self, config_name, configs_path, default_path):
+        with open(default_path) as f:
+            args = yaml.safe_load(f)
+
+        # Update default args with chosen config
+        if config_name != "default":
+            with open(configs_path) as f:
+                yaml_configs = yaml.safe_load_all(f)
+                yaml_args = next(
+                    conf for conf in yaml_configs if conf["config"] == config_name
+                )
+            args.update(yaml_args)
+            print(f"Updating with:\n{yaml_args}\n")
+        print(f"\n{args}\n")
+        for key, value in args.items():
+            setattr(self, key, value)
 
 
 def row_to_string(row, cols):
