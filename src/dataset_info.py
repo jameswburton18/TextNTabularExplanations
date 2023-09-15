@@ -22,26 +22,6 @@ class DatasetInfo:
 
 
 def get_dataset_info(ds_type, model_type=None):
-    # if ds_type == "imdb_genre":imdb_genre_prediction
-    #     return DatasetInfo(
-    #         ds_name_all_text="james-burton/imdb_genre_prediction2",
-    #         ds_name_ordinal="james-burton/imdb_genre_prediction2",
-    #         tab_cols=[
-    #             "Year",
-    #             "Runtime (Minutes)",
-    #             "Rating",
-    #             "Votes",
-    #             "Revenue (Millions)",
-    #             "Metascore",
-    #             "Rank",
-    #         ],
-    #         categorical_cols=[],
-    #         text_cols=["Description"],
-    #         label_col="Genre_is_Drama",
-    #         num_labels=2,
-    #         prob_type="single_label_classification",
-    #         wandb_proj_name="IMDB Genre",
-    #     )
     if ds_type in ["imdb_genre", "imdb_genre_prediction"]:
         match model_type:
             case None:
