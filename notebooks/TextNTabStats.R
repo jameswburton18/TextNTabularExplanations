@@ -4,6 +4,7 @@ library(dplyr)
 library(irr)
 
 # Data creation
+# Original csv was made in top_tokens_&_length_anlys.ipynb
 #######################################
 df <- read.csv("/home/james/CodingProjects/TextNTabularExplanations/models/shap_vals_instance_df.csv")
 # Convert the method column to character type

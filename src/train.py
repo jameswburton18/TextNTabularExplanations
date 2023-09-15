@@ -41,7 +41,7 @@ def main():
     di = ConfigLoader(args["dataset"], "configs/dataset_configs.yaml")
     # Datasets which use the datasets which are all as strings
     all_text_versions = [
-        "all_text",
+        "all_as_text",
         "all_as_text_base_reorder",
         "all_as_text_tnt_reorder",
     ]
@@ -53,8 +53,8 @@ def main():
     dataset = load_dataset(ds_name)  # , download_mode="force_redownload")
     dataset = prepare_text(
         dataset=dataset,
+        di=di,
         version=args["version"],
-        ds_type=args["dataset"],
         model_name=args["model_base"],
     )
 
