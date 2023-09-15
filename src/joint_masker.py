@@ -33,7 +33,7 @@ class JointMasker(Masker):
         mask_token=None,
         collapse_mask_token="auto",
         output_type="string",
-        tab_cluster_scale_factor=2,
+        tab_cluster_scale_factor=1,
         tab_partition_tree=None,
     ):
         # Boiler plate from Text masker
@@ -55,7 +55,7 @@ class JointMasker(Masker):
         self.input_mask_token = mask_token
         self.mask_token = mask_token  # could be recomputed later in this function
         self.mask_token_id = mask_token if isinstance(mask_token, int) else None
-        # This could be important
+        # Optional scaling
         self.tab_cluster_scale_factor = tab_cluster_scale_factor
 
         # Tab

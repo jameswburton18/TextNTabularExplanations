@@ -8,7 +8,7 @@ import pandas as pd
 from datasets import load_dataset, Dataset
 import os
 from tqdm import tqdm
-from src.utils import token_segments, text_ft_index_ends
+from src.utils import token_segments, text_ft_index_ends, format_text_pred
 
 # from src.models import Model
 import lightgbm as lgb
@@ -33,15 +33,13 @@ parser.add_argument(
 
 
 def run_shap(
-    model_type,
-    ds_type,
-    text_model_code,
+    config_type,
     max_samples=100,
     test_set_size=100,
-    tab_scale_factor=2,
-    repeat_idx=None,
 ):
-    di = get_dataset_info(ds_type, model_type)
+    di = ConfigLoader(
+        config_type, "configs/dataset_configs.yaml", "configs/dataset_default.yaml"
+    )
     # Data
     train_df = load_dataset(
         di.ds_name,
@@ -55,36 +53,15 @@ def run_shap(
     ).to_pandas()
     test_df = test_df.sample(test_set_size, random_state=55)
 
-    if text_model_code == "disbert":
-        text_model_base = "distilbert-base-uncased"
-        my_text_model = di.text_model_name
-    elif text_model_code == "bert":
-        text_model_base = "bert-base-uncased"
-        # 0s and 9s become 10s and 19s
-        my_text_model = di.text_model_name[:-1] + "1" + di.text_model_name[-1]
-    elif text_model_code == "drob":
-        text_model_base = "distilroberta-base"
-        # 0s and 9s become 20s and 29s
-        my_text_model = di.text_model_name[:-1] + "2" + di.text_model_name[-1]
-    elif text_model_code == "deberta":
-        text_model_base = "microsoft/deberta-v3-small"
-        # 0s and 9s become 30s and 39s
-        my_text_model = di.text_model_name[:-1] + "3" + di.text_model_name[-1]
-    else:
-        raise ValueError(f"Invalid text model code of {text_model_code}")
-    if repeat_idx is not None:
-        my_text_model = my_text_model + f"_{repeat_idx}"
-
     # Models
-    tokenizer = AutoTokenizer.from_pretrained(text_model_base, model_max_length=512)
-    if model_type in [
-        "all_text",
+    tokenizer = AutoTokenizer.from_pretrained(di.text_model_base, model_max_length=512)
+    if di.model_type in [
         "all_as_text_tnt_reorder",
         "all_as_text_base_reorder",
     ]:
         text_pipeline = pipeline(
             "text-classification",
-            model=my_text_model,
+            model=di.my_text_model,
             tokenizer=tokenizer,
             device="cuda:0",
             truncation=True,
@@ -110,12 +87,11 @@ def run_shap(
         model = AllAsTextModel(
             text_pipeline=text_pipeline,
             cols_to_str_fn=cols_to_str_fn,
-            # cols=di.tab_cols + di.text_cols
         )
     else:
         text_pipeline = pipeline(
             "text-classification",
-            model=my_text_model,
+            model=di.my_text_model,
             tokenizer=tokenizer,
             device="cuda:0",
             truncation=True,
@@ -124,11 +100,16 @@ def run_shap(
         )
         # Define how to convert the text columns to a single string
         if len(di.text_cols) == 1:
-            cols_to_str_fn = lambda array: array[0]
+
+            def cols_to_str_fn(array):
+                return array[0]
+
         else:
-            cols_to_str_fn = lambda array: " | ".join(
-                [f"{col}: {val}" for col, val in zip(di.text_cols, array)]
-            )
+
+            def cols_to_str_fn(array):
+                return " | ".join(
+                    [f"{col}: {val}" for col, val in zip(di.text_cols, array)]
+                )
 
         # LightGBM requires explicitly marking categorical features
         train_df[di.categorical_cols] = train_df[di.categorical_cols].astype("category")
@@ -137,25 +118,12 @@ def run_shap(
         tab_model = lgb.LGBMClassifier(random_state=42)
         tab_model.fit(train_df[di.tab_cols], y_train)
 
-        if model_type == "ensemble_50":
+        if di.model_type in ["ensemble_25", "ensemble_50", "ensemble_75"]:
+            text_weight = float(di.model_type.split("_")[-1]) / 100
             model = WeightedEnsemble(
                 tab_model=tab_model,
                 text_pipeline=text_pipeline,
-                text_weight=0.5,
-                cols_to_str_fn=cols_to_str_fn,
-            )
-        elif model_type == "ensemble_75":
-            model = WeightedEnsemble(
-                tab_model=tab_model,
-                text_pipeline=text_pipeline,
-                text_weight=0.75,
-                cols_to_str_fn=cols_to_str_fn,
-            )
-        elif model_type == "ensemble_25":
-            model = WeightedEnsemble(
-                tab_model=tab_model,
-                text_pipeline=text_pipeline,
-                text_weight=0.25,
+                text_weight=text_weight,
                 cols_to_str_fn=cols_to_str_fn,
             )
         elif model_type == "stack":
@@ -206,9 +174,9 @@ def run_shap(
     np.random.seed(1)
     x = test_df[di.tab_cols + di.text_cols].values
 
-    # We need to load the ordinal dataset so that we can calculate the correlations for the masker
-    ord_ds_name = get_dataset_info(ds_type, "ordinal").ds_name
-    ord_train_df = load_dataset(ord_ds_name, split="train").to_pandas()
+    # We need to load the ordinal dataset so that we can calculate the correlations for
+    # the masker
+    ord_train_df = load_dataset(di.ord_ds_name, split="train").to_pandas()
 
     # Clustering only valid if there is more than one column
     if len(di.tab_cols) > 1:
@@ -231,18 +199,25 @@ def run_shap(
         collapse_mask_token=True,
         max_samples=max_samples,
         tab_partition_tree=tab_pt,
-        tab_cluster_scale_factor=tab_scale_factor,
     )
 
     explainer = shap.explainers.Partition(model=model.predict, masker=masker)
     shap_vals = explainer(x)
 
-    pre = f"_sf{tab_scale_factor}" if tab_scale_factor != 2 else ""
-    repeat_idx_str = f"_{repeat_idx}" if repeat_idx is not None else ""
+    output_dir = "models/shap_vals/"
+    print(f"Results will be saved @: {output_dir}")
+
+    # Make output directory
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    with open(os.path.join(output_dir, f"{config_type}.pkl"), "wb") as f:
+        pickle.dump(shap_vals, f)
+
+    repeat_idx_str = f"_{di.repeat_idx}" if di.repeat_idx is not None else ""
     text_model_name = f"_{text_model_code}"
 
     output_dir = os.path.join(
-        f"models/shap_vals{text_model_name}{pre}{repeat_idx_str}/", ds_type
+        f"models/shap_vals_{di.text_model_code}{repeat_idx_str}/", ds_type
     )
     print(f"Results will be saved @: {output_dir}")
 

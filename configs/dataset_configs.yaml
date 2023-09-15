@@ -1,0 +1,29 @@
+---
+config: imdb_genre_all_text
+text_model_name: james-burton/imdb_genre_0
+ds_name: james-burton/imdb_genre_prediction_all_text
+
+---
+config: imdb_genre_ordinal
+text_model_name: james-burton/imdb_genre_9
+ds_name: james-burton/imdb_genre_prediction_ordinal
+
+---
+config: prod_sent_all_text
+text_model_name: james-burton/prod_sent_0
+ds_name: james-burton/product_sentiment_machine_hack_all_text
+
+---
+config: prod_sent_ordinal
+text_model_name: james-burton/prod_sent_9
+ds_name: james-burton/product_sentiment_machine_hack_ordinal
+
+---
+config: fake_all_text
+text_model_name: james-burton/fake_0
+ds_name: james-burton/fake_job_postings2_all_text
+
+---
+config: fake_ordinal
+text_model_name: james-burton/fake_9
+ds_name: james-burton/fake_job_postings2_ordinal

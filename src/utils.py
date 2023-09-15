@@ -24,7 +24,7 @@ MODEL_NAME_TO_DESC_DICT = {
 
 
 class ConfigLoader:
-    def __init__(self, config_name, configs_path, default_path):
+    def __init__(self, config_name, configs_path, default_path, default):
         with open(default_path) as f:
             args = yaml.safe_load(f)
 
@@ -32,9 +32,14 @@ class ConfigLoader:
         if config_name != "default":
             with open(configs_path) as f:
                 yaml_configs = yaml.safe_load_all(f)
-                yaml_args = next(
-                    conf for conf in yaml_configs if conf["config"] == config_name
-                )
+                try:
+                    yaml_args = next(
+                        conf for conf in yaml_configs if conf["config"] == config_name
+                    )
+                except StopIteration:
+                    raise ValueError(
+                        f"Config name {config_name} not found in {configs_path}"
+                    )
             args.update(yaml_args)
             print(f"Updating with:\n{yaml_args}\n")
         print(f"\n{args}\n")
