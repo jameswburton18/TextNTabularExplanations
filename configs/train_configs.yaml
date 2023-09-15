@@ -1684,7 +1684,7 @@ seed: 53995
 config: testing
 fast_dev_run: true
 do_train: false
-model_base: james-burton/channel_0
+model_base: distilroberta-base
 tags:
   - distilbert
   - all_as_text

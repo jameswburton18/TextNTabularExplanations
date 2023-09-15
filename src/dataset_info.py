@@ -81,9 +81,9 @@ def get_dataset_info2(ds_type, model_type=None):
     ds_type = l2s[ds_type] if ds_type in l2s else ds_type
     dataset_info = DatasetConfigLoader(
         config_name=ds_type + cfg_sfx,
-        configs_path="configs/dataset_configs.yaml",
+        configs_path="configs/shap_configs.yaml",
         default_name=ds_type,
-        defaults_path="configs/dataset_defaults.yaml",
+        defaults_path="configs/dataset_configs.yaml",
     )
 
 
