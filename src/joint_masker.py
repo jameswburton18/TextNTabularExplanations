@@ -299,18 +299,37 @@ class JointMasker(Masker):
                 all_token_ids = []
                 for col_idx, text_col in enumerate(s):
                     col_tokens, col_token_ids = self.token_segments(text_col)
+                    """
+                    We differentiate these because the first column we need to get 
+                    rid of the end of sentence token, the last column we need to get 
+                    rid of the start of sentence token and the middle columns we need
+                    to get rid of both.
+                    
+                    We also need to make allowances for when the tokenizer doesn't have
+                    a start or end of sentence token.
+                    """
                     # First col
                     if col_idx == 0:
-                        col_token_ids = col_token_ids[:-1]
-                        col_tokens = col_tokens[:-1]
+                        col_token_ids = (
+                            col_token_ids[:-1] if self.keep_suffix else col_token_ids
+                        )
+                        col_tokens = col_tokens[:-1] if self.keep_suffix else col_tokens
                     # Middle cols
                     elif col_idx != len(s) - 1:
-                        col_token_ids = col_token_ids[1:-1]
-                        col_tokens = col_tokens[1:-1]
+                        col_token_ids = (
+                            col_token_ids[self.keep_prefix : -1]
+                            if self.keep_suffix
+                            else col_token_ids[self.keep_prefix :]
+                        )
+                        col_tokens = (
+                            col_tokens[self.keep_prefix : -1]
+                            if self.keep_suffix
+                            else col_tokens[self.keep_prefix :]
+                        )
                     # Last col
                     else:
-                        col_token_ids = col_token_ids[1:]
-                        col_tokens = col_tokens[1:]
+                        col_token_ids = col_token_ids[self.keep_prefix :]
+                        col_tokens = col_tokens[self.keep_prefix :]
                     all_tokens.append(np.array(col_tokens))
                     all_token_ids.append(np.array(col_token_ids))
                 self._tokenized_s = all_token_ids
@@ -631,8 +650,11 @@ def join_dendograms(pts):
     n_leaves = [int(max(pt[:, 3])) for pt in pts]
     n_empty = sum([1 for n in n_leaves if n == 1])
     n_groups = [len(pt) for pt in pts]
-    # if n_leaves is 1, then then n_groups is set to 0
-    # n_groups = [g if l > 1 else 0 for g, l in zip(n_groups, n_leaves)]
+
+    # Needed to add this because could join two together but you'd still need
+    # an extra row to join the next one on. So if there are two single words
+    # then we need to reduce n_empty by 1
+    n_empty -= n_leaves[0] == 1 and n_leaves[1] == 1
 
     pt_join = np.zeros((sum(n_groups) + len(pts) - n_empty - 1, 4))
     # For the first partition tree the leaves (ie the words/features) are unchanged,
@@ -683,6 +705,53 @@ def join_dendograms(pts):
         i for idx, i in enumerate(n_in_top_nodes0) if not top_node_acntd_for[idx]
     ]
 
+    #########################################################################################
+    # This bit is all to take into account the case where the first group is a single token
+    # This is a fringe case which will only happen if the first group is a single token and
+    # the tokenizer does not have a start of sentence token
+
+    if pt_join[0, 1] == np.inf:
+        # We have to check that the second group is not a single word too
+        if n_leaves[1] == 1:
+            # first and second groups just form a single group
+            pt_join[0, 1] = 1
+            pt_join[0, 3] = 2
+            # pop the second group
+            pt_join = np.delete(pt_join, 1, 0)
+            # adjust group references: if there is a number > sum(n_leaves) then minus 1 from it
+            pt_join[:, :2] = np.where(
+                pt_join[:, :2] > sum(n_leaves), pt_join[:, :2] - 1, pt_join[:, :2]
+            )
+            # adjust top_nodes: if there is a number > sum(n_leaves) then minus 1 from it
+            top_nodes = [i - 1 for i in top_nodes]
+            # adjust g_cs because we use it later
+            g_cs = [i - 1 for i in g_cs[1:]]
+        else:
+            # Connect it to the top node of the next tree
+            pt_join[0, 1] = top_nodes[1]
+            pt_join[0, 2] = 1
+            pt_join[0, 3] = n_in_top_nodes[1] + 1
+            # rearrange groups such that the first row is now behind the seconrd group
+            second_grp_size = top_nodes[1] - top_nodes[0]
+            new_order = (
+                list(range(1, second_grp_size + 1))
+                + [0]
+                + list(range(1 + second_grp_size, pt_join.shape[0]))
+            )
+            pt_join = pt_join[new_order, :]
+            # adjust group references: if there is a number >= sum(n_leaves) and <= top_nodes[1]
+            # then minus 1 from it
+            pt_join[:, :2] = np.where(
+                (pt_join[:, :2] >= sum(n_leaves)) & (pt_join[:, :2] <= top_nodes[1]),
+                pt_join[:, :2] - 1,
+                pt_join[:, :2],
+            )
+            # redefine top_nodes and n_in_top_nodes, swapping the first two elements
+            top_nodes = top_nodes[1:]
+            n_in_top_nodes = n_in_top_nodes[1:]
+            n_in_top_nodes[0] += 1
+    #########################################################################################
+
     # Now we need to join the top nodes together
     joiner_rows = []
     while len(top_nodes) > 1:
@@ -694,7 +763,6 @@ def join_dendograms(pts):
         if len(top_nodes) > 0:
             top_nodes.insert(0, top_nodes[-1] + len(joiner_rows))
             n_in_top_nodes.insert(0, first_two)
-    sum(n_leaves)
     pt_join[g_cs[-1] :] = np.array(joiner_rows)
     pt_join[:, 2] = pt_join[:, 3]
     pt_join[:, 2] /= pt_join[:, 2].max()
