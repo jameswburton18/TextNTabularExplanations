@@ -12,7 +12,6 @@ import argparse
 from transformers.trainer_callback import EarlyStoppingCallback
 import evaluate
 import numpy as np
-from lion_pytorch import Lion
 from sklearn.metrics import precision_score, recall_score, roc_auc_score
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim import AdamW
@@ -138,13 +137,8 @@ def main():
         torch_compile=args["pytorch2.0"],  # Needs to be true if PyTorch 2.0
     )
 
-    if args["lion_optim"]:
-        opt = Lion(model.parameters(), lr=args["lr"], weight_decay=args["weight_decay"])
-        sched = None
-
     trainer = Trainer(
         model=model,
-        optimizers=(opt, sched) if args["lion_optim"] else (None, None),
         args=training_args,
         tokenizer=tokenizer,
         train_dataset=dataset["train"],
