@@ -19,7 +19,7 @@ from utils import (
     prepare_text,
     ConfigLoader,
 )
-from src.dataset_info import get_dataset_info
+from src.utils import legacy_get_dataset_info
 
 parser = argparse.ArgumentParser()
 parser.add_argument(

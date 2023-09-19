@@ -2,7 +2,7 @@ import numpy as np
 import shap
 import pickle
 from datasets import load_dataset
-from src.dataset_info import get_dataset_info
+from src.utils import legacy_get_dataset_info
 from transformers import pipeline, AutoTokenizer
 import pandas as pd
 from datasets import load_dataset, Dataset
@@ -43,7 +43,7 @@ def run_shap(
                 # "all_as_text_tnt_reorder",
                 # "all_as_text_base_reorder",
             ]:
-                di = get_dataset_info(ds_type, model_type)
+                di = legacy_get_dataset_info(ds_type, model_type)
                 # Data
                 train_df = load_dataset(
                     di.ds_name,

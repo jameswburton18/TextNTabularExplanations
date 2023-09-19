@@ -6,6 +6,8 @@ import yaml
 # from src.utils import ConfigLoader, DatasetConfigLoader
 
 
+###################
+# Legacy
 @dataclass
 class DatasetInfo:
     """Container for dataset information."""
@@ -24,70 +26,7 @@ class DatasetInfo:
     text_model_name: str = None
 
 
-class DatasetConfigLoader:
-    def __init__(
-        self,
-        config_name,
-        configs_path,
-        default_name,
-        defaults_path,
-    ):
-        with open(defaults_path) as f:
-            all_default_args = yaml.safe_load_all(f)
-            try:
-                default_args = next(
-                    conf for conf in all_default_args if conf["config"] == default_name
-                )
-            except StopIteration:
-                raise ValueError(
-                    f"Default config name {default_name} not found in {defaults_path}"
-                )
-
-        # Update default args with chosen config
-        with open(configs_path) as f:
-            yaml_configs = yaml.safe_load_all(f)
-            try:
-                yaml_args = next(
-                    conf for conf in yaml_configs if conf["config"] == config_name
-                )
-            except StopIteration:
-                raise ValueError(
-                    f"Config name {config_name} not found in {configs_path}"
-                )
-        default_args.update(yaml_args)
-        print(f"Updating with:\n{yaml_args}\n")
-        print(f"\n{default_args}\n")
-        for key, value in default_args.items():
-            setattr(self, key, value)
-
-
-def get_dataset_info2(ds_type, model_type=None):
-    l2s = {
-        "imdb_genre_prediction": "imdb_genre",
-        "product_sentiment_machine_hack": "prod_sent",
-        "fake_job_postings2": "fake",
-        "kick_starter_funding": "kick",
-        "jigsaw_unintended_bias100K": "jigsaw",
-        "wine_reviews": "wine",
-        "data_scientist_salary": "salary",
-        "melbourne_airbnb": "airbnb",
-        "news_channel": "news",
-    }
-    if model_type in ["all_text", "all_as_text"]:
-        cfg_sfx = "_all_text"
-    else:
-        cfg_sfx = "_ordinal"
-
-    ds_type = l2s[ds_type] if ds_type in l2s else ds_type
-    dataset_info = DatasetConfigLoader(
-        config_name=ds_type + cfg_sfx,
-        configs_path="configs/shap_configs.yaml",
-        default_name=ds_type,
-        defaults_path="configs/dataset_configs.yaml",
-    )
-
-
-def get_dataset_info(ds_type, model_type=None):
+def legacy_get_dataset_info(ds_type, model_type=None):
     if ds_type in ["imdb_genre", "imdb_genre_prediction"]:
         match model_type:
             case None:
@@ -1651,6 +1590,69 @@ def get_dataset_info(ds_type, model_type=None):
                 ],
             },
         )
+
+
+class DatasetConfigLoader:
+    def __init__(
+        self,
+        config_name,
+        configs_path,
+        default_name,
+        defaults_path,
+    ):
+        with open(defaults_path) as f:
+            all_default_args = yaml.safe_load_all(f)
+            try:
+                default_args = next(
+                    conf for conf in all_default_args if conf["config"] == default_name
+                )
+            except StopIteration:
+                raise ValueError(
+                    f"Default config name {default_name} not found in {defaults_path}"
+                )
+
+        # Update default args with chosen config
+        with open(configs_path) as f:
+            yaml_configs = yaml.safe_load_all(f)
+            try:
+                yaml_args = next(
+                    conf for conf in yaml_configs if conf["config"] == config_name
+                )
+            except StopIteration:
+                raise ValueError(
+                    f"Config name {config_name} not found in {configs_path}"
+                )
+        default_args.update(yaml_args)
+        print(f"Updating with:\n{yaml_args}\n")
+        print(f"\n{default_args}\n")
+        for key, value in default_args.items():
+            setattr(self, key, value)
+
+
+def get_dataset_info2(ds_type, model_type=None):
+    l2s = {
+        "imdb_genre_prediction": "imdb_genre",
+        "product_sentiment_machine_hack": "prod_sent",
+        "fake_job_postings2": "fake",
+        "kick_starter_funding": "kick",
+        "jigsaw_unintended_bias100K": "jigsaw",
+        "wine_reviews": "wine",
+        "data_scientist_salary": "salary",
+        "melbourne_airbnb": "airbnb",
+        "news_channel": "news",
+    }
+    if model_type in ["all_text", "all_as_text"]:
+        cfg_sfx = "_all_text"
+    else:
+        cfg_sfx = "_ordinal"
+
+    ds_type = l2s[ds_type] if ds_type in l2s else ds_type
+    dataset_info = DatasetConfigLoader(
+        config_name=ds_type + cfg_sfx,
+        configs_path="configs/shap_configs.yaml",
+        default_name=ds_type,
+        defaults_path="configs/dataset_configs.yaml",
+    )
 
 
 """
