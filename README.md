@@ -2,7 +2,7 @@
 
 ## Summary
 
-In this repository we make it possible to generate SHAP explanations for multimodal text-tabular datasets, no matter how the two modalities are combined. The accompanying paper will be linked. All trained models and processed datasets are available on our huggingface repo, will be linked.
+In this repository we make it possible to generate SHAP explanations for multimodal text-tabular datasets, no matter how the two modalities are combined. The accompanying paper will be linked. All trained models and processed datasets are available on our huggingface repo, <https://huggingface.co/james-burton>. Note that in the shap generation code, it refers to models and datasets that we host on hugging face, so therefore it should be possible to generate the explanations without training the models or generating the datasets yourself. However, if you wish to train the models or process the datasets yourself, the code is all here.
 
 ## Datasets
 
@@ -27,3 +27,24 @@ This repo relies upon sideways imports, so after cloning the repo, begin with
 `pip install -e .` from the root directory.
 
 Then run `pip install -r requirements.txt` to install the required packages.
+
+## Config naming convention
+
+The configs in `src/train_configs.yaml` follow the following pattern and match a saved model in <https://huggingface.co/james-burton>:
+```
+# 0s: distilbert
+# 10s: bert-base-uncased
+# 20s: distilroberta-base
+# 30s: microsoft/deberta-v3-small
+
+# #0: all_as_text
+# #1: all_as_text_base_reorder
+# #2: all_as_text_tnt_reorder
+# #3: all_as_text_base_reorder, reversed
+# #4: all_as_text_tnt_reorder, reversed
+# #9: text_col_only
+```
+
+## Archive folder
+
+The `archive` folder contains old code and previous experiments, it is not necessary to run any of this code to generate the results in the paper.
