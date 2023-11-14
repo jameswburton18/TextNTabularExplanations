@@ -1,0 +1,1560 @@
+# Pattern:
+# 0s: distilbert
+# 10s: bert-base-uncased
+# 20s: distilroberta-base
+# 30s: microsoft/deberta-v3-small
+
+# #0: all_as_text
+# #1: all_as_text_base_reorder
+# #2: all_as_text_tnt_reorder
+# #3: all_as_text_base_reorder, reversed
+# #4: all_as_text_tnt_reorder, reversed
+# #9: text_col_only
+
+# imdb_genre distilbert
+---
+config: imdb_genre_disbert_all_text
+dataset: imdb_genre
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/imdb_genre_0
+
+---
+config: imdb_genre_disbert_baseline
+dataset: imdb_genre
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/imdb_genre_0
+
+---
+config: imdb_genre_disbert_stack
+dataset: imdb_genre
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/imdb_genre_9
+
+---
+config: imdb_genre_disbert_ensemble_25
+dataset: imdb_genre
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/imdb_genre_9
+
+---
+config: imdb_genre_disbert_ensemble_50
+dataset: imdb_genre
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/imdb_genre_9
+
+---
+config: imdb_genre_disbert_ensemble_75
+dataset: imdb_genre
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/imdb_genre_9
+
+# imdb_genre bert
+---
+config: imdb_genre_bert_all_text
+dataset: imdb_genre
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/imdb_genre_10
+
+---
+config: imdb_genre_bert_baseline
+dataset: imdb_genre
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/imdb_genre_10
+
+---
+config: imdb_genre_bert_stack
+dataset: imdb_genre
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/imdb_genre_19
+
+---
+config: imdb_genre_bert_ensemble_25
+dataset: imdb_genre
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/imdb_genre_19
+
+---
+config: imdb_genre_bert_ensemble_50
+dataset: imdb_genre
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/imdb_genre_19
+
+---
+config: imdb_genre_bert_ensemble_75
+dataset: imdb_genre
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/imdb_genre_19
+
+# imdb_genre distilroberta-base
+---
+config: imdb_genre_drob_all_text
+dataset: imdb_genre
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/imdb_genre_20
+
+---
+config: imdb_genre_drob_baseline
+dataset: imdb_genre
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/imdb_genre_20
+
+---
+config: imdb_genre_drob_stack
+dataset: imdb_genre
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/imdb_genre_29
+
+---
+config: imdb_genre_drob_ensemble_25
+dataset: imdb_genre
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/imdb_genre_29
+
+---
+config: imdb_genre_drob_ensemble_50
+dataset: imdb_genre
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/imdb_genre_29
+
+---
+config: imdb_genre_drob_ensemble_75
+dataset: imdb_genre
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/imdb_genre_29
+
+# imdb_genre deberta
+---
+config: imdb_genre_deberta_all_text
+dataset: imdb_genre
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/imdb_genre_30
+
+---
+config: imdb_genre_deberta_baseline
+dataset: imdb_genre
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/imdb_genre_30
+
+---
+config: imdb_genre_deberta_stack
+dataset: imdb_genre
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/imdb_genre_39
+
+---
+config: imdb_genre_deberta_ensemble_25
+dataset: imdb_genre
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/imdb_genre_39
+
+---
+config: imdb_genre_deberta_ensemble_50
+dataset: imdb_genre
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/imdb_genre_39
+
+---
+config: imdb_genre_deberta_ensemble_75
+dataset: imdb_genre
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/imdb_genre_39
+
+# fake distilbert
+---
+config: fake_disbert_all_text
+dataset: fake
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/fake_0
+
+---
+config: fake_disbert_baseline
+dataset: fake
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/fake_0
+
+---
+config: fake_disbert_stack
+dataset: fake
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/fake_9
+
+---
+config: fake_disbert_ensemble_25
+dataset: fake
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/fake_9
+
+---
+config: fake_disbert_ensemble_50
+dataset: fake
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/fake_9
+
+---
+config: fake_disbert_ensemble_75
+dataset: fake
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/fake_9
+
+# fake bert
+---
+config: fake_bert_all_text
+dataset: fake
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/fake_10
+
+---
+config: fake_bert_baseline
+dataset: fake
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/fake_10
+
+---
+config: fake_bert_stack
+dataset: fake
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/fake_19
+
+---
+config: fake_bert_ensemble_25
+dataset: fake
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/fake_19
+
+---
+config: fake_bert_ensemble_50
+dataset: fake
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/fake_19
+
+---
+config: fake_bert_ensemble_75
+dataset: fake
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/fake_19
+
+# fake distilroberta-base
+---
+config: fake_drob_all_text
+dataset: fake
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/fake_20
+
+---
+config: fake_drob_baseline
+dataset: fake
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/fake_20
+
+---
+config: fake_drob_stack
+dataset: fake
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/fake_29
+
+---
+config: fake_drob_ensemble_25
+dataset: fake
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/fake_29
+
+---
+config: fake_drob_ensemble_50
+dataset: fake
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/fake_29
+
+---
+config: fake_drob_ensemble_75
+dataset: fake
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/fake_29
+
+# fake deberta
+---
+config: fake_deberta_all_text
+dataset: fake
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/fake_30
+
+---
+config: fake_deberta_baseline
+dataset: fake
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/fake_30
+
+---
+config: fake_deberta_stack
+dataset: fake
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/fake_39
+
+---
+config: fake_deberta_ensemble_25
+dataset: fake
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/fake_39
+
+---
+config: fake_deberta_ensemble_50
+dataset: fake
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/fake_39
+
+---
+config: fake_deberta_ensemble_75
+dataset: fake
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/fake_39
+
+# kick distilbert
+---
+config: kick_disbert_all_text
+dataset: kick
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/kick_0
+
+---
+config: kick_disbert_baseline
+dataset: kick
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/kick_0
+
+---
+config: kick_disbert_stack
+dataset: kick
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/kick_9
+
+---
+config: kick_disbert_ensemble_25
+dataset: kick
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/kick_9
+
+---
+config: kick_disbert_ensemble_50
+dataset: kick
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/kick_9
+
+---
+config: kick_disbert_ensemble_75
+dataset: kick
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/kick_9
+
+# kick bert
+---
+config: kick_bert_all_text
+dataset: kick
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/kick_10
+
+---
+config: kick_bert_baseline
+dataset: kick
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/kick_10
+
+---
+config: kick_bert_stack
+dataset: kick
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/kick_19
+
+---
+config: kick_bert_ensemble_25
+dataset: kick
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/kick_19
+
+---
+config: kick_bert_ensemble_50
+dataset: kick
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/kick_19
+
+---
+config: kick_bert_ensemble_75
+dataset: kick
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/kick_19
+
+# kick distilroberta-base
+---
+config: kick_drob_all_text
+dataset: kick
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/kick_20
+
+---
+config: kick_drob_baseline
+dataset: kick
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/kick_20
+
+---
+config: kick_drob_stack
+dataset: kick
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/kick_29
+
+---
+config: kick_drob_ensemble_25
+dataset: kick
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/kick_29
+
+---
+config: kick_drob_ensemble_50
+dataset: kick
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/kick_29
+
+---
+config: kick_drob_ensemble_75
+dataset: kick
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/kick_29
+
+# kick deberta
+---
+config: kick_deberta_all_text
+dataset: kick
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/kick_30
+
+---
+config: kick_deberta_baseline
+dataset: kick
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/kick_30
+
+---
+config: kick_deberta_stack
+dataset: kick
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/kick_39
+
+---
+config: kick_deberta_ensemble_25
+dataset: kick
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/kick_39
+
+---
+config: kick_deberta_ensemble_50
+dataset: kick
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/kick_39
+
+---
+config: kick_deberta_ensemble_75
+dataset: kick
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/kick_39
+
+# jigsaw distilbert
+---
+config: jigsaw_disbert_all_text
+dataset: jigsaw
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/jigsaw_0
+
+---
+config: jigsaw_disbert_baseline
+dataset: jigsaw
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/jigsaw_0
+
+---
+config: jigsaw_disbert_stack
+dataset: jigsaw
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/jigsaw_9
+
+---
+config: jigsaw_disbert_ensemble_25
+dataset: jigsaw
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/jigsaw_9
+
+---
+config: jigsaw_disbert_ensemble_50
+dataset: jigsaw
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/jigsaw_9
+
+---
+config: jigsaw_disbert_ensemble_75
+dataset: jigsaw
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/jigsaw_9
+
+# jigsaw bert
+---
+config: jigsaw_bert_all_text
+dataset: jigsaw
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/jigsaw_10
+
+---
+config: jigsaw_bert_baseline
+dataset: jigsaw
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/jigsaw_10
+
+---
+config: jigsaw_bert_stack
+dataset: jigsaw
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/jigsaw_19
+
+---
+config: jigsaw_bert_ensemble_25
+dataset: jigsaw
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/jigsaw_19
+
+---
+config: jigsaw_bert_ensemble_50
+dataset: jigsaw
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/jigsaw_19
+
+---
+config: jigsaw_bert_ensemble_75
+dataset: jigsaw
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/jigsaw_19
+
+# jigsaw distilroberta-base
+---
+config: jigsaw_drob_all_text
+dataset: jigsaw
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/jigsaw_20
+
+---
+config: jigsaw_drob_baseline
+dataset: jigsaw
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/jigsaw_20
+
+---
+config: jigsaw_drob_stack
+dataset: jigsaw
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/jigsaw_29
+
+---
+config: jigsaw_drob_ensemble_25
+dataset: jigsaw
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/jigsaw_29
+
+---
+config: jigsaw_drob_ensemble_50
+dataset: jigsaw
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/jigsaw_29
+
+---
+config: jigsaw_drob_ensemble_75
+dataset: jigsaw
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/jigsaw_29
+
+# jigsaw deberta
+---
+config: jigsaw_deberta_all_text
+dataset: jigsaw
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/jigsaw_30
+
+---
+config: jigsaw_deberta_baseline
+dataset: jigsaw
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/jigsaw_30
+
+---
+config: jigsaw_deberta_stack
+dataset: jigsaw
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/jigsaw_39
+
+---
+config: jigsaw_deberta_ensemble_25
+dataset: jigsaw
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/jigsaw_39
+
+---
+config: jigsaw_deberta_ensemble_50
+dataset: jigsaw
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/jigsaw_39
+
+---
+config: jigsaw_deberta_ensemble_75
+dataset: jigsaw
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/jigsaw_39
+
+# wine distilbert
+---
+config: wine_disbert_all_text
+dataset: wine
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/wine_0
+
+---
+config: wine_disbert_baseline
+dataset: wine
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/wine_0
+
+---
+config: wine_disbert_stack
+dataset: wine
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/wine_9
+
+---
+config: wine_disbert_ensemble_25
+dataset: wine
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/wine_9
+
+---
+config: wine_disbert_ensemble_50
+dataset: wine
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/wine_9
+
+---
+config: wine_disbert_ensemble_75
+dataset: wine
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/wine_9
+
+# wine bert
+---
+config: wine_bert_all_text
+dataset: wine
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/wine_10
+
+---
+config: wine_bert_baseline
+dataset: wine
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/wine_10
+
+---
+config: wine_bert_stack
+dataset: wine
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/wine_19
+
+---
+config: wine_bert_ensemble_25
+dataset: wine
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/wine_19
+
+---
+config: wine_bert_ensemble_50
+dataset: wine
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/wine_19
+
+---
+config: wine_bert_ensemble_75
+dataset: wine
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/wine_19
+
+# wine distilroberta-base
+---
+config: wine_drob_all_text
+dataset: wine
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/wine_20
+
+---
+config: wine_drob_baseline
+dataset: wine
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/wine_20
+
+---
+config: wine_drob_stack
+dataset: wine
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/wine_29
+
+---
+config: wine_drob_ensemble_25
+dataset: wine
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/wine_29
+
+---
+config: wine_drob_ensemble_50
+dataset: wine
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/wine_29
+
+---
+config: wine_drob_ensemble_75
+dataset: wine
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/wine_29
+
+# wine deberta
+---
+config: wine_deberta_all_text
+dataset: wine
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/wine_30
+
+---
+config: wine_deberta_baseline
+dataset: wine
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/wine_30
+
+---
+config: wine_deberta_stack
+dataset: wine
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/wine_39
+
+---
+config: wine_deberta_ensemble_25
+dataset: wine
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/wine_39
+
+---
+config: wine_deberta_ensemble_50
+dataset: wine
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/wine_39
+
+---
+config: wine_deberta_ensemble_75
+dataset: wine
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/wine_39
+
+# airbnb distilbert
+---
+config: airbnb_disbert_all_text
+dataset: airbnb
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/airbnb_0
+
+---
+config: airbnb_disbert_baseline
+dataset: airbnb
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/airbnb_0
+
+---
+config: airbnb_disbert_stack
+dataset: airbnb
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/airbnb_9
+
+---
+config: airbnb_disbert_ensemble_25
+dataset: airbnb
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/airbnb_9
+
+---
+config: airbnb_disbert_ensemble_50
+dataset: airbnb
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/airbnb_9
+
+---
+config: airbnb_disbert_ensemble_75
+dataset: airbnb
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/airbnb_9
+
+# airbnb bert
+---
+config: airbnb_bert_all_text
+dataset: airbnb
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/airbnb_10
+
+---
+config: airbnb_bert_baseline
+dataset: airbnb
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/airbnb_10
+
+---
+config: airbnb_bert_stack
+dataset: airbnb
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/airbnb_19
+
+---
+config: airbnb_bert_ensemble_25
+dataset: airbnb
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/airbnb_19
+
+---
+config: airbnb_bert_ensemble_50
+dataset: airbnb
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/airbnb_19
+
+---
+config: airbnb_bert_ensemble_75
+dataset: airbnb
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/airbnb_19
+
+# airbnb distilroberta-base
+---
+config: airbnb_drob_all_text
+dataset: airbnb
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/airbnb_20
+
+---
+config: airbnb_drob_baseline
+dataset: airbnb
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/airbnb_20
+
+---
+config: airbnb_drob_stack
+dataset: airbnb
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/airbnb_29
+
+---
+config: airbnb_drob_ensemble_25
+dataset: airbnb
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/airbnb_29
+
+---
+config: airbnb_drob_ensemble_50
+dataset: airbnb
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/airbnb_29
+
+---
+config: airbnb_drob_ensemble_75
+dataset: airbnb
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/airbnb_29
+
+# airbnb deberta
+---
+config: airbnb_deberta_all_text
+dataset: airbnb
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/airbnb_30
+
+---
+config: airbnb_deberta_baseline
+dataset: airbnb
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/airbnb_30
+
+---
+config: airbnb_deberta_stack
+dataset: airbnb
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/airbnb_39
+
+---
+config: airbnb_deberta_ensemble_25
+dataset: airbnb
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/airbnb_39
+
+---
+config: airbnb_deberta_ensemble_50
+dataset: airbnb
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/airbnb_39
+
+---
+config: airbnb_deberta_ensemble_75
+dataset: airbnb
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/airbnb_39
+
+# channel distilbert
+---
+config: channel_disbert_all_text
+dataset: channel
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/channel_0
+
+---
+config: channel_disbert_baseline
+dataset: channel
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/channel_0
+
+---
+config: channel_disbert_stack
+dataset: channel
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/channel_9
+
+---
+config: channel_disbert_ensemble_25
+dataset: channel
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/channel_9
+
+---
+config: channel_disbert_ensemble_50
+dataset: channel
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/channel_9
+
+---
+config: channel_disbert_ensemble_75
+dataset: channel
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/channel_9
+
+# channel bert
+---
+config: channel_bert_all_text
+dataset: channel
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/channel_10
+
+---
+config: channel_bert_baseline
+dataset: channel
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/channel_10
+
+---
+config: channel_bert_stack
+dataset: channel
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/channel_19
+
+---
+config: channel_bert_ensemble_25
+dataset: channel
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/channel_19
+
+---
+config: channel_bert_ensemble_50
+dataset: channel
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/channel_19
+
+---
+config: channel_bert_ensemble_75
+dataset: channel
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/channel_19
+
+# channel distilroberta-base
+---
+config: channel_drob_all_text
+dataset: channel
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/channel_20
+
+---
+config: channel_drob_baseline
+dataset: channel
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/channel_20
+
+---
+config: channel_drob_stack
+dataset: channel
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/channel_29
+
+---
+config: channel_drob_ensemble_25
+dataset: channel
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/channel_29
+
+---
+config: channel_drob_ensemble_50
+dataset: channel
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/channel_29
+
+---
+config: channel_drob_ensemble_75
+dataset: channel
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/channel_29
+
+# channel deberta
+---
+config: channel_deberta_all_text
+dataset: channel
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/channel_30
+
+---
+config: channel_deberta_baseline
+dataset: channel
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/channel_30
+
+---
+config: channel_deberta_stack
+dataset: channel
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/channel_39
+
+---
+config: channel_deberta_ensemble_25
+dataset: channel
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/channel_39
+
+---
+config: channel_deberta_ensemble_50
+dataset: channel
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/channel_39
+
+---
+config: channel_deberta_ensemble_75
+dataset: channel
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/channel_39
+
+# prod_sent distilbert
+---
+config: prod_sent_disbert_all_text
+dataset: prod_sent
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/prod_sent_0
+
+---
+config: prod_sent_disbert_baseline
+dataset: prod_sent
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/prod_sent_0
+
+---
+config: prod_sent_disbert_stack
+dataset: prod_sent
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/prod_sent_9
+
+---
+config: prod_sent_disbert_ensemble_25
+dataset: prod_sent
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/prod_sent_9
+
+---
+config: prod_sent_disbert_ensemble_50
+dataset: prod_sent
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/prod_sent_9
+
+---
+config: prod_sent_disbert_ensemble_75
+dataset: prod_sent
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/prod_sent_9
+
+# prod_sent bert
+---
+config: prod_sent_bert_all_text
+dataset: prod_sent
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/prod_sent_10
+
+---
+config: prod_sent_bert_baseline
+dataset: prod_sent
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/prod_sent_10
+
+---
+config: prod_sent_bert_stack
+dataset: prod_sent
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/prod_sent_19
+
+---
+config: prod_sent_bert_ensemble_25
+dataset: prod_sent
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/prod_sent_19
+
+---
+config: prod_sent_bert_ensemble_50
+dataset: prod_sent
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/prod_sent_19
+
+---
+config: prod_sent_bert_ensemble_75
+dataset: prod_sent
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/prod_sent_19
+
+# prod_sent distilroberta-base
+---
+config: prod_sent_drob_all_text
+dataset: prod_sent
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/prod_sent_20
+
+---
+config: prod_sent_drob_baseline
+dataset: prod_sent
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/prod_sent_20
+
+---
+config: prod_sent_drob_stack
+dataset: prod_sent
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/prod_sent_29
+
+---
+config: prod_sent_drob_ensemble_25
+dataset: prod_sent
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/prod_sent_29
+
+---
+config: prod_sent_drob_ensemble_50
+dataset: prod_sent
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/prod_sent_29
+
+---
+config: prod_sent_drob_ensemble_75
+dataset: prod_sent
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/prod_sent_29
+
+# prod_sent deberta
+---
+config: prod_sent_deberta_all_text
+dataset: prod_sent
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/prod_sent_30
+
+---
+config: prod_sent_deberta_baseline
+dataset: prod_sent
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/prod_sent_30
+
+---
+config: prod_sent_deberta_stack
+dataset: prod_sent
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/prod_sent_39
+
+---
+config: prod_sent_deberta_ensemble_25
+dataset: prod_sent
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/prod_sent_39
+
+---
+config: prod_sent_deberta_ensemble_50
+dataset: prod_sent
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/prod_sent_39
+
+---
+config: prod_sent_deberta_ensemble_75
+dataset: prod_sent
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/prod_sent_39
+
+# salary distilbert
+---
+config: salary_disbert_all_text
+dataset: salary
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/salary_0
+
+---
+config: salary_disbert_baseline
+dataset: salary
+text_model_base: distilbert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/salary_0
+
+---
+config: salary_disbert_stack
+dataset: salary
+text_model_base: distilbert-base-uncased
+model_type: stack
+my_text_model: james-burton/salary_9
+
+---
+config: salary_disbert_ensemble_25
+dataset: salary
+text_model_base: distilbert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/salary_9
+
+---
+config: salary_disbert_ensemble_50
+dataset: salary
+text_model_base: distilbert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/salary_9
+
+---
+config: salary_disbert_ensemble_75
+dataset: salary
+text_model_base: distilbert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/salary_9
+
+# salary bert
+---
+config: salary_bert_all_text
+dataset: salary
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/salary_10
+
+---
+config: salary_bert_baseline
+dataset: salary
+text_model_base: bert-base-uncased
+model_type: all_as_text
+my_text_model: james-burton/salary_10
+
+---
+config: salary_bert_stack
+dataset: salary
+text_model_base: bert-base-uncased
+model_type: stack
+my_text_model: james-burton/salary_19
+
+---
+config: salary_bert_ensemble_25
+dataset: salary
+text_model_base: bert-base-uncased
+model_type: ensemble_25
+my_text_model: james-burton/salary_19
+
+---
+config: salary_bert_ensemble_50
+dataset: salary
+text_model_base: bert-base-uncased
+model_type: ensemble_50
+my_text_model: james-burton/salary_19
+
+---
+config: salary_bert_ensemble_75
+dataset: salary
+text_model_base: bert-base-uncased
+model_type: ensemble_75
+my_text_model: james-burton/salary_19
+
+# salary distilroberta-base
+---
+config: salary_drob_all_text
+dataset: salary
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/salary_20
+
+---
+config: salary_drob_baseline
+dataset: salary
+text_model_base: distilroberta-base
+model_type: all_as_text
+my_text_model: james-burton/salary_20
+
+---
+config: salary_drob_stack
+dataset: salary
+text_model_base: distilroberta-base
+model_type: stack
+my_text_model: james-burton/salary_29
+
+---
+config: salary_drob_ensemble_25
+dataset: salary
+text_model_base: distilroberta-base
+model_type: ensemble_25
+my_text_model: james-burton/salary_29
+
+---
+config: salary_drob_ensemble_50
+dataset: salary
+text_model_base: distilroberta-base
+model_type: ensemble_50
+my_text_model: james-burton/salary_29
+
+---
+config: salary_drob_ensemble_75
+dataset: salary
+text_model_base: distilroberta-base
+model_type: ensemble_75
+my_text_model: james-burton/salary_29
+
+# salary deberta
+---
+config: salary_deberta_all_text
+dataset: salary
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/salary_30
+
+---
+config: salary_deberta_baseline
+dataset: salary
+text_model_base: microsoft/deberta-v3-small
+model_type: all_as_text
+my_text_model: james-burton/salary_30
+
+---
+config: salary_deberta_stack
+dataset: salary
+text_model_base: microsoft/deberta-v3-small
+model_type: stack
+my_text_model: james-burton/salary_39
+
+---
+config: salary_deberta_ensemble_25
+dataset: salary
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_25
+my_text_model: james-burton/salary_39
+
+---
+config: salary_deberta_ensemble_50
+dataset: salary
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_50
+my_text_model: james-burton/salary_39
+
+---
+config: salary_deberta_ensemble_75
+dataset: salary
+text_model_base: microsoft/deberta-v3-small
+model_type: ensemble_75
+my_text_model: james-burton/salary_39

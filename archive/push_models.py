@@ -21,7 +21,7 @@ from utils import (
     row_to_string,
     multiple_row_to_string,
 )
-from src.dataset_info import get_dataset_info
+from src.utils import legacy_get_dataset_info
 
 names = ["jigsaw_10", "fake_10", "kick_10", "wine_10"]
 for model, name in zip(

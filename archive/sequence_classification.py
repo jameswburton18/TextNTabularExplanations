@@ -4,7 +4,7 @@ from src.utils import (
     row_to_string,
     multiple_row_to_string,
 )
-from src.dataset_info import get_dataset_info
+from src.utils import legacy_get_dataset_info
 
 from transformers import AutoTokenizer
 import numpy as np
@@ -33,7 +33,7 @@ from src.utils import (
     row_to_string,
     multiple_row_to_string,
 )
-from src.dataset_info import get_dataset_info
+from src.utils import legacy_get_dataset_info
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -130,7 +130,7 @@ if config_type != "default":
 print(f"\n{args}\n")
 
 # Dataset
-di = get_dataset_info(args["dataset"], model_type=args["version"])
+di = legacy_get_dataset_info(args["dataset"], model_type=args["version"])
 dataset = load_dataset(di.ds_name)  # , download_mode="force_redownload")
 dataset = prepare_text(dataset, args["version"], args["dataset"])
 if di.prob_type == "regression":

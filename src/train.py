@@ -12,16 +12,14 @@ import argparse
 from transformers.trainer_callback import EarlyStoppingCallback
 import evaluate
 import numpy as np
-from lion_pytorch import Lion
 from sklearn.metrics import precision_score, recall_score, roc_auc_score
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim import AdamW
 from utils import (
     prepare_text,
-    row_to_string,
-    multiple_row_to_string,
+    ConfigLoader,
 )
-from src.dataset_info import get_dataset_info
+from src.utils import legacy_get_dataset_info
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -34,37 +32,36 @@ config_type = parser.parse_args().config
 
 
 def main():
-    # Import yaml file
-    with open("configs/train_default.yaml") as f:
-        args = yaml.safe_load(f)
+    # Training args
+    args = ConfigLoader(
+        config_type, "configs/train_configs.yaml", "configs/train_default.yaml"
+    ).__dict__
 
-    # Update default args with chosen config
-    if config_type != "default":
-        with open("configs/train_configs.yaml") as f:
-            yaml_configs = yaml.safe_load_all(f)
-            yaml_args = next(
-                conf for conf in yaml_configs if conf["config"] == config_type
-            )
-        args.update(yaml_args)
-        print(f"Updating with:\n{yaml_args}\n")
-    print(f"\n{args}\n")
-
-    # Dataset
-    di = get_dataset_info(args["dataset"], model_type=args["version"])
-    dataset = load_dataset(di.ds_name)  # , download_mode="force_redownload")
+    # Dataset info
+    di = ConfigLoader(args["dataset"], "configs/dataset_configs.yaml")
+    # Datasets which use the datasets which are all as strings
+    all_text_versions = [
+        "all_as_text",
+        "all_as_text_base_reorder",
+        "all_as_text_tnt_reorder",
+    ]
+    ds_name = (
+        di.all_text_dataset
+        if args["version"] in all_text_versions
+        else di.ordinal_dataset
+    )
+    dataset = load_dataset(ds_name)  # , download_mode="force_redownload")
     dataset = prepare_text(
         dataset=dataset,
+        di=di,
         version=args["version"],
-        ds_type=args["dataset"],
         model_name=args["model_base"],
     )
-    if di.prob_type == "regression":
-        mean_price = np.mean(dataset["train"]["label"])
-        std_price = np.std(dataset["train"]["label"])
 
     # Load model and tokenizer
     model = AutoModelForSequenceClassification.from_pretrained(
-        args["model_base"], num_labels=di.num_labels, problem_type=di.prob_type
+        args["model_base"],
+        num_labels=di.num_labels,
     )
     tokenizer = AutoTokenizer.from_pretrained(args["model_base"])
 
@@ -80,8 +77,6 @@ def main():
             ),
         }
 
-    dataset = dataset.map(encode)  # , load_from_cache_file=True)
-
     # Fast dev run if want to run quickly and not save to wandb
     if args["fast_dev_run"]:
         args["num_epochs"] = 1
@@ -92,6 +87,7 @@ def main():
         print(
             "\n######################    Running in fast dev mode    #######################\n"
         )
+    # , load_from_cache_file=True)
 
     # If not, initialize wandb
     else:
@@ -104,6 +100,8 @@ def main():
         os.environ["WANDB_LOG_MODEL"] = "True"
         output_dir = os.path.join(args["output_root"], args["dataset"], wandb.run.name)
         print(f"Results will be saved @: {output_dir}")
+
+    dataset = dataset.map(encode)
 
     # Make output directory
     if not os.path.exists(output_dir):
@@ -138,13 +136,8 @@ def main():
         torch_compile=args["pytorch2.0"],  # Needs to be true if PyTorch 2.0
     )
 
-    if args["lion_optim"]:
-        opt = Lion(model.parameters(), lr=args["lr"], weight_decay=args["weight_decay"])
-        sched = None
-
     trainer = Trainer(
         model=model,
-        optimizers=(opt, sched) if args["lion_optim"] else (None, None),
         args=training_args,
         tokenizer=tokenizer,
         train_dataset=dataset["train"],
@@ -169,47 +162,37 @@ def main():
         results = trainer.evaluate(dataset["test"], metric_key_prefix="test")
         preds = trainer.predict(dataset["test"]).predictions
         labels = [l[0] for l in dataset["test"]["label"]]
-        if di.prob_type == "regression":
-            unscaled_preds = preds * std_price + mean_price
-            unscaled_refs = [
-                [x[0] * std_price + mean_price] for x in dataset["test"]["label"]
-            ]
-            results["test_unscaled_rmse"] = np.sqrt(
-                np.mean((unscaled_preds - unscaled_refs) ** 2)
+        if di.num_labels == 2:
+            results["test/accuracy"] = np.mean(np.argmax(preds, axis=1) == labels)
+            results["test/precision"] = precision_score(
+                labels,
+                np.argmax(preds, axis=1),
+                labels=np.arange(di.num_labels),
+                zero_division=0,
             )
-            results["test_rmse"] = np.sqrt(results["test_loss"])
-        else:
-            if di.num_labels == 2:
-                results["test/accuracy"] = np.mean(np.argmax(preds, axis=1) == labels)
-                results["test/precision"] = precision_score(
-                    labels,
-                    np.argmax(preds, axis=1),
-                    labels=np.arange(di.num_labels),
-                    zero_division=0,
-                )
-                results["test/recall"] = recall_score(
-                    labels,
-                    np.argmax(preds, axis=1),
-                    labels=np.arange(di.num_labels),
-                    zero_division=0,
-                )
-                results["test/roc_auc"] = roc_auc_score(labels, preds[:, 1])
-            elif di.num_labels > 2:
-                results["test/accuracy"] = np.mean(np.argmax(preds, axis=1) == labels)
-                results["test/precision"] = precision_score(
-                    labels,
-                    np.argmax(preds, axis=1),
-                    average="macro",
-                    labels=np.arange(di.num_labels),
-                    zero_division=0,
-                )
-                results["test/recall"] = recall_score(
-                    labels,
-                    np.argmax(preds, axis=1),
-                    average="macro",
-                    labels=np.arange(di.num_labels),
-                    zero_division=0,
-                )
+            results["test/recall"] = recall_score(
+                labels,
+                np.argmax(preds, axis=1),
+                labels=np.arange(di.num_labels),
+                zero_division=0,
+            )
+            results["test/roc_auc"] = roc_auc_score(labels, preds[:, 1])
+        elif di.num_labels > 2:
+            results["test/accuracy"] = np.mean(np.argmax(preds, axis=1) == labels)
+            results["test/precision"] = precision_score(
+                labels,
+                np.argmax(preds, axis=1),
+                average="macro",
+                labels=np.arange(di.num_labels),
+                zero_division=0,
+            )
+            results["test/recall"] = recall_score(
+                labels,
+                np.argmax(preds, axis=1),
+                average="macro",
+                labels=np.arange(di.num_labels),
+                zero_division=0,
+            )
 
         # Save the predictions
         with open(os.path.join(output_dir, "test_results.txt"), "w") as f:

@@ -1,21 +1,34 @@
 from datasets import Dataset, DatasetDict, load_dataset
 from auto_mm_bench.datasets import dataset_registry
 from sklearn.preprocessing import OrdinalEncoder
-from src.dataset_info import get_dataset_info
+from src.utils import ConfigLoader
+
+LONG_TO_SHORT = {
+    "wine_reviews": "wine",
+    "fake_job_postings2": "fake",
+    "product_sentiment_machine_hack": "prod_sent",
+    "kick_starter_funding": "kick",
+    "jigsaw_unintended_bias100K": "jigsaw",
+    "imdb_genre_prediction": "imdb_genre",
+    "data_scientist_salary": "salary",
+    "melbourne_airbnb": "airbnb",
+    "news_channel": "channel",
+}
 
 # ## Dataset creation here
 for dataset_name in [
-    # "wine_reviews",
-    # "fake_job_postings2",
-    # "product_sentiment_machine_hack",
-    # "kick_starter_funding",
-    # "jigsaw_unintended_bias100K",
-    # "imdb_genre_prediction",
-    # "data_scientist_salary",
-    # "melbourne_airbnb",
+    "wine_reviews",
+    "fake_job_postings2",
+    "product_sentiment_machine_hack",
+    "kick_starter_funding",
+    "jigsaw_unintended_bias100K",
+    "imdb_genre_prediction",
+    "data_scientist_salary",
+    "melbourne_airbnb",
     "news_channel",
 ]:
-    di = get_dataset_info(dataset_name)
+    # Dataset info
+    di = ConfigLoader(LONG_TO_SHORT[dataset_name], "configs/dataset_configs.yaml")
     train_dataset = dataset_registry.create(dataset_name, "train")
 
     test_dataset = dataset_registry.create(dataset_name, "test")

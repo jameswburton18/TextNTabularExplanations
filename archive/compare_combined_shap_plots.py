@@ -7,7 +7,7 @@ import transformers
 import shap
 from src.plot_text import text
 from src.utils import format_fts_for_plotting, text_ft_index_ends
-from src.dataset_info import get_dataset_info
+from src.utils import legacy_get_dataset_info
 from datasets import load_dataset
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -47,7 +47,7 @@ def load_shap_vals(ds_name):
 
 
 def get_line_breaks(ds_name):
-    di = get_dataset_info(ds_name, "all_text")
+    di = legacy_get_dataset_info(ds_name, "all_text")
     ds = load_dataset(di.ds_name, split="test")
     # Define how to convert all columns to a single string
     cols_to_str_fn = lambda array: " [SEP] ".join(
@@ -59,7 +59,7 @@ def get_line_breaks(ds_name):
 
 
 def display_shap_vals(ds_name, shap_groups, names, idx):
-    di = get_dataset_info(ds_name)
+    di = legacy_get_dataset_info(ds_name)
     # names = ["Ensemble 25", "Ensemble 50",
     #         "Ensemble 75", "Stack Ensemble", "All as Text"]
     # shap_groups = [shap_25, shap_50, shap_75, shap_stack, shap_all_text]
@@ -205,7 +205,7 @@ def gen_summary_shap_vals(ds_name):
         "all_text",
         "all_text_baseline",
     ]
-    di = get_dataset_info(ds_name)
+    di = legacy_get_dataset_info(ds_name)
     shap_groups, _ = load_shap_vals(ds_name)
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 
