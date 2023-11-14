@@ -110,8 +110,8 @@ Map(function(ds, caption) {
         pairwise.display = "ns",
         ylab = "Median(Text FI) - Median(Tabular FI)",
         xlab = "Text Model",
-        title = "Are Text or Tabular Features Assigned More Importance?,
-Difference in Median Feature Importance (SHAP), by Text Model",
+        # title = "Are Text or Tabular Features Assigned More Importance?,
+        # Difference in Median Feature Importance (SHAP), by Text Model",
         caption = paste("Dataset: ", caption),
       )
 
@@ -145,8 +145,8 @@ Map(function(ds, caption) {
         pairwise.display = "ns",
         ylab = "Median(Text FI) - Median(Tabular FI)",
         xlab = "Combination Method",
-        title = "Are Text or Tabular Features Assigned More Importance?
-Difference in Median Feature Importance (SHAP), by Combination Method",
+        # title = "Are Text or Tabular Features Assigned More Importance?
+        # Difference in Median Feature Importance (SHAP), by Combination Method",
         caption = paste("Dataset: ", caption),
       )
       # Save the plot to a PDF file
@@ -179,8 +179,8 @@ Map(function(ds, caption) {
           pairwise.display = "ns",
           ylab = "Median(Text FI) - Median(Tabular FI)",
           xlab = "Text Model",
-          title = "Are Text or Tabular Features Assigned More Importance?,
-Difference in Median Feature Importance (SHAP), by Text Model",
+          # title = "Are Text or Tabular Features Assigned More Importance?,
+          # Difference in Median Feature Importance (SHAP), by Text Model",
           caption = paste("Dataset: ", ds, "Combination Method: ", cm),
         )
 
@@ -216,8 +216,8 @@ Map(function(ds, caption) {
           pairwise.display = "ns",
           ylab = "Median(Text FI) - Median(Tabular FI)",
           xlab = "Combination Method",
-          title = "Are Text or Tabular Features Assigned More Importance?,
-Difference in Median Feature Importance (SHAP), by Combination Method",
+          # title = "Are Text or Tabular Features Assigned More Importance?,
+          # Difference in Median Feature Importance (SHAP), by Combination Method",
           caption = paste("Dataset: ", ds, "Text Model: ", tm),
         )
 
@@ -251,8 +251,8 @@ Map(function(ds, caption) {
         pairwise.display = "sig",
         ylab = "Feature Importance",
         xlab = "Text Model",
-        title = "Are the Same Features Always the Most Important?
-Feature Importance (SHAP) Compared, by Text Model",
+        # title = "Are the Same Features Always the Most Important?
+        # Feature Importance (SHAP) Compared, by Text Model",
         caption = paste("Dataset: ", caption),
       )
       # Save the plot to a PDF file
@@ -283,8 +283,8 @@ Map(function(ds, caption) {
         pairwise.display = "sig",
         ylab = "Feature Importance",
         xlab = "Combination Method",
-        title = "Are the Same Features Always the Most Important?
-Feature Importance (SHAP) Compared, by Combination Method",
+        # title = "Are the Same Features Always the Most Important?
+        # Feature Importance (SHAP) Compared, by Combination Method",
         caption = paste("Dataset: ", caption),
       )
       # Save the plot to a PDF file

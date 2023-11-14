@@ -20,7 +20,7 @@
 #     done
 # done
 
-for code in disbert bert drob deberta #
+for code in bert disbert drob deberta #
 do
     for ds_type in airbnb channel salary kick jigsaw fake wine imdb_genre prod_sent 
     do
