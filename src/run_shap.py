@@ -30,6 +30,12 @@ parser.add_argument(
     default="disbert",
     help="Code name for text model to use",
 )
+parser.add_argument(
+    "--repeat_idx",
+    type=int,
+    default=None,
+    help="For the explainability consistency experiment, which repeat to use",
+)
 
 
 def run_shap(
@@ -536,51 +542,51 @@ if __name__ == "__main__":
     ds_type = parser.parse_args().ds_type
     text_model_code = parser.parse_args().text_model_code
     sf = 1
+    # for model_type in [
+    #     "ensemble_50",
+    #     "ensemble_75",
+    #     "ensemble_25",
+    #     "stack",
+    #     "all_text",
+    # ]:
+    #     pass
+    #     shap_vals = run_shap(
+    #         model_type,
+    #         ds_type=ds_type,
+    #         tab_scale_factor=sf,
+    #         text_model_code=text_model_code,
+    #     )
+    # run_all_text_baseline_shap(
+    #     ds_type=ds_type, text_model_code=text_model_code, tab_scale_factor=sf
+    # )
+    # gen_summary_shap_vals(ds_type, text_model_code=text_model_code, tab_scale_factor=sf)
+    repeat_idx = parser.parse_args().repeat_idx
     for model_type in [
-        "ensemble_50",
-        "ensemble_75",
-        "ensemble_25",
-        "stack",
+        # "ensemble_50",
+        # "ensemble_75",
+        # "ensemble_25",
+        # "stack",
         "all_text",
     ]:
         pass
-        shap_vals = run_shap(
-            model_type,
-            ds_type=ds_type,
-            tab_scale_factor=sf,
-            text_model_code=text_model_code,
-        )
+        # shap_vals = run_shap(
+        #     model_type,
+        #     ds_type=ds_type,
+        #     tab_scale_factor=sf,
+        #     text_model_code=text_model_code,
+        #     test_set_size=1000,  # 100 normal, 1000 for exp consistency,
+        #     repeat_idx=repeat_idx,
+        # )
     run_all_text_baseline_shap(
-        ds_type=ds_type, text_model_code=text_model_code, tab_scale_factor=sf
+        ds_type=ds_type,
+        text_model_code=text_model_code,
+        tab_scale_factor=sf,
+        repeat_idx=repeat_idx,
+        test_set_size=1000,  # 100 normal, 1000 for exp consistency,
     )
-    gen_summary_shap_vals(ds_type, text_model_code=text_model_code, tab_scale_factor=sf)
-
-    for repeat_idx in [1, 2, 3, 4]:
-        for model_type in [
-            # "ensemble_50",
-            # "ensemble_75",
-            # "ensemble_25",
-            # "stack",
-            "all_text",
-        ]:
-            pass
-            shap_vals = run_shap(
-                model_type,
-                ds_type=ds_type,
-                tab_scale_factor=sf,
-                text_model_code=text_model_code,
-                test_set_size=1000,  # 100 normal, 1000 for exp consistency,
-                repeat_idx=repeat_idx,
-            )
-        run_all_text_baseline_shap(
-            ds_type=ds_type,
-            text_model_code=text_model_code,
-            tab_scale_factor=sf,
-            repeat_idx=repeat_idx,
-        )
-        gen_summary_shap_vals(
-            ds_type,
-            text_model_code=text_model_code,
-            tab_scale_factor=sf,
-            repeat_idx=repeat_idx,
-        )
+    gen_summary_shap_vals(
+        ds_type,
+        text_model_code=text_model_code,
+        tab_scale_factor=sf,
+        repeat_idx=repeat_idx,
+    )
