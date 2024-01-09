@@ -108,12 +108,14 @@ Map(function(ds, caption) {
         package = "ggsci",
         palette = "default_jco",
         pairwise.display = "ns",
-        ylab = "Median(Text FI) - Median(Tabular FI)",
+        # ylab = "Median(Text FI) - Median(Tabular FI)",
+        ylab = expression(phi["Median Text Feature"] - phi["Median Tabular Feature"]),
         xlab = "Text Model",
         # title = "Are Text or Tabular Features Assigned More Importance?,
         # Difference in Median Feature Importance (SHAP), by Text Model",
         caption = paste("Dataset: ", caption),
-      )
+      ) +
+        theme(axis.title.y = element_text(size = 14))
 
       # Save the plot to a PDF file
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/text_tab_mod_", ds, ".pdf", sep = "")
@@ -143,12 +145,14 @@ Map(function(ds, caption) {
         palette = "default_jco",
         pairwise.comparisons = TRUE,
         pairwise.display = "ns",
-        ylab = "Median(Text FI) - Median(Tabular FI)",
+        # ylab = "Median(Text FI) - Median(Tabular FI)",
+        ylab = expression(phi["Median Text Feature"] - phi["Median Tabular Feature"]),
         xlab = "Combination Method",
         # title = "Are Text or Tabular Features Assigned More Importance?
         # Difference in Median Feature Importance (SHAP), by Combination Method",
         caption = paste("Dataset: ", caption),
-      )
+      ) +
+        theme(axis.title.y = element_text(size = 14))
       # Save the plot to a PDF file
       file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/pdfs/text_tab_comb_", ds, ".pdf", sep = "")
       ggsave(file = file_name, plot = p, width = 8.5, height = 5)
@@ -177,20 +181,22 @@ Map(function(ds, caption) {
           package = "ggsci",
           palette = "default_jco",
           pairwise.display = "ns",
-          ylab = "Median(Text FI) - Median(Tabular FI)",
+          # ylab = "Median(Text FI) - Median(Tabular FI)",
+          ylab = expression(phi["Median Text Feature"] - phi["Median Tabular Feature"]),
           xlab = "Text Model",
           # title = "Are Text or Tabular Features Assigned More Importance?,
           # Difference in Median Feature Importance (SHAP), by Text Model",
           caption = paste("Dataset: ", ds, "Combination Method: ", cm),
-        )
+        ) +
+          theme(axis.title.y = element_text(size = 14))
 
         # Save the plot to a PDF file
         file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/pdfs/text_tab_mod_", ds, "_", cm, ".pdf", sep = "")
-        ggsave(file = file_name, plot = p, width = 8.5, height = 5)
+        ggsave(file = file_name, plot = p, width = 7, height = 5)
 
         # save as jpeg
         file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/jpegs/text_tab_mod_", ds, "_", cm, ".jpeg", sep = "")
-        ggsave(file = file_name, plot = p, width = 8.5, height = 5)
+        ggsave(file = file_name, plot = p, width = 7, height = 5)
       },
       error = function(e) {
         print(paste("Error occurred for Dataset:", ds, "Combination Method:", cm))
@@ -214,20 +220,22 @@ Map(function(ds, caption) {
           package = "ggsci",
           palette = "default_jco",
           pairwise.display = "ns",
-          ylab = "Median(Text FI) - Median(Tabular FI)",
+          # ylab = "Median(Text FI) - Median(Tabular FI)",
+          ylab = expression(phi["Median Text Feature"] - phi["Median Tabular Feature"]),
           xlab = "Combination Method",
           # title = "Are Text or Tabular Features Assigned More Importance?,
           # Difference in Median Feature Importance (SHAP), by Combination Method",
           caption = paste("Dataset: ", ds, "Text Model: ", tm),
-        )
+        ) +
+          theme(axis.title.y = element_text(size = 14))
 
         # Save the plot to a PDF file
         file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/pdfs/text_tab_method_", ds, "_", tm, ".pdf", sep = "")
-        ggsave(file = file_name, plot = p, width = 8.5, height = 5)
+        ggsave(file = file_name, plot = p, width = 7, height = 5)
 
         # save as jpeg
         file_name <- paste("/home/james/CodingProjects/TextNTabularExplanations/notebooks/images/R_plots/individual/jpegs/indiv_text_tab_method_", ds, "_", tm, ".jpeg", sep = "")
-        ggsave(file = file_name, plot = p, width = 8.5, height = 5)
+        ggsave(file = file_name, plot = p, width = 7, height = 5)
       },
       error = function(e) {
         print(paste("Error occurred for Dataset:", ds, "Text Model:", tm))
